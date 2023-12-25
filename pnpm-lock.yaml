@@ -2,11 +2,13 @@ lockfileVersion: 5.4
 
 specifiers:
   '@astrojs/check': ^0.3.4
+  '@yuler/utils': ^0.2.0
   astro: ^4.0.6
   typescript: ^5.3.3
 
 dependencies:
   '@astrojs/check': 0.3.4_typescript@5.3.3
+  '@yuler/utils': 0.2.0
   astro: 4.0.7_typescript@5.3.3
   typescript: 5.3.3
 
@@ -868,6 +870,11 @@ packages:
 
   /@vscode/l10n/0.0.16:
     resolution: {integrity: sha512-JT5CvrIYYCrmB+dCana8sUqJEcGB1ZDXNLMQ2+42bW995WmNoenijWMUdZfwmuQUTQcEVVIa2OecZzTYWUW9Cg==}
+    dev: false
+
+  /@yuler/utils/0.2.0:
+    resolution: {integrity: sha512-jvOh7sn1dYrthL0gS0LPIWn2mxi5W+sROXnEHxN+tZjzmhfsDVPMdncsKmZY5Nj/N4uTIOexpUUrUA7WzKqUfQ==}
+    engines: {node: '>=18'}
     dev: false
 
   /acorn/8.11.2:
