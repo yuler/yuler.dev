@@ -1,6 +1,6 @@
 ---
 title: 'Hi, Astro!'
-description: 'A quick introduction to Astro.'
+description: 'xxx'
 image:
   url: 'https://docs.astro.build/assets/full-logo-light.png'
   alt: 'The full Astro logo.'
