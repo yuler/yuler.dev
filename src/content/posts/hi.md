@@ -16,3 +16,8 @@ tags: ["astro"]
 先写，无论什么，先从 0 到 1，无论写的再差，也比没有好。
 
 那么现在开始吧。
+
+本站点通过 Astro 部署到 GitHub Pages 上
+
+refs: https://docs.astro.build/en/guides/deploy/github/
+
