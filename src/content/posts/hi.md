@@ -1,10 +1,12 @@
 ---
 title: 'Hi, Astro!'
 description: 'xxx'
+slug: 'hi'
 image:
   url: 'https://docs.astro.build/assets/full-logo-light.png'
   alt: 'The full Astro logo.'
 tags: ["astro"]
+date: 2024-01-01
 ---
 
 作为一个程序员，写博客无疑是一个非常好的习惯。
@@ -19,5 +21,4 @@ tags: ["astro"]
 
 本站点通过 Astro 部署到 GitHub Pages 上
 
-refs: https://docs.astro.build/en/guides/deploy/github/
-
+refs: <https://docs.astro.build/en/guides/deploy/github/>

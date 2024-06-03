@@ -1,7 +1,10 @@
 ---
 import { getCollection } from 'astro:content'
 
-const posts = await getCollection('posts')
+const posts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? data.draft !== true : true
+})
+console.log({ posts })
 ---
 
 <html lang="en">
@@ -10,11 +13,23 @@ const posts = await getCollection('posts')
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>yuler</title>
+    <title>Astro</title>
   </head>
-  <body class="container">
-    <h1>Astro</h1>
-
-    <a href="/posts">Posts</a>
+  <body>
+    <main class="max-w-4xl mx-auto p-6">
+      <h1 class="text-3xl font-bold">Posts</h1>
+      <ul class="mt-8 space-y-4">
+        {
+          posts.map(post => (
+            <li class="w-full flex items-baseline justify-between">
+              <a href={`/posts/${post.slug}`} class="block text-blue-600 hover:underline">
+                {post.data.title}
+              </a>
+              <time class="text-sm text-gray-500">{post.data.date.toLocaleDateString()}</time>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
   </body>
 </html>
