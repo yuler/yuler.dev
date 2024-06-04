@@ -130,7 +130,7 @@ watermark({ content: 'yuler' })
 ### 通过 PhotoShop 工具
 
 - 打开 [photopea](https://photopea.com) 加载此曲线
-- 上传带有透明水印的图片，`Command + m` 打开曲线配置后，在 Preset 中选择 `watermark` 取消
+- 上传带有透明水印的图片，`Command + m` 打开曲线配置后，在 Preset 中选择 `watermark` 曲线配置
 
 ### 通过 ffmpeg
 
@@ -155,9 +155,3 @@ ffmpeg -i input.png -vf "curves=psfile=watermark.acv:interp=pchip" -update 1 out
 
 既然可以通过 `ffmpeg` 命令行来将透明水印显示出来，那么我就用 Rails 写了个简单的 web 应用。仓库地址：[yuler/watermark](https://github.com/yuler/watermark)
 稍后会部署到 [watermark.yuler.dev](https://watermark.yuler.dev) 域名下
-
-{/* # refs
-
-- <https://github.com/guofei9987/blind_watermark/>
-- <https://watermark.tencent.com/>
-- <https://www.zhihu.com/question/48242096> */}
