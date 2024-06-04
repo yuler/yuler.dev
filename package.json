@@ -9,7 +9,8 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "up": "npx taze -I"
+    "up": "npx taze -I",
+    "autocorrect": "autocorrect --fix src/content/**/*.{md,mdx}"
   },
   "dependencies": {
     "@astrojs/check": "^0.7.0",

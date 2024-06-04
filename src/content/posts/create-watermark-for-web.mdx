@@ -1,6 +1,6 @@
 ---
 title: 给 Web 端网站添加水印
-description: 通过 canvas 给 Web 端网站一个透明度很高的水印, 然后通过 ffmpeg 调整曲线是的水印显示出来
+description: 通过 canvas 给 Web 端网站一个透明度很高的水印，然后通过 ffmpeg 调整曲线是的水印显示出来
 slug: 'create-watermark-for-web'
 image:
   url: 'https://docs.astro.build/assets/full-logo-light.png'
@@ -55,13 +55,13 @@ function watermark({ width = 100, height = 100, content, debug = false }) {
 
 ## 背景
 
-前段时间在公司遇到有人通过后台管理系统通过截图的方式泄漏数据。于是提出了一个需求，给后台网站添加水印的同时希望用户看不见，但是我们能通过截屏的图片解析出水印的内容解析。
+前段时间在公司遇到有人通过后台管理系统通过截图的方式泄漏数据。于是提出了一个需求，给后台网站添加水印的同时希望用户看不见，但是我们能通过截屏的图片解析出水印的内容，这样就可以知道是会泄漏的。
 
 ## 经过调研
 
 在 web 端加水印的方式一般都是通过 canvas 绘制水印，然后通过 css 的 `background` 属性设置背景图片，并且平铺开来。
 
-我们可以通过下面的 JavaScript 代码来实现一个简单的水印，代码如下: 
+我们可以通过下面的 JavaScript 代码来实现一个简单的水印，代码如下：
 
 ```js
 function watermark({ width = 100, height = 100, content, debug = false }) {
@@ -108,7 +108,7 @@ function watermark({ width = 100, height = 100, content, debug = false }) {
 watermark({ content: 'yuler', debug: true })
 ```
 
-<Button onclick="watermark({ content: 'yuler', debug: true })">添加水印(debug模式)</Button>
+<Button onclick="watermark({ content: 'yuler', debug: true })">添加水印 (debug 模式)</Button>
 
 可以看见水印，然后让我们运行透明模式
 
@@ -116,7 +116,7 @@ watermark({ content: 'yuler', debug: true })
 watermark({ content: 'yuler' })
 ```
 
-<Button onclick="watermark({ content: 'yuler' })">添加水印(透明模式)</Button>
+<Button onclick="watermark({ content: 'yuler' })">添加水印 (透明模式)</Button>
 
 <br />
 
@@ -134,7 +134,7 @@ watermark({ content: 'yuler' })
 
 ### 通过 ffmpeg
 
-同时可以通过 `ffmpeg` 来实现 PhotoShop 调节图片色阶的功能。
+同时可以通过 `ffmpeg` 来实现 PhotoShop 调节图片曲线的功能。
 
 ```bash
 ffmpeg -i input.png -vf "curves=psfile=watermark.acv:interp=pchip" -update 1 output.png
@@ -153,7 +153,7 @@ ffmpeg -i input.png -vf "curves=psfile=watermark.acv:interp=pchip" -update 1 out
 
 ### 结论
 
-既然可以通过 `ffmpeg` 命令行来将透明水印显示出来，那么我就用 Rails 写了个简单的 web 应用。 仓库地址: [yuler/watermark](https://github.com/yuler/watermark)
+既然可以通过 `ffmpeg` 命令行来将透明水印显示出来，那么我就用 Rails 写了个简单的 web 应用。仓库地址：[yuler/watermark](https://github.com/yuler/watermark)
 稍后会部署到 [watermark.yuler.dev](https://watermark.yuler.dev) 域名下
 
 {/* # refs
