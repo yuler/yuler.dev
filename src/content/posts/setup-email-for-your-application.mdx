@@ -1,0 +1,65 @@
+---
+title: 应用程序邮箱的设置
+description: 通过腾讯企业邮箱设置, 实现域名绑定和邮箱管理, 并进行测试。
+slug: 'setup-email-for-your-application'
+image:
+  url: 'https://docs.astro.build/assets/full-logo-light.png'
+  alt: 'The full Astro logo.'
+tags: ["email", "SASS"]
+date: 2024-08-27
+---
+
+## 背景
+
+在开发 Web SASS 的时候, 我们可能经常需要使用邮件服务。例如: 通过邮箱登录, 找回密码, 订阅内容通知等。
+
+我们可以通过三方服务(如: Mailgun, SendGrid, resend 等), 但是我们可以通过域名绑定自己的邮箱，下面介绍通过通过腾讯企业邮箱绑定域名的方式。
+
+
+## 设置邮箱
+
+我们可以使用腾讯邮箱，通过域名绑定邮箱
+
+- 第一步注册[企业微信](https://work.weixin.qq.com/)
+- 登录企业微信后台, 协作 -> 邮件 -> 邮箱域名 中添加自己的域名
+- 设置域名解析, 根据引导配置相关的解析记录即可, 等待生效
+- 协作 -> 邮件 -> 邮箱管理, 创建公共邮箱, 获取邮箱密码
+
+通过下面脚本测试是否配置成功
+
+```bash
+#!/bin/bash
+
+SMTP_SERVER="smtp.exmail.qq.com"
+SMTP_PORT="465"
+SMTP_USERNAME="from@example.com"
+SMTP_PASSWORD="xxx"
+
+# 检查并创建 msmtp 配置文件
+if [ ! -f ~/.msmtprc ]; then
+  echo "创建 msmtp 配置文件 ~/.msmtprc"
+  cat <<EOL >~/.msmtprc
+# msmtp 配置文件
+account default
+host $(echo $SMTP_SERVER)
+port $(echo $SMTP_PORT)
+from $(echo $SMTP_USERNAME)
+auth on
+user $(echo $SMTP_USERNAME)
+password $(echo $SMTP_PASSWORD)
+tls on
+tls_starttls off
+# 尝试使用系统默认的证书路径
+tls_trust_file /etc/ssl/cert.pem
+EOL
+  # 设置权限
+  chmod 600 ~/.msmtprc
+else
+  echo "msmtp 配置文件 ~/.msmtprc 已存在"
+fi
+
+# 发送测试邮件
+echo -e "Subject: 测试邮件\n\n这是一个测试邮件。" | msmtp to@example.com
+```
+
+测试成功后, 就可以在你的框架或者库中使用
