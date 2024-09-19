@@ -1,0 +1,111 @@
+---
+title: Docker
+description: Docker 入门指南
+slug: 'docker-guide'
+image:
+  url: 'https://docs.astro.build/assets/full-logo-light.png'
+  alt: 'The full Astro logo.'
+tags: ["docker", "SASS"]
+date: 2024-09-20
+---
+
+## 什么是 Docker？
+
+Docker 是一个开源的容器化平台，允许开发者将应用及其依赖打包到一个轻量级的容器中。这样，应用就可以在任何支持 Docker 的环境中一致地运行，解决了“在我电脑上可以跑”的问题。
+
+## 为什么使用 Docker？
+
+1. **环境一致性**：容器可以在不同的操作系统和云平台上保持一致的运行环境。
+2. **资源高效**：相比传统虚拟机，Docker 容器更加轻量，启动速度更快。
+3. **便于管理**：Docker 提供了易于使用的命令行工具，可以快速部署、更新和删除应用。
+
+## 安装 Docker
+
+在开始使用 Docker 之前，需要先安装 Docker。可以通过访问 [Docker 官方网站](https://www.docker.com/get-started) 根据你的操作系统进行安装。
+
+## 创建第一个 Docker 容器
+
+### 1. 拉取镜像
+
+Docker Hub 是一个公共的镜像库，我们可以从中拉取各种预先构建好的镜像。打开终端，运行以下命令来拉取一个简单的 Nginx 镜像：
+
+```bash
+docker pull nginx
+```
+
+### 2. 运行容器
+
+镜像下载完成后，可以使用以下命令启动一个新的 Nginx 容器：
+
+```bash
+docker run -d -p 8080:80 nginx
+```
+
+- `-d`：表示后台运行容器。
+- `-p 8080:80`：将宿主机的 8080 端口映射到容器的 80 端口。
+
+### 3. 访问应用
+
+在浏览器中输入 `http://localhost:8080`，你应该能看到 Nginx 的欢迎页面。
+
+## 管理 Docker 容器
+
+### 查看正在运行的容器
+
+使用以下命令查看当前正在运行的容器：
+
+```bash
+docker ps
+```
+
+### 停止和删除容器
+
+如果需要停止容器，可以使用 `docker stop` 命令。假设容器 ID 为 `abc123`，可以运行：
+
+```bash
+docker stop abc123
+```
+
+要删除容器，可以使用：
+
+```bash
+docker rm abc123
+```
+
+## 创建自己的 Dockerfile
+
+除了使用现成的镜像，你还可以创建自己的镜像。以下是一个简单的 Dockerfile 示例，用于创建一个 Node.js 应用：
+
+1. 创建一个名为 `Dockerfile` 的文件，内容如下：
+
+   ```dockerfile
+   FROM node:20
+
+   WORKDIR /app
+
+   COPY package*.json ./
+   RUN npm install
+
+   COPY . .
+
+   EXPOSE 3000
+   CMD ["node", "app.js"]
+   ```
+
+2. 在与 Dockerfile 同一目录下，构建镜像：
+
+   ```bash
+   docker build -t my-node-app .
+   ```
+
+3. 运行容器：
+
+   ```bash
+   docker run -d -p 3000:3000 my-node-app
+   ```
+
+## 总结
+
+Docker 是一个强大的工具，可以极大地简化应用的部署和管理。通过本文的简单示例，你已经能够创建并管理 Docker 容器。接下来可以深入学习 Docker Compose、Docker Swarm 等高级特性，进一步提升你的容器化技能。
+
+希望这篇博客能帮助你顺利入门 Docker！
