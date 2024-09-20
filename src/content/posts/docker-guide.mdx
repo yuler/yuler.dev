@@ -1,5 +1,5 @@
 ---
-title: Docker
+title: Docker 入门指南
 description: Docker 入门指南
 slug: 'docker-guide'
 image:
@@ -11,7 +11,7 @@ date: 2024-09-20
 
 ## 什么是 Docker？
 
-Docker 是一个开源的容器化平台，允许开发者将应用及其依赖打包到一个轻量级的容器中。这样，应用就可以在任何支持 Docker 的环境中一致地运行，解决了“在我电脑上可以跑”的问题。
+Docker 是一个开源的容器化平台，允许开发者将应用及其依赖打包到一个轻量级的容器中。这样，应用就可以在任何支持 Docker 的环境中一致地运行，解决了"在我电脑上可以跑"的问题。Docker 容器就像是一个微型的、标准化的虚拟环境，确保了应用在不同系统间的可移植性和一致性。Docker 的概念类似于 Java 虚拟机（JVM）：就像 JVM 为 Java 应用提供了一个统一的运行环境，Docker 为各种应用提供了一个标准化的运行环境。
 
 ## 为什么使用 Docker？
 
@@ -22,6 +22,13 @@ Docker 是一个开源的容器化平台，允许开发者将应用及其依赖�
 ## 安装 Docker
 
 在开始使用 Docker 之前，需要先安装 Docker。可以通过访问 [Docker 官方网站](https://www.docker.com/get-started) 根据你的操作系统进行安装。
+
+### 测试 Docker 是否安装成功
+
+```bash
+docker --version
+docker run hello-world
+```
 
 ## 创建第一个 Docker 容器
 
@@ -76,36 +83,109 @@ docker rm abc123
 
 除了使用现成的镜像，你还可以创建自己的镜像。以下是一个简单的 Dockerfile 示例，用于创建一个 Node.js 应用：
 
+0. 比如我们有一个简单的 Node.js 应用，我们希望将它打包成一个 Docker 镜像。
+
+```js
+// app.js
+const express = require('express');
+const app = express();
+
+app
+  .get('/', (req, res) => {
+    res.send('Hello, Docker!');
+  })
+  .get('/users', (req, res) => {
+    res.send('List of users');
+  })
+  .get('/users/:id', (req, res) => {
+    res.send(`User ${req.params.id}`);
+  })
+  .listen(3000, () => {
+    console.log('Server is running on port 3000');
+  });
+```
+
+
 1. 创建一个名为 `Dockerfile` 的文件，内容如下：
 
-   ```dockerfile
-   FROM node:20
+```dockerfile
+FROM node:20
 
-   WORKDIR /app
+WORKDIR /app
 
-   COPY package*.json ./
-   RUN npm install
+COPY package*.json ./
+RUN npm install
 
-   COPY . .
+COPY . .
 
-   EXPOSE 3000
-   CMD ["node", "app.js"]
-   ```
+EXPOSE 3000
+CMD ["node", "app.js"]
+```
 
 2. 在与 Dockerfile 同一目录下，构建镜像：
 
-   ```bash
-   docker build -t my-node-app .
-   ```
+```bash
+docker build -t my-node-app .
+```
 
 3. 运行容器：
 
-   ```bash
-   docker run -d -p 3000:3000 my-node-app
-   ```
+```bash
+docker run -d -p 3000:3000 my-node-app
+```
+
+## multi-stage builds 示例
+ 
+Multi-stage builds 是 Docker 的一个强大特性，它允许你在一个 Dockerfile 中使用多个阶段来构建你的应用。这种方法可以显著减小最终镜像的大小，因为你可以只保留运行应用所需的文件，而丢弃构建过程中的中间文件。
+
+例如一个纯前端应用的 multi-stage build Dockerfile 示例：
+
+```bash
+pnpm create vite
+```
+
+```dockerfile
+# Stage 1: Build the Vue application
+FROM node:20 as build-stage
+
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy project files and build
+COPY . .
+RUN npm run build
+
+# Stage 2: Serve the app using Nginx
+FROM nginx:stable-alpine as production-stage
+
+# Copy built assets from build-stage
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx server
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+```bash
+docker build -t my-static-app .
+docker run -d -p 3000:80 my-static-app
+```
 
 ## 总结
 
-Docker 是一个强大的工具，可以极大地简化应用的部署和管理。通过本文的简单示例，你已经能够创建并管理 Docker 容器。接下来可以深入学习 Docker Compose、Docker Swarm 等高级特性，进一步提升你的容器化技能。
+Docker 是一个强大的工具，可以极大地简化应用的部署和管理。通过本文的简单示例，你已经能够创建并管理 Docker 容器。
 
-希望这篇博客能帮助你顺利入门 Docker！
+接下来可以深入学习 Docker Compose 和 Kamal 等工具，进一步提升你的容器化技能。
+
+## 参考资料
+
+- [Docker 官方文档](https://docs.docker.com/get-started/)
+- [Docker Compose 官方文档](https://docs.docker.com/compose/)
+- [Kamal](https://kamal-deploy.org/)
