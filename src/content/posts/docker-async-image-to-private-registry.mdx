@@ -1,0 +1,25 @@
+---
+draft: true
+title: 将 Docker 镜像异步推送到私有仓库
+description: 通过 GitHub Actions 将 Docker 镜像异步推送到私有仓库
+slug: 'docker-async-image-to-private-registry'
+image:
+  url: 'https://docs.astro.build/assets/full-logo-light.png'
+  alt: 'The full Astro logo.'
+tags: ["docker", "docker registry"]
+date: 2024-11-06
+---
+
+## 背景, 由于 Docker Hub 在大陆被墙, 为了在
+
+```bash
+MIRROR_DOCKER_USERNAME=<your_username>
+MIRROR_DOCKER_PASSWORD=<your_password>
+MIRROR_DOCKER_REGISTRY=<your_registry>
+
+docker pull basecamp/kamal-proxy:v0.8.2
+docker tag basecamp/kamal-proxy:v0.8.2 yuler/kamal-proxy:v0.8.2
+docker push $MIRROR_DOCKER_REGISTRY/yuler/kamal-proxy:v0.8.2
+```
+
+https://github.com/yuler/docker_image_pusher
