@@ -1,7 +1,7 @@
 ---
-title: 'WeChat bot!'
-description: 'wechat bot'
-slug: 'hi'
+title: 'WeChat Bot!'
+description: 'Wechat bot'
+slug: 'wechat-bot'
 image:
   url: 'https://docs.astro.build/assets/full-logo-light.png'
   alt: 'The full Astro logo.'
@@ -11,20 +11,184 @@ date: 2024-11-15
 
 ## 背景
 
-帮朋友调研微信机器人方案
+帮朋友调研微信机器人方案, 发了个 GitHub 仓库 [chatgpt-on-wechat](https://github.com/zhayujie/chatgpt-on-wechat) 让我部署下
+发现这个仓库是使用 Python 的 itchat 库实现的 web 版本的微信机器人, 并且做了一些相关的 patch 处理 参见 [lib/itchat](https://github.com/zhayujie/chatgpt-on-wechat/tree/master/lib/itchat)
 
-## 快速搭建一个微信机器人
+首先微信没有开放官方的 API, 社区上有一些三方库, 主要实现有以下集中
+
+1. Web 协议, 通过无头浏览器模拟 web 端发出请求和拦截请求
+
+- [wechaty](https://github.com/wechaty/wechaty)
+- [ItChat](https://github.com/littlecodersh/ItChat)
+
+2. Windows 协议, 通过住
+
+- [WeChatFerry](https://github.com/lich0821/WeChatFerry)
+
+3. iPad 协议
+
+- [padlocal](https://wechaty.js.org/docs/puppet-services/padlocal)
+
+4. 直接 Hack Android 手机, 逆向微信
 
 ## Dokploy
 
-## Webhook
+[Dokploy](https://github.com/Dokploy/dokploy) 是一个基于 Docker 自动化部署平台, 开源, 免费自行部署
+
+refs: https://www.reddit.com/r/SideProject/comments/1gq6o61/after_6_months_of_work_dokploy_cloud_is_live/
+
+## 快速搭建一个微信机器人
+
+基于 [wechatbot-webhook](https://github.com/danni-cool/wechatbot-webhook) 部署
+
+部署到 Dokploy
+
+```yaml
+version: '3.8'
+services:
+  wechat-webhook:
+    image: dannicool/docker-wechatbot-webhook
+    container_name: wechat-webhook
+    volumes:
+      - ./wechat-webhook-logs:/app/log
+    ports:
+      - "3001:3001"
+    environment:
+      - LOG_LEVEL=info
+      # - DISABLE_AUTO_LOGIN=true
+      - ACCEPT_RECVD_MSG_MYSELF=true
+      - RECVD_MSG_API=https://wechat-callback.hz.yuler.dev
+      - LOGIN_API_TOKEN=WEBHOOK_TOKEN # 登录地址Token访问地址： http://localhost:3001/login?token=[LOCAL_LOGIN_API_TOKEN]
+    restart: unless-stopped
+```
+
+## Callback
+
+我们再创建一个服务接受上面的请求
+
+```typescript
+import { serve } from '@hono/node-server'
+import { Hono } from 'hono'
+const app = new Hono()
+
+
+app.post('/', async (ctx) => {
+  const formData = await ctx.req.formData()
+  const type = (formData.get('type') ?? '') as string
+  let content = (formData.get('content') ?? '') as any
+  let source = (formData.get('source') ?? '') as any
+  const isMentioned = (formData.get('isMentioned') ?? '') as string
+  const isMsgFromSelf = (formData.get('isMsgFromSelf') ?? '') as string
+  const topic = source?.room?.payload?.topic ?? ''
+  
+  try {
+    source = JSON.parse(source)
+  } catch {
+    console.log('source parse error')
+  }
+
+  // 非 `#dev` 群消息不处理
+  if (!topic.startsWith('#dev')) {
+    return ctx.json({})
+  }
+
+  console.log({ type, content, source, isMentioned, isMsgFromSelf })
+  
+  // 文本消息 'text' & @xxx
+  if (type === 'text' && isMentioned === '1') {
+    // TODO: 动态化 @xxx
+    content = content.slice('@xxx '.length)
+    if (content === 'ping')  {
+      const mention = `@${source.from.payload.name}`
+      return ctx.json({ success: true, data: { type: 'text', content: mention + ' pong' }})
+    }
+  }
+
+  return ctx.json({})
+})
+```
+
+## 集成 OCR
+
+[Umi-OCR](https://github.com/hiroi-sora/Umi-OCR) 开源 OCR 免费并且离线
+
+### Docker 运行
+
+[Linux 版本](https://github.com/hiroi-sora/Umi-OCR_runtime_linux)
+
+通过上面的仓库构建 image 并且 push 到 docker hub [yule/umi-ocr-paddle](https://hub.docker.com/r/yule/umi-ocr-paddle)
+
+```bash
+docker run -d --name umi-ocr -e HEADLESS=true -p 1224:1224 yule/umi-ocr-paddle
+```
+
+### 部署到到 Dokploy
+
+```yaml
+services:
+  wechat-ocr:
+    image: yule/umi-ocr-paddle
+    container_name: wechat-ocr
+    # volumes:
+    #   - ./wechat-ocr-logs:/app/log
+    ports:
+      - "1224:1224"
+    environment:
+      - HEADLESS=true
+      - LOG_LEVEL=info 
+    restart: unless-stopped
+```
 
 ## 集成 AI
 
-## OCR
+1. proxy?
 
-- https://github.com/hiroi-sora/Umi-OCR_runtime_linux
-- yule/umi-ocr-paddle
+测试脚本
+
+```bash
+curl https://api.openai.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant."
+      },
+      {
+        "role": "user",
+        "content": "Hello!"
+      }
+    ]
+  }'
+```
+
+由于 OpenAI 禁止大陆 IP 访问, 所以需要使用代理
+
+refs: https://github.com/justjavac/openai-proxy
+
+2. Node SDK
+
+```typescript
+import OpenAI from 'openai'
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const completion = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    { role: "system", content: 'You are a helpful assistant.' },
+    { role: "user", '你好啊' }
+  ],
+  temperature: 0.8,
+});
+
+const answer = completion.choices[0].message.content
+console.log({answer})
+```
 
 ## 使用场景
 
