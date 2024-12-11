@@ -6,7 +6,7 @@ image:
   url: 'https://docs.astro.build/assets/full-logo-light.png'
   alt: 'The full Astro logo.'
 tags: ["astro"]
-date: 2024-11-09
+date: 2024-12-09
 ---
 
 ## 背景
@@ -15,7 +15,19 @@ date: 2024-11-09
 
 ## 设置
 
-### 远程控制
+- 取消密码策略, 这样可以设置较短开机密码
+
+```bash
+pwpolicy -clearaccountpolicies
+```
+
+## Mac Setup
+
+- ClashX Pro
+- [搜狗输入法](https://shurufa.sogou.com/), 取消 Ctrl + Space 切换输入法快捷键(和 VSCode 冲突, 设置完后需要重启 VSCode)
+- My self [dotfiles](https://github.com/yuler/dotfiles/), install.sh & brew.sh & npm.sh
+
+## 远程控制
 
 在 Mac mini 上设置远程控制
 
@@ -35,12 +47,6 @@ date: 2024-11-09
 
 > <https://youtu.be/7NJpTb9MNFo?si=wD_WnzGJLlwSErmY>
 
-### Mac Setup
+## Refs
 
-> <https://sourabhbajaj.com/mac-setup/>
-
-- ClashX Pro
-- [Brew](https://brew.sh/)
-- [Chrome](https://www.google.com/chrome)
-- [Raycast](https://www.raycast.com/)
-- [OrbStack](https://orbstack.dev/)
+- <https://sourabhbajaj.com/mac-setup/>
