@@ -18,8 +18,13 @@ MIRROR_DOCKER_PASSWORD=<your_password>
 MIRROR_DOCKER_REGISTRY=<your_registry>
 
 docker pull basecamp/kamal-proxy:v0.8.2
-docker tag basecamp/kamal-proxy:v0.8.2 yuler/kamal-proxy:v0.8.2
+docker tag basecamp/kamal-proxy:v0.8.2 $MIRROR_DOCKER_REGISTRY/yuler/kamal-proxy:v0.8.2
 docker push $MIRROR_DOCKER_REGISTRY/yuler/kamal-proxy:v0.8.2
+docker image basecamp/kamal-proxy:v0.8.2 $MIRROR_DOCKER_REGISTRY/yuler/kamal-proxy:v0.8.2
+
+
+docker pull $MIRROR_DOCKER_REGISTRY/yuler/kamal-proxy:v0.8.2
+docker tag $MIRROR_DOCKER_REGISTRY/yuler/kamal-proxy:v0.8.2 basecamp/kamal-proxy:v0.8.2
 ```
 
 https://github.com/yuler/docker_image_pusher
