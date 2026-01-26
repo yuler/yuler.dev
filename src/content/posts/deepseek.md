@@ -2,7 +2,7 @@
 title: 'Hi, DeepSeek!'
 description: 'An introduction to the DeepSeek large language model, including its features, use cases, and self-hosting deployment guide.'
 slug: 'deepseek'
-tags: ["astro"]
+tags: ["DeepSeek", "LLM", "AI", "Ollama"]
 date: 2025-02-18
 ---
 
