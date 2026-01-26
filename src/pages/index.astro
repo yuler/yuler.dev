@@ -1,4 +1,5 @@
 ---
+import Layout from '../layouts/Layout.astro'
 import GitHub from '../assets/github.svg'
 import Twitter from '../assets/twitter.svg'
 
@@ -11,45 +12,52 @@ const posts = (
 ).sort((a, b) => (b.data.date > a.data.date ? 1 : -1))
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <meta name="google-adsense-account" content="ca-pub-4885835477556856" />
-    <title>yuler</title>
-  </head>
-  <body>
-    <main class="max-w-4xl mx-auto p-6">
-      <!-- TODO: logo -->
-      <h1 class="text-4xl font-bold">Yu</h1>
-      <p class="mt-4">
-        Hi, I'm Yu Le. You can call me <a href="https://github.com/yuler" class="underline">`yuler`</a>. I'm a software
-        engineer currently living in Beijing.
-      </p>
-      <div class="flex space-x-4 mt-8">
-        <a href="https://github.com/yuler" target="_blank" rel="noopener noreferrer">
-          <img src={GitHub.src} />
-        </a>
-        <a href="https://twitter.com/isyuler" target="_blank" rel="noopener noreferrer">
-          <img src={Twitter.src} />
-        </a>
-      </div>
+<Layout title="yuler">
+  <main class="max-w-4xl mx-auto p-6">
+    <!-- TODO: logo -->
+    <h1 class="text-4xl font-bold">Yu</h1>
+    <p class="mt-4">
+      Hi, I'm Yu Le. You can call me <a
+        href="https://github.com/yuler"
+        class="underline">`yuler`</a
+      >. I'm a software engineer currently living in Beijing.
+    </p>
+    <div class="flex space-x-4 mt-8">
+      <a
+        href="https://github.com/yuler"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={GitHub.src} />
+      </a>
+      <a
+        href="https://twitter.com/isyuler"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={Twitter.src} />
+      </a>
+    </div>
 
-      <h2 class="mt-10 text-2xl font-bold">Posts</h2>
-      <ul class="mt-4 space-y-4">
-        {
-          posts.map(post => (
-            <li class="w-full flex items-baseline justify-between">
-              <a href={`/posts/${post.slug}`} class="block hover:underline">
-                {post.data.title} {post.data.draft ? <span class="text-sm text-gray-500">(Draft)</span> : ''}
-              </a>
-              <time class="text-sm text-gray-500">{post.data.date.toLocaleDateString()}</time>
-            </li>
-          ))
-        }
-      </ul>
-    </main>
-  </body>
-</html>
+    <h2 class="mt-10 text-2xl font-bold">Posts</h2>
+    <ul class="mt-4 space-y-4">
+      {
+        posts.map(post => (
+          <li class="w-full flex items-baseline justify-between">
+            <a href={`/posts/${post.slug}`} class="block hover:underline">
+              {post.data.title}{' '}
+              {post.data.draft ? (
+                <span class="text-sm text-gray-500">(Draft)</span>
+              ) : (
+                ''
+              )}
+            </a>
+            <time class="text-sm text-gray-500">
+              {post.data.date.toLocaleDateString()}
+            </time>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</Layout>
