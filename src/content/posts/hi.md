@@ -3,7 +3,7 @@ title: 'Hi, Astro!'
 description: 'xxx'
 slug: 'hi'
 image:
-  url: 'https://docs.astro.build/assets/full-logo-light.png'
+  url: 'https://docs.astro.build/assets/full-logo.png'
   alt: 'The full Astro logo.'
 tags: ["astro"]
 date: 2024-01-01

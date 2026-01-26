@@ -2,10 +2,7 @@
 title: 'Setup Mac Mini'
 description: 'WIP'
 slug: 'setup-mac-mini'
-image:
-  url: 'https://docs.astro.build/assets/full-logo-light.png'
-  alt: 'The full Astro logo.'
-tags: ["astro"]
+tags: ["mac", "mac mini"]
 date: 2024-12-09
 ---
 
