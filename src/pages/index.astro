@@ -1,63 +1,31 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import GitHub from '../assets/github.svg'
-import Twitter from '../assets/twitter.svg'
-
-import { getCollection } from 'astro:content'
-
-const posts = (
-  await getCollection('posts', ({ data }) => {
-    return import.meta.env.PROD ? data.draft !== true : true
-  })
-).sort((a, b) => (b.data.date > a.data.date ? 1 : -1))
+import Github from '../components/cards/Github.astro'
+import X from '../components/cards/X.astro'
+import Location from '../components/cards/Location.astro'
+import Profile from '../components/cards/Profile.astro'
+import Workout from '../components/cards/Workout.astro'
+import Posts from '../components/cards/Posts.astro'
 ---
 
-<Layout title="yuler">
-  <main class="max-w-4xl mx-auto p-6">
-    <!-- TODO: logo -->
-    <h1 class="text-4xl font-bold">Yu</h1>
-    <p class="mt-4">
-      Hi, I'm Yu Le. You can call me <a
-        href="https://github.com/yuler"
-        class="underline">`yuler`</a
-      >. I'm a software engineer currently living in Beijing.
-    </p>
-    <div class="flex space-x-4 mt-8">
-      <a
-        href="https://github.com/yuler"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img src={GitHub.src} />
-      </a>
-      <a
-        href="https://twitter.com/isyuler"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img src={Twitter.src} />
-      </a>
-    </div>
+<Layout title="Yu Le — A programmer">
+  <div class="h-full px-4 py-12 md:py-20">
+    <div class="mx-auto max-w-7xl">
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8">
+        <div class="flex h-full flex-col gap-4 lg:col-span-1">
+          <Profile />
+          <div class="grid grid-cols-2 gap-4">
+            <Github />
+            <X />
+          </div>
+          <Location class="flex-1" />
+          <Workout class="flex-1" />
+        </div>
 
-    <h2 class="mt-10 text-2xl font-bold">Posts</h2>
-    <ul class="mt-4 space-y-4">
-      {
-        posts.map(post => (
-          <li class="w-full flex items-baseline justify-between">
-            <a href={`/posts/${post.slug}`} class="block hover:underline">
-              {post.data.title}{' '}
-              {post.data.draft ? (
-                <span class="text-sm text-gray-500">(Draft)</span>
-              ) : (
-                ''
-              )}
-            </a>
-            <time class="text-sm text-gray-500">
-              {post.data.date.toLocaleDateString()}
-            </time>
-          </li>
-        ))
-      }
-    </ul>
-  </main>
+        <div class="h-full lg:col-span-2">
+          <Posts />
+        </div>
+      </div>
+    </div>
+  </div>
 </Layout>

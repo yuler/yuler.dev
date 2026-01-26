@@ -1,0 +1,126 @@
+---
+import { formatDate } from '../../utils/date'
+
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+
+// Note: Mauanl update
+const weeksLevel = [
+  { start: '2026-01-01', end: '2026-01-04', level: 6 },
+  { start: '2026-01-05', end: '2026-01-11', level: 4 },
+  { start: '2026-01-12', end: '2026-01-18', level: 3 },
+]
+
+const firstWeek = ['2026-01-01', '2026-01-04']
+const weeks = [firstWeek]
+
+let lastEnd = new Date(firstWeek[1])
+
+for (let i = 0; i < 51; i++) {
+  const start = new Date(lastEnd)
+  start.setDate(start.getDate() + 1)
+  const end = new Date(start)
+  end.setDate(end.getDate() + 6)
+
+  weeks.push([formatDate(start), formatDate(end)])
+  lastEnd = end
+}
+
+const weeklyStats = weeks.map(([start, end]) => {
+  const levelData = weeksLevel.find(w => w.start === start)
+  return {
+    dateStr: `${start} ~ ${end}`,
+    level: levelData ? levelData.level : 0,
+    isCurrentWeek: false,
+  }
+})
+---
+
+<div
+  class={`relative rounded-3xl bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-lg ${className}`}
+>
+  <div class="flex flex-col gap-2">
+    {/* Header */}
+    <div class="flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900">Workout</h3>
+      <span class="text-xs text-gray-400">2026</span>
+    </div>
+
+    {/* Graph */}
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-wrap gap-1">
+        {
+          weeklyStats.map((week, index) => (
+            <div class="group relative">
+              <div
+                class:list={[
+                  'size-4 rounded-[2px] transition-colors duration-200 cursor-pointer',
+                  {
+                    'bg-gray-100 ': week.level === 0,
+                    'bg-emerald-100': week.level === 1,
+                    'bg-emerald-200': week.level === 2,
+                    'bg-emerald-300': week.level === 3,
+                    'bg-emerald-400': week.level === 4,
+                    'bg-emerald-500': week.level === 5,
+                    'bg-emerald-600': week.level === 6,
+                    'bg-emerald-700': week.level === 7,
+                    'ring-1 ring-black/50 dark:ring-white/50':
+                      week.isCurrentWeek,
+                  },
+                ]}
+              />
+              {/* Tooltip */}
+              <div
+                class:list={[
+                  'absolute bottom-full mb-2 w-max scale-95 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 pointer-events-none z-50',
+                  index < 5
+                    ? 'left-0 translate-x-0'
+                    : index > weeklyStats.length - 5
+                      ? 'right-0 translate-x-0'
+                      : 'left-1/2 -translate-x-1/2',
+                ]}
+              >
+                <div class="rounded-lg bg-gray-900 px-2 py-1 text-[10px] text-white shadow-xl ring-1 ring-white/10">
+                  <div class="font-medium">{week.dateStr}</div>
+                  <div class="text-gray-400">Level {week.level}</div>
+                </div>
+                <div
+                  class:list={[
+                    'absolute top-full border-4 border-transparent border-t-gray-900',
+                    index < 5
+                      ? 'left-2'
+                      : index > weeklyStats.length - 5
+                        ? 'right-2'
+                        : 'left-1/2 -translate-x-1/2',
+                  ]}
+                />
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <div
+        class="mt-4 flex items-center justify-between text-[10px] text-gray-400 px-1"
+      >
+        <span>Current is updated weekly</span>
+        <div class="flex gap-1 items-center">
+          <span>Less</span>
+          <div class="flex gap-0.5">
+            <div class="size-1.5 rounded-[1px] bg-gray-100"></div>
+            <div class="size-1.5 rounded-[1px] bg-emerald-100"></div>
+            <div class="size-1.5 rounded-[1px] bg-emerald-200"></div>
+            <div class="size-1.5 rounded-[1px] bg-emerald-300"></div>
+            <div class="size-1.5 rounded-[1px] bg-emerald-400"></div>
+            <div class="size-1.5 rounded-[1px] bg-emerald-500"></div>
+            <div class="size-1.5 rounded-[1px] bg-emerald-600"></div>
+            <div class="size-1.5 rounded-[1px] bg-emerald-700"></div>
+          </div>
+          <span>More</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

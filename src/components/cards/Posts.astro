@@ -1,0 +1,61 @@
+---
+import { getCollection } from 'astro:content'
+import ChevronRight from '../icons/ChevronRight.astro'
+import { formatDate } from '../../utils/date'
+
+const posts = (
+  await getCollection('posts', ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true
+  })
+).sort((a, b) => (b.data.date > a.data.date ? 1 : -1))
+---
+
+<div class="flex h-full flex-col rounded-3xl bg-white p-8 shadow-sm">
+  <div class="mb-6 flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-gray-900">Posts</h2>
+    <span class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">
+      {posts.length} posts
+    </span>
+  </div>
+
+  <ul class="flex-1 space-y-2">
+    {
+      posts.slice(0, 5).map(post => (
+        <li>
+          <a
+            href={`/posts/${post.slug}`}
+            class="group flex items-center justify-between rounded-2xl p-4 transition-colors hover:bg-gray-50"
+          >
+            <div>
+              <h3 class="font-medium text-gray-900 group-hover:text-blue-600">
+                {post.data.title}
+                {post.data.draft && (
+                  <span class="ml-2 rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                    Draft
+                  </span>
+                )}
+              </h3>
+              <time
+                class="text-sm text-gray-500"
+                datetime={post.data.date.toISOString()}
+              >
+                {formatDate(post.data.date)}
+              </time>
+            </div>
+            <ChevronRight class="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-blue-600" />
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="mt-auto flex justify-center pt-6">
+    <a
+      href="/posts"
+      class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+    >
+      View all posts
+      <ChevronRight class="h-4 w-4" />
+    </a>
+  </div>
+</div>

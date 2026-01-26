@@ -1,0 +1,99 @@
+---
+import MapPin from '../icons/MapPin.astro'
+import ArrowUpRight from '../icons/ArrowUpRight.astro'
+import 'leaflet/dist/leaflet.css'
+
+interface Props {
+  class?: string
+  title?: string
+  subtitle?: string
+  mapCoords?: { lng: number; lat: number }
+}
+
+const {
+  class: className,
+  title = 'Beijing, China',
+  subtitle = 'Currently based here',
+  mapCoords = { lng: 116.338, lat: 39.7282 },
+} = Astro.props
+---
+
+<a
+  href={`https://www.google.com/maps/search/?api=1&query=${mapCoords.lat},${mapCoords.lng}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  class:list={[
+    'group relative flex flex-col overflow-hidden rounded-3xl bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md',
+    className,
+  ]}
+>
+  <div class="absolute inset-0 z-0">
+    <div
+      class="location-map h-full w-full object-cover"
+      data-lat={mapCoords.lat}
+      data-lng={mapCoords.lng}
+    >
+    </div>
+    <div
+      class="pointer-events-none absolute inset-0 bg-gradient-to-t from-white/95 via-white/80 to-white/60 z-[401]"
+    >
+    </div>
+  </div>
+
+  <div class="absolute -right-4 -top-4 opacity-5 z-10">
+    <MapPin class="size-32" />
+  </div>
+
+  <div class="relative z-10 flex h-full flex-col">
+    <div class="text-left">
+      <h3 class="text-lg font-semibold text-gray-900">{title}</h3>
+      <p class="text-sm text-gray-500">{subtitle}</p>
+    </div>
+  </div>
+
+  <div
+    class="absolute right-4 bottom-4 z-20 opacity-0 transition-opacity group-hover:opacity-100"
+  >
+    <ArrowUpRight class="size-5 text-gray-400" />
+  </div>
+</a>
+
+<script>
+  import L from 'leaflet'
+
+  const maps = document.querySelectorAll(
+    '.location-map',
+  ) as NodeListOf<HTMLElement>
+
+  maps.forEach(mapElement => {
+    const lat = parseFloat(mapElement.dataset.lat || '0')
+    const lng = parseFloat(mapElement.dataset.lng || '0')
+
+    const map = L.map(mapElement, {
+      center: [lat, lng],
+      zoom: 11,
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+    })
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map)
+  })
+</script>
+
+<style>
+  /* Fix Leaflet z-index issues with other absolute elements */
+  :global(.leaflet-pane) {
+    z-index: 0 !important;
+  }
+  :global(.leaflet-bottom),
+  :global(.leaflet-top) {
+    z-index: 0 !important;
+  }
+</style>

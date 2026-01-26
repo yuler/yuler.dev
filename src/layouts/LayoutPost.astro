@@ -5,7 +5,7 @@ const { frontmatter } = Astro.props
 ---
 
 <Layout pageTitle={frontmatter.title}>
-  <main class="max-w-4xl mx-auto p-6">
+  <div class="max-w-4xl mx-auto p-6">
     <article class="prose lg:prose-xl">
       <h1>{frontmatter.title}</h1>
       <!-- TODO: poster, tags -->
@@ -21,7 +21,7 @@ const { frontmatter } = Astro.props
       </div> -->
       <slot />
     </article>
-  </main>
+  </div>
 </Layout>
 
 <style is:global>
