@@ -1,6 +1,6 @@
 ---
 title: 'Hi, DeepSeek!'
-description: 'xxx'
+description: 'An introduction to the DeepSeek large language model, including its features, use cases, and self-hosting deployment guide.'
 slug: 'deepseek'
 tags: ["astro"]
 date: 2025-02-18
