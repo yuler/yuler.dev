@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
 import LayoutPost from '../../layouts/LayoutPost.astro'
+import BackToHome from '../../components/BackToHome.astro'
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('posts')
@@ -15,5 +16,6 @@ const { Content } = await entry.render()
 ---
 
 <LayoutPost frontmatter={entry.data}>
+  <BackToHome />
   <Content />
 </LayoutPost>
