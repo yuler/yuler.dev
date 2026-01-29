@@ -3,7 +3,6 @@ title: Agent Skills
 description: 赋予智能体新能力与专业技能的开放格式。介绍 Anthropic 定义的 Agent Skills 规范、SKILL 结构、与 MCP 的对比及快速上手指南。
 tags: ["agent", "skills", "ai"]
 date: 2026-01-29
-draft: true
 ---
 
 # Agent Skills
@@ -16,7 +15,6 @@ Anthropic 定义的开放规范：[https://agentskills.io/](https://agentskills.
 
 > A simple, open format for giving agents new capabilities and expertise.
 
----
 
 ## SKILL 的本质
 
@@ -46,7 +44,6 @@ my-skill/
 - **Extensible 可扩展** — 从简单文本指令到复杂代码执行、资源管理
 - **Portable 可移植** — 就是一个文件夹，轻松修改、版本迭代和分享
 
----
 
 ## SKILL 是如何工作的?
 
@@ -70,21 +67,19 @@ flowchart LR
 
 3. **Execution 执行** — Agent 根据 SKILL.md 指令，按需加载引用文件或执行指定代码。
 
----
 
 ## SKILL 规范与格式
 
 ### SKILL.md Frontmatter
 
 ```yaml
----
 name: pdf-processing
 description: Extract text and tables from PDF files, fill forms, merge documents.
 license: Apache-2.0
 metadata:
   author: example-org
   version: "1.0"
----
+
 ```
 
 **必须字段**: `name`, `description`
@@ -124,7 +119,6 @@ metadata:
 
 保持 SKILL.md < 500 行，详细指令放到 references 按内容拆分。
 
----
 
 ## Skill vs MCP
 
@@ -175,7 +169,6 @@ Agent Skill 是 **"你会干什么"**，而 MCP 是 **"你如何与外界沟通�
 - **Skill 是"攻略"** — 告诉玩家"先跳再开火"。玩家（Agent）利用游戏自带的动作（本地工具）去完成。
 - **MCP 是"特制手柄"** — 给游戏增加了一个"一键大招"的实体按键。只要按下去，协议就会强制执行预设好的复杂动作。
 
----
 
 ## 快速上手
 
@@ -227,17 +220,14 @@ npx skills add https://github.com/michalparkola/tapestry-skills-for-claude-code/
 - https://skills.sh/
 - https://github.com/ComposioHQ/awesome-claude-skills
 
----
 
 ## 编写一个简单的 SKILL
 
 以 **git-commit** SKILL 为例：
 
 ```md
----
 name: git-commit
 description: Generates human-readable commit messages with leading emoji by analyzing git diff. Use when the user wants to commit, needs a commit message, or asks to summarize staged/unstaged changes. Ignores lock files (e.g. pnpm-lock.yaml).
----
 
 ## What I do
 
@@ -273,7 +263,6 @@ description: Generates human-readable commit messages with leading emoji by anal
 Pick the closest type; keep the message concise.
 ```
 
----
 
 ## 参考链接
 
