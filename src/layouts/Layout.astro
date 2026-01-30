@@ -19,5 +19,30 @@ const { title } = Astro.props
       <slot />
     </main>
     <Footer />
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+      
+      // Find all mermaid code blocks and extract raw text
+      document.querySelectorAll('pre[data-language="mermaid"]').forEach(pre => {
+        const code = pre.querySelector('code');
+        if (code) {
+          // Extract raw text content
+          const rawCode = code.textContent;
+          // Create new pre element with mermaid class
+          const newPre = document.createElement('pre');
+          newPre.className = 'mermaid not-prose';
+          newPre.textContent = rawCode;
+          // Replace the old pre element
+          pre.parentNode.replaceChild(newPre, pre);
+        }
+      });
+      
+      // Initialize mermaid
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose',
+      });
+    </script>
   </body>
 </html>

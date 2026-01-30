@@ -10,52 +10,58 @@ const posts = (
 ).sort((a, b) => (b.data.date > a.data.date ? 1 : -1))
 ---
 
-<div class="flex h-full flex-col rounded-3xl bg-white p-8 shadow-sm">
-  <div class="mb-6 flex items-center justify-between">
-    <h2 class="text-xl font-semibold text-gray-900">Posts</h2>
-    <span class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">
-      {posts.length} posts
+<div class="relative bg-white border border-gray-200 p-6 h-full flex flex-col">
+  <!-- Corner Markers -->
+  <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+  <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+  <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+  <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+
+  <div class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+    <h2 class="text-lg font-semibold text-gray-900 font-mono">Posts</h2>
+    <span class="px-2 py-0.5 text-sm bg-gray-100 text-gray-600 font-mono">
+      {posts.length}
     </span>
   </div>
 
-  <ul class="flex-1 space-y-2">
+  <ul class="flex-1 space-y-1">
     {
       posts.slice(0, 5).map(post => (
         <li>
           <a
             href={`/posts/${post.slug}`}
-            class="group flex items-center justify-between rounded-2xl p-4 transition-colors hover:bg-gray-50"
+            class="group flex items-center justify-between p-3 transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
           >
             <div>
-              <h3 class="font-medium text-gray-900 group-hover:text-blue-600">
+              <h3 class="font-medium text-gray-900 group-hover:text-gray-700">
                 {post.data.title}
                 {post.data.draft && (
-                  <span class="ml-2 rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                  <span class="ml-2 px-1.5 py-0.5 text-xs bg-gray-200 text-gray-600">
                     Draft
                   </span>
                 )}
               </h3>
               <time
-                class="text-sm text-gray-500"
+                class="text-xs text-gray-500 font-mono"
                 datetime={post.data.date.toISOString()}
               >
                 {formatDate(post.data.date)}
               </time>
             </div>
-            <ChevronRight class="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-blue-600" />
+            <ChevronRight class="h-4 w-4 text-gray-400 transition-transform group-hover:translate-x-0.5" />
           </a>
         </li>
       ))
     }
   </ul>
 
-  <div class="mt-auto flex justify-center pt-6">
+  <div class="mt-auto flex justify-center pt-6 border-t border-gray-100">
     <a
       href="/posts"
-      class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+      class="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
     >
-      View all posts
-      <ChevronRight class="h-4 w-4" />
+      View all
+      <ChevronRight class="h-3 w-3" />
     </a>
   </div>
 </div>

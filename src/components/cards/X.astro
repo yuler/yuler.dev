@@ -19,23 +19,29 @@ const {
   href={href}
   target="_blank"
   rel="noopener noreferrer"
-  class="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+  class="group relative bg-white border border-gray-200 p-4 transition-all duration-300 hover:border-gray-400"
 >
-  {/* Background Icon Slot */}
-  <div class="absolute -right-4 -top-4 opacity-5">
-    <XIcon class="size-28" />
+  <!-- Corner Markers -->
+  <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+  <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+  <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+  <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+
+  <!-- Background Icon -->
+  <div class="absolute right-2 bottom-2 opacity-5">
+    <XIcon class="size-10" />
   </div>
 
-  {/* Content */}
+  <!-- Content -->
   <div class="relative z-10">
-    <h3 class="text-lg font-semibold text-gray-900">{title}</h3>
-    <p class="text-sm text-gray-500">{subtitle}</p>
+    <h3 class="text-base font-semibold text-gray-900 font-mono">{title}</h3>
+    <p class="text-xs text-gray-500 font-mono">{subtitle}</p>
   </div>
 
-  {/* Arrow for links */}
+  <!-- Arrow -->
   <div
-    class="absolute bottom-4 right-4 opacity-0 transition-opacity group-hover:opacity-100"
+    class="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
   >
-    <ArrowUpRight class="size-5 text-gray-400" />
+    <ArrowUpRight class="size-4 text-gray-400" />
   </div>
 </a>

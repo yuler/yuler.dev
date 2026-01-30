@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content'
 import LayoutPost from '../../layouts/LayoutPost.astro'
-import BackToHome from '../../components/BackToHome.astro'
-import { formatDate, humanize } from '../../utils/date'
+import ChevronRight from '../../components/icons/ChevronRight.astro'
+import { formatDate } from '../../utils/date'
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('posts')
@@ -15,25 +15,20 @@ export async function getStaticPaths() {
 const { entry } = Astro.props
 const { Content } = await entry.render()
 
-// Calculate reading time (average reading speed: 200 words per minute)
+// Calculate reading time
 const readingTime = (content: string) => {
   if (!content) return 1
-  // Remove markdown syntax and count words
   const plainText = content
-    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-    .replace(/`[^`]+`/g, '') // Remove inline code
-    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Remove markdown links but keep text
-    .replace(/[#*_~`]/g, '') // Remove markdown formatting
-    .replace(/\n+/g, ' ') // Replace newlines with spaces
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`]+`/g, '')
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+    .replace(/[#*_~`]/g, '')
+    .replace(/\n+/g, ' ')
     .trim()
-  
   const words = plainText.split(/\s+/).filter(word => word.length > 0).length
-  const minutes = Math.max(1, Math.ceil(words / 200))
-  return minutes
+  return Math.max(1, Math.ceil(words / 200))
 }
 
-// Get content text for reading time calculation
-// Try to access body from entry, fallback to 1 min if unavailable
 let readTime = 1
 try {
   const contentText = (entry as any).body || ''
@@ -41,43 +36,71 @@ try {
 } catch {
   readTime = 1
 }
+
 ---
 
 <LayoutPost frontmatter={entry.data}>
-  <div class="mx-auto max-w-3xl px-4 py-6 md:px-8 md:py-12 lg:py-16">
-    <BackToHome />
-    
-    <!-- Hero Section -->
-    <header class="mb-12 border-b border-gray-200 pb-8">
-      <h1 class="mb-4 text-4xl font-bold leading-tight tracking-tight text-gray-900 md:text-5xl">
-        {entry.data.title}
-      </h1>
-      
-      {entry.data.description && (
-        <p class="mb-6 text-xl leading-relaxed text-gray-500 md:text-2xl">
-          {entry.data.description}
-        </p>
-      )}
-      
-      <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex flex-wrap items-center gap-2">
-          <time 
-            class="text-sm font-medium text-gray-500" 
-            datetime={entry.data.date.toISOString()}
-            title={entry.data.date.toISOString()}
-          >
-            {formatDate(entry.data.date)}
-          </time>
-          <span class="text-sm text-gray-300">•</span>
-          <span class="text-sm font-medium text-gray-500">{readTime} min read</span>
+  <!-- Clean Light Background -->
+  <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
+    <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8 font-mono">
+        <a href="/" class="hover:text-gray-900 transition-colors">~</a>
+        <span class="text-gray-300">/</span>
+        <a href="/posts" class="hover:text-gray-900 transition-colors">posts</a>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-900 truncate max-w-[200px]">{entry.data.title}</span>
+      </nav>
+
+      <!-- Article Header Card -->
+      <div class="bg-white border border-gray-200 p-8 mb-8 relative">
+        <!-- Corner Markers -->
+        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+
+        {/* Title */}
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight font-mono">
+          <span class="text-gray-400">#</span> {entry.data.title}
+        </h1>
+
+        {/* Description */}
+        {entry.data.description && (
+          <p class="text-gray-600 mb-6 text-lg border-l-2 border-gray-300 pl-4">
+            <span class="text-gray-400">></span> {entry.data.description}
+          </p>
+        )}
+
+        {/* Meta Grid */}
+        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 pt-4 border-t border-gray-200 font-mono">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400">date:</span>
+            <time datetime={entry.data.date.toISOString()} class="text-gray-900">
+              {entry.data.date.toISOString().split('T')[0]}
+            </time>
+          </div>
+          <span class="text-gray-300">|</span>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400">read:</span>
+            <span class="text-gray-900">{readTime}min</span>
+          </div>
+          {entry.data.draft && (
+            <>
+              <span class="text-gray-300">|</span>
+              <span class="px-2 py-0.5 text-xs font-medium bg-gray-200 text-gray-700">DRAFT</span>
+            </>
+          )}
         </div>
-        
+
+        {/* Tags */}
         {entry.data.tags && entry.data.tags.length > 0 && (
-          <div class="flex flex-wrap gap-2">
+          <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200">
+            <span class="text-gray-400 font-mono text-sm">tags:</span>
             {entry.data.tags.map((tag) => (
-              <a 
+              <a
                 href={`/tags/${tag}`}
-                class="inline-flex items-center rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-200 hover:text-gray-900 hover:-translate-y-0.5"
+                class="px-2 py-0.5 text-sm border border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900 transition-colors"
               >
                 {tag}
               </a>
@@ -85,36 +108,50 @@ try {
           </div>
         )}
       </div>
-      
-      {entry.data.image && (
-        <div class="mt-8 overflow-hidden rounded-2xl shadow-lg">
-          <img 
-            src={entry.data.image.url} 
-            alt={entry.data.image.alt}
-            class="block h-auto w-full object-cover"
-            loading="eager"
-          />
-        </div>
-      )}
-    </header>
-    
-    <!-- Article Content -->
-    <article class="prose prose-lg prose-gray max-w-none md:prose-xl 
-      prose-headings:font-bold prose-headings:text-gray-900 prose-headings:tracking-tight 
-      prose-h2:mt-10 prose-h2:mb-4 prose-h2:text-3xl prose-h2:leading-snug 
-      prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-2xl prose-h3:leading-snug 
-      prose-h4:mt-6 prose-h4:mb-3 prose-h4:text-xl prose-h4:leading-snug 
-      prose-p:mb-6 prose-p:text-gray-700 prose-p:leading-relaxed 
-      prose-a:text-blue-600 prose-a:underline prose-a:underline-offset-2 prose-a:transition-colors hover:prose-a:text-blue-700 
-      prose-strong:text-gray-900 
-      prose-ul:my-6 prose-ul:pl-7 prose-ol:my-6 prose-ol:pl-7 prose-li:my-2 prose-li:text-gray-700 
-      prose-blockquote:my-6 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:py-4 prose-blockquote:pl-6 prose-blockquote:pr-6 prose-blockquote:italic prose-blockquote:text-blue-900 prose-blockquote:rounded-r-lg 
-      prose-img:my-8 prose-img:rounded-xl prose-img:shadow-lg 
-      prose-hr:my-10 prose-hr:border-t prose-hr:border-gray-200 
-      prose-table:my-6 prose-table:w-full prose-table:border-collapse 
-      prose-th:bg-gray-50 prose-th:p-3 prose-th:text-left prose-th:font-semibold prose-th:text-gray-900 prose-th:border-b prose-th:border-gray-200 
-      prose-td:p-3 prose-td:border-b prose-td:border-gray-200">
-      <Content />
-    </article>
+
+      <!-- Article Content Card -->
+      <div class="bg-white border border-gray-200 p-8 md:p-12 relative">
+        <!-- Corner Markers -->
+        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+        <article class="prose prose-gray max-w-none
+          prose-headings:font-bold prose-headings:text-gray-900 prose-headings:font-mono
+          prose-h1:text-3xl prose-h1:md:text-4xl prose-h1:mb-6
+          prose-h2:text-xl prose-h2:md:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2
+          prose-h3:text-lg prose-h3:md:text-xl prose-h3:mt-6 prose-h3:mb-3
+          prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
+          prose-a:text-gray-900 prose-a:underline prose-a:underline-offset-4 prose-a:decoration-gray-400 prose-a:hover:decoration-gray-900
+          prose-strong:text-gray-900 prose-strong:font-semibold
+          prose-code:border-gray-300 prose-code:text-rose-600 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+          prose-pre:bg-gray-200 prose-pre:p-4 prose-pre:rounded-none prose-pre:border prose-pre:border-gray-300
+          prose-pre:code:text-gray-800 prose-pre:code:bg-transparent prose-pre:code:p-0 prose-pre:code:rounded-none
+          prose-ul:my-4 prose-ul:pl-6 prose-ol:my-4 prose-ol:pl-6
+          prose-li:my-1 prose-li:text-gray-700
+          prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:bg-gray-50 prose-blockquote:pl-4 prose-blockquote:py-2 prose-blockquote:my-4 prose-blockquote:not-italic prose-blockquote:text-gray-600
+          prose-hr:border-gray-200 prose-hr:my-8
+          prose-table:w-full prose-table:border-collapse prose-table:my-4
+          prose-th:border prose-th:border-gray-200 prose-th:bg-gray-50 prose-th:p-2 prose-th:text-left prose-th:text-gray-900 prose-th:font-semibold prose-th:text-sm prose-th:font-mono
+          prose-td:border prose-td:border-gray-200 prose-td:p-2 prose-td:text-gray-700 prose-td:text-sm">
+          <Content />
+        </article>
+      </div>
+
+      <!-- Navigation Footer -->
+      <div class="mt-8 flex items-center justify-between bg-white border border-gray-200 p-4 relative">
+        <!-- Corner Markers -->
+        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+
+        <a href="/posts" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors">
+          <span>←</span>
+          <span>All posts</span>
+        </a>
+        <span class="text-xs text-gray-400 font-mono">[END]</span>
+      </div>
+    </div>
   </div>
 </LayoutPost>

@@ -1,7 +1,7 @@
 ---
 title: Agent Skills
 description: 赋予智能体新能力与专业技能的开放格式。介绍 Anthropic 定义的 Agent Skills 规范、SKILL 结构、与 MCP 的对比及快速上手指南。
-tags: ["agent", "skills", "ai"]
+tags: ['agent', 'skills', 'ai']
 date: 2026-01-29
 ---
 
@@ -33,11 +33,11 @@ my-skill/
 
 ### SKILL.md 的组成
 
-| 部分 | 说明 |
-|------|------|
-| **Metadata** | 元数据: name, description 等 |
-| **Instructions** | 指令: 自描述、可扩展、可移植 |
-| **Resources** | 资源: scripts, references, assets |
+| 部分             | 说明                              |
+| ---------------- | --------------------------------- |
+| **Metadata**     | 元数据: name, description 等      |
+| **Instructions** | 指令: 自描述、可扩展、可移植      |
+| **Resources**    | 资源: scripts, references, assets |
 
 ### 指令的核心特性
 
@@ -53,12 +53,12 @@ my-skill/
 
 ```mermaid
 flowchart LR
-    A[Discovery<br/>发现] --> B[Activation<br/>激活]
-    B --> C[Execution<br/>执行]
+    A["Discovery 发现"] --> B["Activation 激活"]
+    B --> C["Execution 执行"]
 
-    style A fill:#FF6B6B
-    style B fill:#4ECDC4
-    style C fill:#45B7D1
+    style A fill:#FF6B6B,color:#fff
+    style B fill:#4ECDC4,color:#000
+    style C fill:#45B7D1,color:#fff
 ```
 
 ### 三个阶段详解
@@ -82,7 +82,7 @@ description: Extract text and tables from PDF files, fill forms, merge documents
 license: Apache-2.0
 metadata:
   author: example-org
-  version: "1.0"
+  version: '1.0'
 ---
 ```
 
@@ -110,16 +110,11 @@ metadata:
 
 ### 渐进式披露的资源建议
 
-```
-┌─────────────────────────────────────────────────┐
-│  Metadata:       ~100 tokens                    │
-├─────────────────────────────────────────────────┤
-│  Instructions:   < 5000 tokens (recommended)    │
-├─────────────────────────────────────────────────┤
-│  Resources:      as needed                      │
-│  • scripts/, references/, assets/               │
-└─────────────────────────────────────────────────┘
-```
+| 部分             | 建议                                     |
+| ---------------- | ---------------------------------------- |
+| **Metadata**     | ~100 tokens                              |
+| **Instructions** | < 5000 tokens (recommended)              |
+| **Resources**    | as needed scripts/, references/, assets/ |
 
 保持 SKILL.md < 500 行，详细指令放到 references 按内容拆分。
 
@@ -145,12 +140,12 @@ Agent Skill 是 **"你会干什么"**，而 MCP 是 **"你如何与外界沟通�
 
 ### 维度对比表
 
-| 维度 | Agent Skills (核心是指令) | MCP (核心是连接) |
-|------|---------------------------|------------------|
-| **形式** | **.md 文件**（自然语言定义逻辑） | **JSON-RPC 服务**（代码定义接口） |
-| **编写门槛** | **极低**。懂业务逻辑就能写。 | **中等**。需要写程序、打镜像。 |
-| **运行位置** | **本地工作区**。随项目代码走。 | **隔离环境**。如 Docker 或远程 Server。 |
-| **执行成功率** | 依赖 LLM 实时推理，环境差异大。 | **极高**。环境标准化，屏蔽系统差异。 |
+| 维度           | Agent Skills (核心是指令)        | MCP (核心是连接)                        |
+| -------------- | -------------------------------- | --------------------------------------- |
+| **形式**       | **.md 文件**（自然语言定义逻辑） | **JSON-RPC 服务**（代码定义接口）       |
+| **编写门槛**   | **极低**。懂业务逻辑就能写。     | **中等**。需要写程序、打镜像。          |
+| **运行位置**   | **本地工作区**。随项目代码走。   | **隔离环境**。如 Docker 或远程 Server。 |
+| **执行成功率** | 依赖 LLM 实时推理，环境差异大。  | **极高**。环境标准化，屏蔽系统差异。    |
 
 ### 实战场景对比
 
@@ -258,16 +253,16 @@ description: Generates human-readable commit messages with leading emoji by anal
 
 ## Emoji reference
 
-| Change type        | Emoji | Example                    |
-|--------------------|-------|----------------------------|
-| New feature        | ✨    | ✨ Add login form          |
-| Bug fix            | 🐛    | 🐛 Fix date timezone       |
-| Documentation      | 📝    | 📝 Update API readme       |
-| Style / format     | 💄    | 💄 Format with prettier    |
-| Refactor           | ♻️    | ♻️ Extract auth helper    |
-| Performance        | ⚡    | ⚡ Lazy load images       |
-| Dependencies       | 📦    | 📦 Upgrade React to 19    |
-| Config / tooling   | 🔧    | 🔧 Add ESLint rule        |
+| Change type      | Emoji | Example                 |
+| ---------------- | ----- | ----------------------- |
+| New feature      | ✨    | ✨ Add login form       |
+| Bug fix          | 🐛    | 🐛 Fix date timezone    |
+| Documentation    | 📝    | 📝 Update API readme    |
+| Style / format   | 💄    | 💄 Format with prettier |
+| Refactor         | ♻️    | ♻️ Extract auth helper  |
+| Performance      | ⚡    | ⚡ Lazy load images     |
+| Dependencies     | 📦    | 📦 Upgrade React to 19  |
+| Config / tooling | 🔧    | 🔧 Add ESLint rule      |
 
 Pick the closest type; keep the message concise.
 ```
