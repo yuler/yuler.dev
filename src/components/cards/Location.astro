@@ -23,10 +23,16 @@ const {
   target="_blank"
   rel="noopener noreferrer"
   class:list={[
-    'group relative flex flex-col overflow-hidden rounded-3xl bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md',
+    'group relative flex flex-col bg-white border border-gray-200 transition-all duration-300 hover:border-gray-400',
     className,
   ]}
 >
+  <!-- Corner Markers -->
+  <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400 z-20"></div>
+  <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400 z-20"></div>
+  <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400 z-20"></div>
+  <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400 z-20"></div>
+
   <div class="absolute inset-0 z-0">
     <div
       class="location-map h-full w-full object-cover"
@@ -40,21 +46,21 @@ const {
     </div>
   </div>
 
-  <div class="absolute -right-4 -top-4 opacity-5 z-10">
+  <div class="absolute right-0 top-0 opacity-5 z-10">
     <MapPin class="size-32" />
   </div>
 
-  <div class="relative z-10 flex h-full flex-col">
-    <div class="text-left">
-      <h3 class="text-lg font-semibold text-gray-900">{title}</h3>
-      <p class="text-sm text-gray-500">{subtitle}</p>
+  <div class="relative z-10 flex h-full flex-col p-4">
+    <div class="text-left mt-auto border-t border-gray-100 pt-3">
+      <h3 class="text-base font-semibold text-gray-900 font-mono">{title}</h3>
+      <p class="text-xs text-gray-500 font-mono">{subtitle}</p>
     </div>
   </div>
 
   <div
     class="absolute right-4 bottom-4 z-20 opacity-0 transition-opacity group-hover:opacity-100"
   >
-    <ArrowUpRight class="size-5 text-gray-400" />
+    <ArrowUpRight class="size-4 text-gray-400" />
   </div>
 </a>
 

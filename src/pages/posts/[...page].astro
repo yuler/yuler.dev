@@ -2,7 +2,6 @@
 import { getCollection } from 'astro:content'
 import Layout from '../../layouts/Layout.astro'
 import ChevronRight from '../../components/icons/ChevronRight.astro'
-import BackToHome from '../../components/BackToHome.astro'
 import { formatDate } from '../../utils/date'
 
 import type { GetStaticPaths } from 'astro'
@@ -28,45 +27,55 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
 ---
 
 <Layout title="Posts — Yu Le">
-  <div class="h-full px-4 py-12 md:py-20">
-    <div class="mx-auto max-w-3xl">
-      <BackToHome />
+  <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
+    <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8 font-mono">
+        <a href="/" class="hover:text-gray-900 transition-colors">~</a>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-900">posts</span>
+      </nav>
+      <!-- Main Card -->
+      <div class="relative bg-white border border-gray-200 p-6">
+        <!-- Corner Markers -->
+        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
 
-      <div class="rounded-3xl bg-white p-8 shadow-sm">
-        <div class="mb-6 flex items-center justify-between">
-          <h1 class="text-xl font-semibold text-gray-900">Posts</h1>
-          <span
-            class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600"
-          >
-            Page {page.currentPage} of {page.lastPage}
+        <!-- Header -->
+        <div class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+          <h1 class="text-lg font-semibold text-gray-900 font-mono">Posts</h1>
+          <span class="px-2 py-0.5 text-sm bg-gray-100 text-gray-600 font-mono">
+            {page.currentPage}/{page.lastPage}
           </span>
         </div>
 
-        <ul class="space-y-2">
+        <ul class="space-y-1">
           {
             page.data.map(post => (
               <li>
                 <a
                   href={`/posts/${post.slug}`}
-                  class="group flex items-center justify-between rounded-2xl p-4 transition-colors hover:bg-gray-50"
+                  class="group flex items-center justify-between p-3 transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
                 >
                   <div>
-                    <h3 class="font-medium text-gray-900 group-hover:text-blue-600">
+                    <h3 class="font-medium text-gray-900 group-hover:text-gray-700">
                       {post.data.title}
                       {post.data.draft && (
-                        <span class="ml-2 rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                        <span class="ml-2 px-1.5 py-0.5 text-xs bg-gray-200 text-gray-600">
                           Draft
                         </span>
                       )}
                     </h3>
                     <time
-                      class="text-sm text-gray-500"
+                      class="text-xs text-gray-500 font-mono"
                       datetime={post.data.date.toISOString()}
                     >
                       {formatDate(post.data.date)}
                     </time>
                   </div>
-                  <ChevronRight class="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-blue-600" />
+                  <ChevronRight class="h-4 w-4 text-gray-400 transition-transform group-hover:translate-x-0.5" />
                 </a>
               </li>
             ))
@@ -79,21 +88,26 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
               {page.url.prev ? (
                 <a
                   href={page.url.prev}
-                  class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
                 >
-                  <ChevronRight class="h-4 w-4 rotate-180" />
-                  Previous
+                  <span>←</span>
+                <span>Prev</span>
                 </a>
               ) : (
                 <span />
               )}
+
+              <span class="text-sm text-gray-400 font-mono">
+                {page.currentPage}/{page.lastPage}
+              </span>
+
               {page.url.next ? (
                 <a
                   href={page.url.next}
-                  class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
                 >
-                  Next
-                  <ChevronRight class="h-4 w-4" />
+                  <span>Next</span>
+                <span>→</span>
                 </a>
               ) : (
                 <span />

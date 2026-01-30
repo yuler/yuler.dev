@@ -13,9 +13,10 @@ export default defineConfig({
   integrations: [
     mdx({
       syntaxHighlight: 'shiki',
-      shikiConfig: { theme: 'dracula', },
-      // remarkPlugins: [remarkToc],
-      // rehypePlugins: [rehypeMinifyHtml],
+      shikiConfig: {
+        theme: 'github-light',
+        excludeLangs: ['mermaid'],
+      },
       remarkRehype: { footnoteLabel: 'Footnotes' },
       gfm: true,
     }),
