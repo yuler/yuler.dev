@@ -11,7 +11,8 @@
     "astro": "astro",
     "up": "npx taze -I",
     "autocorrect": "autocorrect --fix src/content/**/*.{md,mdx}",
-    "create:post": "node scripts/create-post.mjs"
+    "create:post": "node scripts/create-post.mjs",
+    "export:pdf": "node scripts/export-post-pdf.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
@@ -25,6 +26,8 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@types/leaflet": "^1.9.21"
+    "@types/leaflet": "^1.9.21",
+    "playwright": "^1.58.2",
+    "sharp": "^0.34.5"
   }
 }
