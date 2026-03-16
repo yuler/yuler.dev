@@ -12,7 +12,8 @@
     "up": "npx taze -I",
     "autocorrect": "autocorrect --fix src/content/**/*.{md,mdx}",
     "create:post": "node scripts/create-post.mjs",
-    "export:pdf": "node scripts/export-post-pdf.mjs"
+    "export:pdf": "node scripts/export-post-pdf.mjs",
+    "commit": "opencode run git commit"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
