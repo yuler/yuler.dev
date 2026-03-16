@@ -7,19 +7,81 @@
 
 import { spawn } from 'node:child_process'
 import { createServer } from 'node:http'
-import { createReadStream, existsSync, statSync } from 'node:fs'
+import { createReadStream, existsSync, statSync, readdirSync, mkdirSync, readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
 const distDir = join(root, 'dist')
-
-const slug = process.argv[2] || '2026/vibe-coding'
+const postsRoot = join(root, 'src', 'content', 'posts')
 const port = 4173
 const baseUrl = `http://127.0.0.1:${port}`
-const postUrl = `${baseUrl}/posts/${slug}`
-const outPath = join(root, `vibe-coding.pdf`)
+
+function listPostSlugs(dir = postsRoot, prefix = '') {
+  const entries = readdirSync(dir, { withFileTypes: true })
+  const slugs = []
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name)
+    const rel = prefix ? `${prefix}/${entry.name}` : entry.name
+    if (entry.isDirectory()) {
+      slugs.push(...listPostSlugs(fullPath, rel))
+    } else if (entry.isFile() && (entry.name.endsWith('.md') || entry.name.endsWith('.mdx'))) {
+      const withoutExt = rel.replace(/\.(md|mdx)$/, '')
+      let dateRaw = null
+      try {
+        const content = readFileSync(fullPath, 'utf8')
+        const match = content.match(/^date:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/m)
+        if (match) {
+          dateRaw = match[1]
+        }
+      } catch {
+        // ignore read/parse errors, leave dateRaw as null
+      }
+      const date = dateRaw ? new Date(dateRaw) : null
+      slugs.push({ slug: withoutExt, date, dateRaw })
+    }
+  }
+  return slugs.sort((a, b) => {
+    if (a.date && b.date) {
+      return b.date.getTime() - a.date.getTime()
+    }
+    if (a.date && !b.date) return -1
+    if (!a.date && b.date) return 1
+    return a.slug.localeCompare(b.slug)
+  })
+}
+
+async function chooseSlugTui() {
+  const posts = listPostSlugs()
+  if (!posts.length) {
+    console.error('No posts found under `content/posts`.')
+    process.exit(1)
+  }
+
+  console.log('Select a post to export from `content/posts` (sorted by frontmatter `date`):\n')
+  posts.forEach((p, i) => {
+    const idx = String(i + 1).padStart(2, ' ')
+    const dateLabel = p.dateRaw ?? 'no-date'
+    console.log(`${idx}. [${dateLabel}] ${p.slug}`)
+  })
+  console.log('\nEnter number (default 1): ')
+
+  const rl = await import('node:readline')
+  const iface = rl.createInterface({ input: process.stdin, output: process.stdout })
+
+  const answer = await new Promise((resolve) => {
+    iface.question('> ', (ans) => resolve(ans.trim()))
+  })
+  iface.close()
+
+  let index = parseInt(answer || '1', 10)
+  if (Number.isNaN(index) || index < 1 || index > posts.length) {
+    console.log(`Invalid selection, defaulting to 1.`)
+    index = 1
+  }
+  return posts[index - 1].slug
+}
 
 async function build() {
   return new Promise((resolve, reject) => {
@@ -56,7 +118,7 @@ function serveDist() {
   })
 }
 
-async function exportPdf() {
+async function exportPdf(postUrl, outPath) {
   const { chromium } = await import('playwright')
   const browser = await chromium.launch()
   const page = await browser.newPage()
@@ -103,6 +165,21 @@ async function exportPdf() {
 }
 
 async function main() {
+  let slug = process.argv[2]
+  if (!slug) {
+    slug = await chooseSlugTui()
+  } else {
+    console.log(`Using slug from CLI: ${slug}`)
+  }
+
+  const postUrl = `${baseUrl}/posts/${slug}`
+  const safeName = slug.replace(/[^\w\-]+/g, '-')
+  const pdfDir = join(root, 'pdfs')
+  if (!existsSync(pdfDir)) {
+    mkdirSync(pdfDir, { recursive: true })
+  }
+  const outPath = join(pdfDir, `${safeName}.pdf`)
+
   if (!existsSync(distDir)) {
     console.log('Building site...')
     await build()
@@ -114,7 +191,7 @@ async function main() {
   server.listen(port, '127.0.0.1', async () => {
     try {
       console.log(`Serving at ${baseUrl}, exporting ${postUrl} to PDF...`)
-      await exportPdf()
+      await exportPdf(postUrl, outPath)
       console.log(`PDF saved: ${outPath}`)
     } finally {
       server.close()

@@ -16,5 +16,8 @@ node_modules/
 # macOS-specific files
 .DS_Store
 
+# Output
+pdfs/
+
 # Misc
 TODO.md
