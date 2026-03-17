@@ -1,5 +1,6 @@
 ---
 import { formatDate } from '../../utils/date'
+import ids from '../../../data/strava/activities/ids.json'
 
 interface Props {
   class?: string
@@ -7,15 +8,36 @@ interface Props {
 
 const { class: className } = Astro.props
 
-// Note: Mauanl update
-const weeksLevel = [
-  { start: '2026-01-01', end: '2026-01-04', level: 6 },
-  { start: '2026-01-05', end: '2026-01-11', level: 4 },
-  { start: '2026-01-12', end: '2026-01-18', level: 3 },
-]
+// Load all activity JSON files and pick the ones referenced by ids.json
+const activityModules = import.meta.glob('../../../data/strava/activities/*.json', {
+  eager: true,
+})
 
-const firstWeek = ['2026-01-01', '2026-01-04']
-const weeks = [firstWeek]
+type Activity = {
+  id: number
+  name: string
+  moving_time: number
+  start_date_local: string
+}
+
+const activities: Activity[] = (ids as number[])
+  .map(id => {
+    const mod = activityModules[`../../../data/strava/activities/${id}.json`] as
+      | { default?: Activity }
+      | Activity
+      | undefined
+
+    if (!mod) return undefined
+
+    // Vite JSON imports can be either the value itself or { default: value }
+    const data = 'default' in (mod as any) ? (mod as any).default : mod
+    return data as Activity
+  })
+  .filter(Boolean) as Activity[]
+
+// Build 52 weeks for 2026 starting from Jan 1st
+const firstWeek: [string, string] = ['2026-01-01', '2026-01-04']
+const weeks: [string, string][] = [firstWeek]
 
 let lastEnd = new Date(firstWeek[1])
 
@@ -29,12 +51,49 @@ for (let i = 0; i < 51; i++) {
   lastEnd = end
 }
 
-const weeklyStats = weeks.map(([start, end]) => {
-  const levelData = weeksLevel.find(w => w.start === start)
+function formatDuration(totalSeconds: number) {
+  const s = Math.max(0, Math.floor(totalSeconds))
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+
+  if (h > 0 && m > 0) return `${h}h ${m}m`
+  if (h > 0) return `${h}h`
+  return `${m}m`
+}
+
+// Aggregate weekly moving time + activity names (2026 only)
+const weeklySeconds = new Array(weeks.length).fill(0) as number[]
+const weeklyNames = new Array(weeks.length).fill(0).map(() => []) as string[][]
+
+for (const activity of activities) {
+  const date = new Date(activity.start_date_local)
+  if (date.getFullYear() !== 2026) continue
+
+  const dateStr = formatDate(date)
+  const weekIndex = weeks.findIndex(([start, end]) => dateStr >= start && dateStr <= end)
+  if (weekIndex === -1) continue
+
+  weeklySeconds[weekIndex] += activity.moving_time
+  weeklyNames[weekIndex].push(activity.name)
+}
+
+// Map total hours to level 0–7 (rounded up, capped at 7)
+const weeklyStats = weeks.map(([start, end], index) => {
+  const hours = weeklySeconds[index] / 3600
+  const level = hours === 0 ? 0 : Math.min(7, Math.ceil(hours))
+
+  const today = new Date()
+  const todayStr = formatDate(today)
+  const isCurrentWeek = todayStr >= start && todayStr <= end
+
   return {
+    start,
+    end,
     dateStr: `${start} ~ ${end}`,
-    level: levelData ? levelData.level : 0,
-    isCurrentWeek: false,
+    durationStr: formatDuration(weeklySeconds[index]),
+    names: weeklyNames[index],
+    level,
+    isCurrentWeek,
   }
 })
 ---
@@ -52,7 +111,15 @@ const weeklyStats = weeks.map(([start, end]) => {
     <!-- Header -->
     <div class="flex items-center justify-between border-b border-gray-100 pb-2">
       <h3 class="text-lg font-semibold text-gray-900 font-mono">Workout</h3>
-      <span class="text-xs text-gray-400 font-mono">2026</span>
+      <div class="flex items-center gap-3">
+        <a
+          href="/workouts"
+          class="text-xs text-gray-400 font-mono hover:text-gray-600 transition-colors underline underline-offset-2 decoration-gray-200 hover:decoration-gray-400"
+        >
+          View all →
+        </a>
+        <span class="text-xs text-gray-400 font-mono">2026</span>
+      </div>
     </div>
 
     <!-- Graph -->
@@ -61,23 +128,31 @@ const weeklyStats = weeks.map(([start, end]) => {
         {
           weeklyStats.map((week, index) => (
             <div class="group relative">
-              <div
-                class:list={[
-                  'size-4 transition-colors duration-200 cursor-pointer',
-                  {
-                    'bg-gray-100 ': week.level === 0,
-                    'bg-emerald-100': week.level === 1,
-                    'bg-emerald-200': week.level === 2,
-                    'bg-emerald-300': week.level === 3,
-                    'bg-emerald-400': week.level === 4,
-                    'bg-emerald-500': week.level === 5,
-                    'bg-emerald-600': week.level === 6,
-                    'bg-emerald-700': week.level === 7,
-                    'ring-1 ring-black/50 dark:ring-white/50':
-                      week.isCurrentWeek,
-                  },
-                ]}
-              />
+              {week.level > 0 ? (
+                <a
+                  href={`/workouts?from=${week.start}&to=${week.end}`}
+                  class:list={[
+                    'block size-4 transition-colors duration-200 cursor-pointer',
+                    {
+                      'bg-emerald-100': week.level === 1,
+                      'bg-emerald-200': week.level === 2,
+                      'bg-emerald-300': week.level === 3,
+                      'bg-emerald-400': week.level === 4,
+                      'bg-emerald-500': week.level === 5,
+                      'bg-emerald-600': week.level === 6,
+                      'bg-emerald-700': week.level === 7,
+                      'ring-1 ring-black/50 dark:ring-white/50': week.isCurrentWeek,
+                    },
+                  ]}
+                />
+              ) : (
+                <div
+                  class:list={[
+                    'size-4 bg-gray-100',
+                    { 'ring-1 ring-black/50 dark:ring-white/50': week.isCurrentWeek },
+                  ]}
+                />
+              )}
               {/* Tooltip */}
               <div
                 class:list={[
@@ -91,16 +166,22 @@ const weeklyStats = weeks.map(([start, end]) => {
               >
                 <div class="bg-gray-900 px-2 py-1 text-[10px] text-white shadow-xl ring-1 ring-white/10">
                   <div class="font-medium">{week.dateStr}</div>
-                  <div class="text-gray-400">Level {week.level}</div>
+                  <div class="text-gray-400">
+                    {week.durationStr} · {week.names.length} {week.names.length === 1 ? 'activity' : 'activities'}
+                  </div>
+                  {week.names.length > 0 && (
+                    <div class="mt-1 max-w-[220px] text-gray-200">
+                      {week.names.slice(0, 4).map(name => (
+                        <div class="truncate">• {name}</div>
+                      ))}
+                      {week.names.length > 4 && <div class="text-gray-400">…and {week.names.length - 4} more</div>}
+                    </div>
+                  )}
                 </div>
                 <div
                   class:list={[
                     'absolute top-full border-4 border-transparent border-t-gray-900',
-                    index < 5
-                      ? 'left-2'
-                      : index > weeklyStats.length - 5
-                        ? 'right-2'
-                        : 'left-1/2 -translate-x-1/2',
+                    index < 5 ? 'left-2' : index > weeklyStats.length - 5 ? 'right-2' : 'left-1/2 -translate-x-1/2',
                   ]}
                 />
               </div>
@@ -108,23 +189,33 @@ const weeklyStats = weeks.map(([start, end]) => {
           ))
         }
       </div>
-      <div
-        class="mt-4 flex items-center justify-between text-[10px] text-gray-400 px-1"
-      >
-        <span>Current is updated weekly</span>
-        <div class="flex gap-1 items-center">
-          <span>Less</span>
-          <div class="flex gap-0.5">
-            <div class="size-1.5 bg-gray-100"></div>
-            <div class="size-1.5 bg-emerald-100"></div>
-            <div class="size-1.5 bg-emerald-200"></div>
-            <div class="size-1.5 bg-emerald-300"></div>
-            <div class="size-1.5 bg-emerald-400"></div>
-            <div class="size-1.5 bg-emerald-500"></div>
-            <div class="size-1.5 bg-emerald-600"></div>
-            <div class="size-1.5 bg-emerald-700"></div>
+      <div class="mt-4 flex items-center justify-between text-[10px] text-gray-400 px-1">
+        <span>
+          Powered by{' '}
+          <a
+            href="https://www.strava.com/"
+            target="_blank"
+            rel="noreferrer"
+            class="underline! text-xs underline-offset-2 decoration-gray-300 hover:decoration-gray-500 hover:text-gray-600 transition-colors"
+          >
+            Strava
+          </a>
+        </span>
+        <div class="flex gap-3 items-center">
+          <div class="flex gap-1 items-center">
+            <span>Less</span>
+            <div class="flex gap-0.5">
+              <div class="size-1.5 bg-gray-100"></div>
+              <div class="size-1.5 bg-emerald-100"></div>
+              <div class="size-1.5 bg-emerald-200"></div>
+              <div class="size-1.5 bg-emerald-300"></div>
+              <div class="size-1.5 bg-emerald-400"></div>
+              <div class="size-1.5 bg-emerald-500"></div>
+              <div class="size-1.5 bg-emerald-600"></div>
+              <div class="size-1.5 bg-emerald-700"></div>
+            </div>
+            <span>More</span>
           </div>
-          <span>More</span>
         </div>
       </div>
     </div>
