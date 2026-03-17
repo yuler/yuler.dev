@@ -1,0 +1,283 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import ChevronRight from '../../components/icons/ChevronRight.astro'
+import { formatDate } from '../../utils/date'
+import ids from '../../../data/strava/activities/ids.json'
+
+const activityModules = import.meta.glob('../../../data/strava/activities/*.json', {
+  eager: true,
+})
+
+type Activity = {
+  id: number
+  name: string
+  type: string
+  sport_type: string
+  distance: number
+  moving_time: number
+  start_date_local: string
+  average_speed: number
+  total_elevation_gain: number
+  has_heartrate: boolean
+  average_heartrate?: number
+  map: { polyline: string; summary_polyline: string }
+}
+
+const activities: Activity[] = (ids as number[])
+  .map(id => {
+    const mod = activityModules[`../../../data/strava/activities/${id}.json`] as
+      | { default?: Activity }
+      | Activity
+      | undefined
+    if (!mod) return undefined
+    const data = 'default' in (mod as any) ? (mod as any).default : mod
+    return data as Activity
+  })
+  .filter(Boolean) as Activity[]
+
+activities.sort((a, b) => new Date(b.start_date_local).getTime() - new Date(a.start_date_local).getTime())
+
+// Build 52 weeks for 2026 and keep only weeks that have activities
+const firstWeek: [string, string] = ['2026-01-01', '2026-01-04']
+const allWeeks: [string, string][] = [firstWeek]
+let lastEnd = new Date(firstWeek[1])
+for (let i = 0; i < 51; i++) {
+  const start = new Date(lastEnd)
+  start.setDate(start.getDate() + 1)
+  const end = new Date(start)
+  end.setDate(end.getDate() + 6)
+  allWeeks.push([formatDate(start), formatDate(end)])
+  lastEnd = end
+}
+
+const activityDates = new Set(activities.map(a => formatDate(new Date(a.start_date_local))))
+const weeks = allWeeks
+  .map(([start, end], i) => ({ start, end, index: i + 1 }))
+  .filter(({ start, end }) => [...activityDates].some(d => d >= start && d <= end))
+
+const sportIcons: Record<string, string> = {
+  Run: '🏃',
+  Ride: '🚴',
+  Walk: '🚶',
+  Swim: '🏊',
+  Hike: '🥾',
+  Yoga: '🧘',
+  WeightTraining: '🏋️',
+}
+
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
+}
+
+function formatDistance(meters: number): string {
+  if (meters < 1000) return `${Math.round(meters)}m`
+  return `${(meters / 1000).toFixed(2)}km`
+}
+
+function formatPace(type: string, avgSpeed: number): string {
+  if (avgSpeed === 0) return '-'
+  if (type === 'Ride') return `${(avgSpeed * 3.6).toFixed(1)} km/h`
+  const paceSeconds = 1000 / avgSpeed
+  const paceMin = Math.floor(paceSeconds / 60)
+  const paceSec = Math.round(paceSeconds % 60)
+  return `${paceMin}'${String(paceSec).padStart(2, '0')}"/km`
+}
+---
+
+<Layout title="Workouts — Yu Le">
+  <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
+    <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8 font-mono">
+        <a href="/" class="hover:text-gray-900 transition-colors">~</a>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-900">workouts</span>
+      </nav>
+
+      <!-- Week Filter -->
+      <div class="mb-4 bg-white border border-gray-200 px-4 py-3 relative">
+        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+        <div class="flex items-center justify-between">
+          <button
+            id="week-prev"
+            class="px-2 py-1 text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            ← Prev
+          </button>
+          <div class="flex items-center gap-2">
+            <select
+              id="week-select"
+              class="appearance-none bg-transparent text-sm font-mono text-gray-900 text-center cursor-pointer hover:text-gray-600 transition-colors focus:outline-none pr-1"
+            >
+              <option value="">All weeks</option>
+              {
+                weeks.map(w => (
+                  <option value={`${w.start}~${w.end}`}>
+                    W{String(w.index).padStart(2, '0')}: {w.start} ~ {w.end}
+                  </option>
+                ))
+              }
+            </select>
+            <span id="filter-count" class="text-xs text-gray-400 font-mono"></span>
+          </div>
+          <button
+            id="week-next"
+            class="px-2 py-1 text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Card -->
+      <div class="relative bg-white border border-gray-200 p-6">
+        <!-- Corner Markers -->
+        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+
+        <!-- Header -->
+        <div class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+          <h1 class="text-lg font-semibold text-gray-900 font-mono">Workouts</h1>
+          <span id="activity-count" class="px-2 py-0.5 text-sm bg-gray-100 text-gray-600 font-mono">
+            {activities.length} activities
+          </span>
+        </div>
+
+        <ul id="activity-list" class="space-y-1">
+          {
+            activities.map(activity => (
+              <li data-date={formatDate(new Date(activity.start_date_local))}>
+                <a
+                  href={`/workouts/${activity.id}`}
+                  class="group flex items-center justify-between p-3 transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                >
+                  <div class="flex items-center gap-3 min-w-0">
+                    <span class="text-lg shrink-0" title={activity.sport_type}>
+                      {sportIcons[activity.sport_type] || '💪'}
+                    </span>
+                    <div class="min-w-0">
+                      <h3 class="font-medium text-gray-900 group-hover:text-gray-700 truncate">{activity.name}</h3>
+                      <div class="flex items-center gap-3 text-xs text-gray-500 font-mono mt-0.5">
+                        <time datetime={activity.start_date_local}>
+                          {formatDate(new Date(activity.start_date_local))}
+                        </time>
+                        <span class="text-gray-300">|</span>
+                        <span>{formatDistance(activity.distance)}</span>
+                        <span class="text-gray-300">|</span>
+                        <span>{formatDuration(activity.moving_time)}</span>
+                        <span class="hidden sm:inline text-gray-300">|</span>
+                        <span class="hidden sm:inline">{formatPace(activity.sport_type, activity.average_speed)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight class="h-4 w-4 text-gray-400 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="hidden py-12 text-center text-gray-400 font-mono text-sm">
+          No activities this week
+        </div>
+
+        <!-- Footer -->
+        <div
+          class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400 font-mono"
+        >
+          <span>
+            Powered by{' '}
+            <a
+              href="https://www.strava.com/"
+              target="_blank"
+              rel="noreferrer"
+              class="underline! underline-offset-2 decoration-gray-300 hover:decoration-gray-500 hover:text-gray-600 transition-colors"
+            >
+              Strava
+            </a>
+          </span>
+          <a href="/" class="hover:text-gray-600 transition-colors">← Home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    ;(function () {
+      var select = document.getElementById('week-select')
+      var prevBtn = document.getElementById('week-prev')
+      var nextBtn = document.getElementById('week-next')
+      var countEl = document.getElementById('filter-count')
+      var activityCount = document.getElementById('activity-count')
+      var emptyState = document.getElementById('empty-state')
+      var items = document.querySelectorAll('#activity-list > li')
+      var total = items.length
+
+      function applyFilter(from, to) {
+        var visible = 0
+        items.forEach(function (li) {
+          var date = li.getAttribute('data-date')
+          if (!from || (date >= from && date <= to)) {
+            li.style.display = ''
+            visible++
+          } else {
+            li.style.display = 'none'
+          }
+        })
+        countEl.textContent = from ? visible + ' matched' : ''
+        activityCount.textContent = (from ? visible : total) + (visible === 1 ? ' activity' : ' activities')
+        emptyState.classList.toggle('hidden', visible > 0)
+
+        var idx = select.selectedIndex
+        prevBtn.disabled = idx <= 1
+        nextBtn.disabled = idx <= 0 || idx >= select.options.length - 1
+      }
+
+      function setWeek(value) {
+        select.value = value
+        if (value) {
+          var parts = value.split('~')
+          applyFilter(parts[0], parts[1])
+          history.replaceState(null, '', '?from=' + parts[0] + '&to=' + parts[1])
+        } else {
+          applyFilter(null, null)
+          history.replaceState(null, '', window.location.pathname)
+        }
+      }
+
+      select.addEventListener('change', function () {
+        setWeek(select.value)
+      })
+
+      prevBtn.addEventListener('click', function () {
+        var idx = select.selectedIndex
+        if (idx > 1) setWeek(select.options[idx - 1].value)
+      })
+
+      nextBtn.addEventListener('click', function () {
+        var idx = select.selectedIndex
+        if (idx > 0 && idx < select.options.length - 1) setWeek(select.options[idx + 1].value)
+      })
+
+      // Init from URL params
+      var params = new URLSearchParams(window.location.search)
+      var from = params.get('from')
+      var to = params.get('to')
+      if (from && to) {
+        setWeek(from + '~' + to)
+      } else {
+        prevBtn.disabled = true
+        nextBtn.disabled = true
+      }
+    })()
+  </script>
+</Layout>
