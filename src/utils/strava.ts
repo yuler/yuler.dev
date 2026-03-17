@@ -3,85 +3,106 @@
  * Documentation: https://developers.strava.com/docs/reference/
  */
 
-const getEnv = (key: string): string => {
-  // @ts-ignore
-  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
-    // @ts-ignore
-    return import.meta.env[key]
+const API_BASE = 'https://www.strava.com/api/v3'
+
+function getEnv(key: string): string {
+  if (typeof process === 'undefined' || !process.env) {
+    throw new Error('Server-side only: process.env is not available.')
   }
-  return process.env[key] || ''
+  const value = process.env[key]
+  if (!value) {
+    throw new Error(`Missing environment variable: ${key}`)
+  }
+  return value
 }
 
-const STRAVA_CLIENT_ID = getEnv('STRAVA_CLIENT_ID')
-const STRAVA_CLIENT_SECRET = getEnv('STRAVA_CLIENT_SECRET')
-const STRAVA_REFRESH_TOKEN = getEnv('STRAVA_REFRESH_TOKEN')
+let cachedToken: string | null = null
 
-const TOKEN_URL = 'https://www.strava.com/oauth/token'
-const ACTIVITIES_URL = 'https://www.strava.com/api/v3/athlete/activities'
+async function getAccessToken(): Promise<string> {
+  if (cachedToken) return cachedToken
 
-async function getAccessToken() {
-  const response = await fetch(TOKEN_URL, {
+  const res = await fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      client_id: STRAVA_CLIENT_ID,
-      client_secret: STRAVA_CLIENT_SECRET,
-      refresh_token: STRAVA_REFRESH_TOKEN,
+      client_id: getEnv('STRAVA_CLIENT_ID'),
+      client_secret: getEnv('STRAVA_CLIENT_SECRET'),
+      refresh_token: getEnv('STRAVA_REFRESH_TOKEN'),
       grant_type: 'refresh_token',
     }),
   })
 
-  const data = await response.json()
+  const data = await res.json()
   if (data.errors) {
-    throw new Error(`Failed to refresh token: ${JSON.stringify(data.errors)}`)
+    throw new Error(`Token refresh failed: ${JSON.stringify(data.errors)}`)
   }
-  return data.access_token
+  cachedToken = data.access_token as string
+  return cachedToken
+}
+
+async function stravaFetch<T>(
+  path: string,
+  params?: Record<string, string | number>,
+): Promise<T> {
+  const token = await getAccessToken()
+  const url = new URL(`${API_BASE}${path}`)
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      if (v != null) url.searchParams.set(k, String(v))
+    }
+  }
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(
+      `Strava API ${path} failed (${res.status}): ${JSON.stringify(err)}`,
+    )
+  }
+
+  return res.json() as Promise<T>
 }
 
 /**
- * Fetch activities from Strava
  * https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities
  */
-export async function getStravaActivities(after?: number, perPage = 100) {
-  const accessToken = await getAccessToken()
-  const url = new URL(ACTIVITIES_URL)
-  if (after) {
-    url.searchParams.append('after', after.toString())
-  }
-  url.searchParams.append('per_page', perPage.toString())
-
-  const response = await fetch(url.toString(), {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+export function getStravaActivities(
+  options: { after?: number; page?: number; perPage?: number } = {},
+) {
+  const { after, page, perPage = 100 } = options
+  return stravaFetch<StravaActivity[]>('/athlete/activities', {
+    ...(after && { after }),
+    ...(page && { page }),
+    per_page: perPage,
   })
-
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(`Failed to fetch Strava activities: ${JSON.stringify(errorData)}`)
-  }
-
-  return response.json()
 }
 
 /**
- * Fetch a specific activity with detailed map polyline
  * https://developers.strava.com/docs/reference/#api-Activities-getActivityById
  */
-export async function getStravaActivityById(id: number) {
-  const accessToken = await getAccessToken()
-  const response = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
+export function getStravaActivityById(id: number) {
+  return stravaFetch<StravaActivityDetail>(`/activities/${id}`)
+}
 
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(`Failed to fetch activity ${id}: ${JSON.stringify(errorData)}`)
-  }
+export interface StravaActivity {
+  id: number
+  name: string
+  type: string
+  sport_type: string
+  distance: number
+  moving_time: number
+  start_date: string
+  start_date_local: string
+  map: { id: string; summary_polyline: string }
+  [key: string]: unknown
+}
 
-  return response.json()
+export interface StravaActivityDetail extends StravaActivity {
+  map: { id: string; summary_polyline: string; polyline: string }
+  calories: number
+  description: string | null
+  [key: string]: unknown
 }
