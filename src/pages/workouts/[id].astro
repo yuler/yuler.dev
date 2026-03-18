@@ -1,0 +1,284 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import { formatDate } from '../../utils/date'
+import { decodePolyline } from '../../utils/polyline'
+import ids from '../../../data/strava/activities/ids.json'
+
+import type { GetStaticPaths } from 'astro'
+
+type Activity = {
+  id: number
+  name: string
+  type: string
+  sport_type: string
+  distance: number
+  moving_time: number
+  elapsed_time: number
+  start_date_local: string
+  average_speed: number
+  max_speed: number
+  total_elevation_gain: number
+  elev_high: number
+  elev_low: number
+  has_heartrate: boolean
+  average_heartrate?: number
+  max_heartrate?: number
+  calories: number
+  description: string | null
+  device_name: string
+  start_latlng: number[]
+  end_latlng: number[]
+  map: { polyline: string; summary_polyline: string }
+}
+
+export const getStaticPaths: GetStaticPaths = () => {
+  const activityModules = import.meta.glob('../../../data/strava/activities/*.json', {
+    eager: true,
+  })
+
+  return (ids as number[])
+    .map(id => {
+      const mod = activityModules[`../../../data/strava/activities/${id}.json`] as
+        | { default?: Activity }
+        | Activity
+        | undefined
+      if (!mod) return null
+      const activity = ('default' in (mod as any) ? (mod as any).default : mod) as Activity
+      return { params: { id: String(id) }, props: { activity } }
+    })
+    .filter(Boolean) as any
+}
+
+const { activity } = Astro.props as { activity: Activity }
+
+const polyline = activity.map?.polyline || activity.map?.summary_polyline || ''
+const hasMap = polyline.length > 0
+const points = hasMap ? decodePolyline(polyline) : []
+
+function deviceEmoji(name: string): string {
+  const n = name.toLowerCase()
+  if (n.includes('apple watch')) return '⌚'
+  if (n.includes('iphone')) return '📱'
+  if (n.includes('ipad')) return '📱'
+  if (n.includes('garmin')) return '⌚'
+  if (n.includes('fitbit')) return '⌚'
+  if (n.includes('wahoo') || n.includes('bike computer')) return '🖥️'
+  if (n.includes('polar')) return '⌚'
+  if (n.includes('suunto')) return '⌚'
+  if (n.includes('coros')) return '⌚'
+  if (n.includes('samsung') || n.includes('galaxy watch')) return '⌚'
+  if (n.includes('android') || n.includes('pixel')) return '📱'
+  if (n.includes('zwift') || n.includes('peloton') || n.includes('trainer')) return '🚲'
+  return '📟'
+}
+
+const sportIcons: Record<string, string> = {
+  Run: '🏃',
+  Ride: '🚴',
+  Walk: '🚶',
+  Swim: '🏊',
+  Hike: '🥾',
+  Yoga: '🧘',
+  WeightTraining: '🏋️',
+}
+
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  if (h > 0) return `${h}h ${m}m ${s}s`
+  return `${m}m ${s}s`
+}
+
+function formatDistance(meters: number): string {
+  if (meters < 1000) return `${Math.round(meters)}m`
+  return `${(meters / 1000).toFixed(2)} km`
+}
+
+function formatSpeed(type: string, avgSpeed: number): string {
+  if (avgSpeed === 0) return '-'
+  if (type === 'Ride') return `${(avgSpeed * 3.6).toFixed(1)} km/h`
+  const paceSeconds = 1000 / avgSpeed
+  const paceMin = Math.floor(paceSeconds / 60)
+  const paceSec = Math.round(paceSeconds % 60)
+  return `${paceMin}'${String(paceSec).padStart(2, '0')}"/km`
+}
+
+const stats = [
+  { label: 'Distance', value: formatDistance(activity.distance) },
+  { label: 'Moving Time', value: formatDuration(activity.moving_time) },
+  { label: 'Elapsed Time', value: formatDuration(activity.elapsed_time) },
+  { label: 'Pace / Speed', value: formatSpeed(activity.sport_type, activity.average_speed) },
+  { label: 'Max Speed', value: `${(activity.max_speed * 3.6).toFixed(1)} km/h` },
+  { label: 'Elevation Gain', value: `${activity.total_elevation_gain}m` },
+  ...(activity.has_heartrate
+    ? [
+        { label: 'Avg Heart Rate', value: `${activity.average_heartrate} bpm` },
+        { label: 'Max Heart Rate', value: `${activity.max_heartrate} bpm` },
+      ]
+    : []),
+  ...(activity.calories ? [{ label: 'Calories', value: `${activity.calories} kcal` }] : []),
+]
+---
+
+<Layout title={`${activity.name} — Workouts`}>
+  <link
+    slot="head"
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script slot="head" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" is:inline></script>
+
+  <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
+    <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8 font-mono">
+        <a href="/" class="hover:text-gray-900 transition-colors">~</a>
+        <span class="text-gray-300">/</span>
+        <a href="/workouts" class="hover:text-gray-900 transition-colors">workouts</a>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-900 truncate max-w-[200px]">{activity.name}</span>
+      </nav>
+
+      <!-- Header Card -->
+      <div class="bg-white border border-gray-200 p-6 md:p-8 mb-4 relative">
+        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+
+        <div class="flex items-start gap-3 mb-4">
+          <span class="text-2xl">{sportIcons[activity.sport_type] || '💪'}</span>
+          <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
+              {activity.name}
+            </h1>
+            <div class="flex items-center gap-3 text-sm text-gray-500 font-mono mt-1">
+              <time datetime={activity.start_date_local}>
+                {formatDate(new Date(activity.start_date_local))}
+              </time>
+              <span class="text-gray-300">|</span>
+              <span>{activity.sport_type}</span>
+              {activity.device_name && (
+                <>
+                  <span class="text-gray-300">|</span>
+                  <span class="text-gray-400">{deviceEmoji(activity.device_name)} {activity.device_name}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {activity.description && (
+          <p class="text-gray-600 border-l-2 border-gray-300 pl-4 mt-4">
+            {activity.description}
+          </p>
+        )}
+      </div>
+
+      <!-- Map Card -->
+      {hasMap && (
+        <div class="bg-white border border-gray-200 mb-4 relative">
+          <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400 z-[1000]"></div>
+          <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400 z-[1000]"></div>
+          <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400 z-[1000]"></div>
+          <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400 z-[1000]"></div>
+
+          <div class="p-4 border-b border-gray-100">
+            <h2 class="text-sm font-semibold text-gray-900 font-mono">Route</h2>
+          </div>
+          <div id="activity-map" class="h-[400px] w-full"></div>
+        </div>
+      )}
+
+      <!-- Stats Card -->
+      <div class="bg-white border border-gray-200 p-6 md:p-8 mb-4 relative">
+        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+
+        <h2 class="text-sm font-semibold text-gray-900 font-mono mb-4 pb-3 border-b border-gray-100">
+          Stats
+        </h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {stats.map(stat => (
+            <div class="p-3 bg-gray-50 border border-gray-100">
+              <div class="text-xs text-gray-400 font-mono mb-1">{stat.label}</div>
+              <div class="text-lg font-semibold text-gray-900 font-mono">{stat.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Navigation Footer -->
+      <div class="flex items-center justify-between bg-white border border-gray-200 p-4 relative">
+        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
+        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
+        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
+        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+
+        <a href="/workouts" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono">
+          <span>←</span>
+          <span>All workouts</span>
+        </a>
+        <a
+          href={`https://www.strava.com/activities/${activity.id}`}
+          target="_blank"
+          rel="noreferrer"
+          class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
+        >
+          <span>View on Strava</span>
+          <span>↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {hasMap && (
+    <script define:vars={{ points }}>
+      document.addEventListener('DOMContentLoaded', () => {
+        const L = window.L
+        if (!L || !points.length) return
+
+        const map = L.map('activity-map', {
+          zoomControl: true,
+          attributionControl: true,
+        })
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+        }).addTo(map)
+
+        const latlngs = points.map(p => [p[0], p[1]])
+        const polyline = L.polyline(latlngs, {
+          color: '#10b981',
+          weight: 3,
+          opacity: 0.9,
+          smoothFactor: 1,
+        }).addTo(map)
+
+        // Start/End markers
+        const startIcon = L.divIcon({
+          className: '',
+          html: '<div style="width:12px;height:12px;background:#10b981;border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>',
+          iconSize: [12, 12],
+          iconAnchor: [6, 6],
+        })
+        const endIcon = L.divIcon({
+          className: '',
+          html: '<div style="width:12px;height:12px;background:#ef4444;border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>',
+          iconSize: [12, 12],
+          iconAnchor: [6, 6],
+        })
+
+        L.marker(latlngs[0], { icon: startIcon }).addTo(map).bindPopup('Start')
+        L.marker(latlngs[latlngs.length - 1], { icon: endIcon }).addTo(map).bindPopup('End')
+
+        map.fitBounds(polyline.getBounds(), { padding: [30, 30] })
+      })
+    </script>
+  )}
+</Layout>
