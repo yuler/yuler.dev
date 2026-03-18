@@ -91,6 +91,12 @@ try {
               <span class="px-2 py-0.5 text-xs font-medium bg-gray-200 text-gray-700">DRAFT</span>
             </>
           )}
+          {entry.data.wip && (
+            <>
+              <span class="text-gray-300">|</span>
+              <span class="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700">WIP</span>
+            </>
+          )}
         </div>
 
         {/* Tags */}
@@ -116,6 +122,15 @@ try {
         <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
         <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
         <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+
+        {entry.data.wip && (
+          <div class="mb-8 p-4 bg-amber-50 border-l-4 border-amber-400 text-amber-800 text-sm font-mono flex items-start">
+            <span class="mr-2">🚧</span>
+            <span>
+              <strong>Note:</strong> This post is a work in progress. It might be incomplete or undergo significant changes.
+            </span>
+          </div>
+        )}
         <article class="prose prose-gray max-w-none
           prose-headings:font-bold prose-headings:text-gray-900 prose-headings:font-mono
           prose-h1:text-3xl prose-h1:md:text-4xl prose-h1:mb-6
