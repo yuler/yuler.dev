@@ -35,8 +35,8 @@ function listPostSlugs(dir = postsRoot, prefix = '') {
         if (match) {
           dateRaw = match[1]
         }
-      } catch {
-        // ignore read/parse errors, leave dateRaw as null
+      } catch (e) {
+        console.warn(`[Warning] Failed to read date from ${fullPath}: ${e.message}`);
       }
       const date = dateRaw ? new Date(dateRaw) : null
       slugs.push({ slug: withoutExt, date, dateRaw })
