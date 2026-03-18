@@ -16,7 +16,7 @@ After:
 
 在改造这个网站主题之前的时候, 之前就有想法通过一些 App 来记录我的训练数据，然后通过接口或者代码的方式来同步到 Workouts 卡片上
 
-之前就在 GitHub 上看到[cyc.earth](https://cyc.earth/)这个项目，可以用来记录骑行数据，了解到时通过 [Strava](https://www.strava.com/) 来记录骑行数据, 就埋下过这个想法
+之前就在 GitHub 上看到[cyc.earth](https://cyc.earth/)这个项目，可以用来记录骑行数据，了解到是通过 [Strava](https://www.strava.com/) 来记录骑行数据, 就埋下过这个想法
 
 更早之前也了解到 [yihong0618](https://github.com/yihong0618) 的 [running_page](https://github.com/yihong0618/running_page) 这个项目，那个时候也不运动(跑步, 骑行), 只知道是 python 写的, 只了解到是通过 App 记录平时运动的数据, 然后通过代码抓取数据
 
