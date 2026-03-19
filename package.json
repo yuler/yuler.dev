@@ -12,8 +12,10 @@
     "up": "npx taze -I",
     "autocorrect": "autocorrect --fix src/content/**/*.{md,mdx}",
     "create:post": "node scripts/create-post.mjs",
+    "export:pdf": "node scripts/export-post-pdf.mjs",
     "test:strava": "npx tsx --env-file=.env scripts/test-strava.mjs",
-    "sync:strava:activities": "npx tsx --env-file=.env scripts/sync-strava-activities.mjs"
+    "sync:strava:activities": "npx tsx --env-file=.env scripts/sync-strava-activities.mjs",
+    "commit": "opencode run git commit"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
@@ -28,6 +30,8 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.21",
+    "playwright": "^1.58.2",
+    "sharp": "^0.34.5",
     "tsx": "^4.21.0"
   }
 }

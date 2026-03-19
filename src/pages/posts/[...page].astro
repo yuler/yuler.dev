@@ -67,6 +67,11 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
                           Draft
                         </span>
                       )}
+                      {post.data.wip && (
+                        <span class="ml-2 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700">
+                          WIP
+                        </span>
+                      )}
                     </h3>
                     <time
                       class="text-xs text-gray-500 font-mono"

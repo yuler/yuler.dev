@@ -1,0 +1,293 @@
+---
+title: 'Vibe-coding'
+description: '什么是 Vibe coding？谁在用？有哪些工具与项目？从 Karpathy、Linus、DHH 到 OpenClaw，一文了解 vibe-coding 的生态与实践。'
+tags: ['vibe coding', 'ai', 'cursor', 'copilot']
+date: 2026-03-11
+wip: true
+---
+
+# Vibe-coding
+
+## What's vibe-coding
+
+什么是 vibe coding?
+
+---
+
+我的理解:
+
+**你只需用自然语言输入你的意图（Vibe），AI 会帮你输出相应的代码，剩下的工作就交给它来完成。**
+
+---
+
+**Andrej Karpathy**（安德烈·卡帕斯）：AI 领域著名专家，被业界昵称为 "KP"，曾任 Tesla AI 总监，OpenAI 创始成员。
+
+![Karpathy 关于 vibe coding 的推文](./../../../assets/vibe-coding/vibe-code-karpathy-tweet.png)
+
+https://x.com/karpathy/status/1886192184808149383?lang=en
+
+---
+
+维基百科解释
+
+https://zh.wikipedia.org/wiki/Vibe_coding
+
+---
+
+## Who's vibe-coding?
+
+看看下面这张图
+
+![who is vibe coding](./../../../assets/vibe-coding/who-is-vibe-coding.png)
+
+---
+
+**Linus Torvalds**：Linux 之父，Git 的作者
+
+![Linus vibe coding](./../../../assets/vibe-coding/vibe-code-linus-repo.jpeg)
+
+https://github.com/torvalds/AudioNoise#:~:text=basically%20written%20by-,vibe%2Dcoding,-.%20I%20know%20more
+
+---
+
+**Tobi**：Shopify 联合创始人兼 CEO
+
+![Tobi tweet](./../../../assets/vibe-coding/vibe-code-tobi-tweet.png)
+
+https://x.com/tobi/status/2026148524140695973, https://github.com/tobi
+
+---
+
+**DHH**：Ruby on Rails 之父
+
+![DHH tweet](./../../../assets/vibe-coding/vibe-code-ddh-tweet.png)
+
+https://x.com/dhh/status/2028463162513871329
+
+---
+
+**Ryan Dahl**：Node.js 和 Deno 的作者
+
+![Ryan Dahl tweet](./../../../assets/vibe-coding/vibe-code-ry-tweet.png)
+
+https://x.com/rough__sea/status/2013280952370573666
+
+---
+
+## Awesome vibe-coding projects
+
+[BettaFish](https://github.com/666ghj/BettaFish) 和 [MiroFish](https://github.com/666ghj/MiroFish)：
+
+20 岁大学生花 10 天 VibeCoding 一个开源项目，获盛大资本 3000 万投资
+
+感兴趣的朋友可以去读下作者 BaiFu 的分享: https://mp.weixin.qq.com/s?__biz=MzY4NjA0NjIwMQ==&mid=2247483661&idx=1&sn=243099d64445cb678df265c93226cb78&scene=21&poc_token=HP_It2mjYUFCqSUM2Enc1XrrvBtUR-AFzsiMdMUL
+
+---
+
+[OpenClaw](https://github.com/openclaw/openclaw)
+
+无疑是 2025 年到现在 GitHub 上最火的项目之一
+
+https://camo.githubusercontent.com/10b2eee0e3170cb0012af3e2ed7165483789fe846be75907fa61fab6aee419d0/68747470733a2f2f6170692e737461722d686973746f72792e636f6d2f7376673f7265706f733d6f70656e636c61772f6f70656e636c617726747970653d64617465266c6567656e643d746f702d6c656674
+
+OpenClaw 是奥地利开发者 **Peter Steinberger** 起初当作「playground project」做出来的个人 AI 助手项目，跑在你自己的设备上，并通过 WhatsApp、Telegram、Discord 等聊天软件来收发指令——非常符合 vibe-coding 的典型场景：先把「我要一个能在各种聊天软件里帮我干活的本地 Agent」这个 vibe 丢给代码，再不断迭代。
+
+Peter 已于 2026 年 2 月正式加入 OpenAI，专注于「让普通人也能用上的 Agent」，同时继续以开源的方式推进 OpenClaw 生态, 如今已由基金会托管，保持开源开放。
+
+---
+
+[ryOS](https://github.com/ryokun6/ryos)
+
+Cursor 设计负责人 Ryo Lu 用 Cursor 全流程 vibe 出来的「操作系统」—— 在浏览器里跑的怀旧风 OS（复刻 Mac OS X Aqua、System 7、Windows XP/98 等）
+
+内置 17 个应用（Finder、终端、iPod 模拟器、时光机浏览器等）、AI 助手 Ryo、虚拟文件系统与多主题，技术栈为 React 19 + TypeScript + three.js
+
+---
+
+再看看 GitHub 热门榜单： https://github.com/trending?since=monthly
+
+都有一个 [claude](https://github.com/claude) 的头像
+
+## Vibe-coding tools
+
+IDE Extensions, AI-Native IDEs, Terminals, Online SaaS, Others
+
+---
+
+### IDE Extensions
+
+- **GitHub Copilot** (VS Code, JetBrains) - https://github.com/features/copilot ：GitHub 官方出的 AI 编程助手，支持补全、重构和注释生成。
+- **Cline** (VS Code) - https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev ：在 VS Code 里和 Claude 协作写代码、跑命令、改项目结构的 Agent 插件。
+- **Tabnine** - https://www.tabnine.com/ ：早期老牌的本地/云端 AI 补全工具，支持多语言。
+
+---
+
+### AI-Native IDEs
+
+![vibe coding IDEs](./../../../assets/vibe-coding/vibe-coding-ides.png)
+
+- [Cursor](https://cursor.com/)：基于 VS Code 的 AI 原生 IDE，支持多模型、Agent 模式和项目级重构
+- [Antigravity](https://antigravity.google/)：Google 推出的 Agent-first IDE，深度集成 Gemini，支持多智能体协作开发
+- [Kiro](https://kiro.dev/)：以规格驱动开发（Spec-Driven）为核心的 AI IDE，背后是 AWS，适合从原型到生产的端到端开发。
+- [Zed](https://zed.dev/)：超快原生编辑器，内置协作和 AI 助手，适合需要低延迟的开发体验。
+- [Trae](https://www.trae.ai/)：字节系的 AI IDE，支持 Claude、GPT 等模型，偏向全自动写项目和重构。
+
+---
+
+### CLI / Terminals GUI
+
+![terminal CLIs](./../../../assets/vibe-coding/terminal-clis.png)
+
+- [OpenCode](https://open-code.ai/)：面向多模型、多 Agent 的终端 IDE，支持自动运行命令、改代码和管理会话。
+- [Claude](https://claude.ai)：Anthropic 出的多模态 AI 助手，也可以配合命令行做代码生成和评审。
+- [Codex CLI](https://developers.openai.com/codex/cli/)：OpenAI 推出的终端 AI 代理，可以读写代码、运行命令、做本地开发自动化。
+- [Cursor Agent CLI](https://cursor.com/cli)：把 Cursor Agent 搬到终端里，在任意编辑器或纯命令行里 vibe-coding。
+- [GitHub Copilot](https://github.com/features/copilot)：GitHub 官方 AI 助手，在终端配合 `gh` 等工具也能辅助开发流程。
+- [Gemini](https://ai.google.dev/)：Google 的大模型家族，可通过官方或第三方 CLI 在终端中调用做代码/命令代理。
+- [Qwen Code](https://qwenlm.github.io/qwen-code-docs/)：阿里出品的开源代码智能体，支持通过 CLI 对整个项目进行分析和修改。
+- [Kimi CLI](https://github.com/MoonshotAI/kimi-cli)：MoonshotAI 官方终端 Agent，支持读写代码、执行命令和接入多种编辑器。
+- [pi.dev](https://buildwithpi.ai/)：极简风格的开源终端 Agent，只带少量基础工具，适合自定义扩展和 embedding 到其他系统。
+
+---
+
+### Online SaaS
+
+- [v0.dev](https://v0.dev)：Vercel 推出的文本到前端工具，在浏览器里用自然语言直接生成 React/Next.js 界面。
+- [Replit Agent](https://replit.com/agent)：在网页里通过 Agent 生成、修改、运行代码，适合快速原型和教学场景。
+- [Google Studio](https://aistudio.google.com/)：Google 推出的 AI 开发平台，支持通过 Agent 生成、修改、运行代码。
+- [OpenHands](https://openhands.dev/): 云端运行 Agentic 开发
+- [Bolt.new](https://bolt.new)：StackBlitz 旗下的 AI Web IDE，支持一键从 Prompt 生成全栈应用并在线预览、迭代。
+- Cursor, Codex, Claude 都支持 Cloud 模式运行 Agentic 开发
+
+---
+
+### Others
+
+- [Conductor](https://www.conductor.build/)：在本地 Mac 上跑一支 AI 编码 Agent 团队，自动帮你在多个工作区并行改代码、跑测试和提 PR。
+- [cc-switch](https://github.com/farion1231/cc-switch)：一个统一管理 Claude Code / Codex / OpenCode / Gemini CLI 的桌面工具，用来切换模型提供方、MCP/Skills 和系统 Prompt。
+
+
+## Spec-Driven Development
+
+
+speckit
+
+// TODO:
+
+- [GitHub Spec Kit](https://github.com/github/spec-kit)：GitHub 官方出的 AI 编程助手，支持补全、重构和注释生成。
+
+## Git worktree
+
+在日常开发中，如果你会同时用到多种工具、多个 AI Agent，最好避免大家「抢同一组文件」导致冲突。这时候就可以善用 `git worktree`：为同一个仓库快速创建多个独立工作目录，每个 worktree 绑定一个分支，各干各的。
+
+简单说，`git worktree` 能让你：
+
+- 为不同任务快速开一块干净的工作区，用完就删，不污染主仓库目录。
+- 同时在多个分支/工作区上开发、调试和试验，而不用频繁 `stash`/`checkout`。
+
+结合 AI 工具的一个好用法是：把每个 AI Agent 当作一个「数字员工」，给它分配一个专属 worktree 和分支，让它在自己的工作区里改代码、跑测试、提交 commit。我们作为「人类 tech lead」只需要负责分配任务、协调工作、进行人工 review 和合并即可。
+
+- 在主仓库开/删对应的 worktree，分配任务。
+- 让不同 Agent 在各自的 worktree 里并行工作。
+- 等 Agent 完成后，把对应分支提交上来，再进行人工 review 和合并，形成一条串起来的工程化工作流。
+
+我自己的日常用法可以通过编写 shell function 来实现：[git-worktree functions](https://github.com/yuler/dotfiles/blob/main/.functions#L56-L91) `gwa`, `gwd` 快速创建和删除 worktree
+
+## MCP & SKILLS
+
+[MCP](https://modelcontextprotocol.io/) & [SKILLS](https://agentskills.io/)
+
+这两个是 AI Agent 的标配，一个是标准化的接口，一个是标准化的技能库。
+
+YC CEO 抨击 MCP, Prepelx 宣布移除 MCP 支持
+
+TODO:
+
+https://yuler.dev/posts/2026/agent-skills/
+
+https://github.com/tanweai/pua
+
+https://github.com/yuler/dotfiles/blob/main/.functions#L94-L109
+
+- List some popular skills
+- 演示自己写的一些 skills
+
+## Voice Inputs
+
+通过语音输入，打字速度可以从每分钟 45 字提升到 220 字(根据统计)，大幅加快了 vibe-coding 的效率
+
+- [Typeless](https://typeless.info/)：跨应用的 AI 语音输入工具，在 VS Code、浏览器等任意输入框里直接把你的口语整理成高质量文本。
+- [闪电说](https://shandianshuo.cn/)：国产本地优先的 AI 语音输入法，比键盘更快，自动去除口头禅、纠正错别字，适合长文本/指令输入。
+- [Handy](https://handy.computer/)：开源跨平台语音输入工具，基于 Whisper 等模型在本地转写语音，按下快捷键说完就把文字粘贴到当前光标处。
+
+## Show time: vibe-coding demo
+
+TODO:
+
+来，咱们先现场演示一个简单的 vibe-coding 例子
+
+```text
+请生成一个单文件的前端页面这个当前文件（index.html，纯原生 JS + CSS，不要任何依赖）, 输出到当前目录的 `dist/index.html`
+```
+
+---
+
+```text
+帮我用系统默认浏览器打开这个文件预览下
+```
+
+---
+
+使用 gh 帮我创建一个仓库
+
+---
+
+## Code review by AI
+
+集成到 GitHub PR 用 AI 做 code review 的方案:
+
+- **[GitHub Copilot for Pull Requests](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review)**：GitHub 官方，在 PR 中生成描述、建议 commit message、识别潜在问题，与 Issues/Projects 打通。
+- **[Google Code Assist](https://developers.google.com/gemini-code-assist/docs/review-github-code)**: Google 官方出的 AI 代码审查工具，支持自动生成代码审查报告、识别潜在问题、建议改进方案。
+- **[Cursor BugBot](https://cursor.com/bugbot)**: Cursor 官方出的 AI 代码审查工具，支持自动生成代码审查报告、识别潜在问题、建议改进方案。
+
+## 番外: OpenClaw
+
+首先这个项目就是 Vibe-Coding 出来的， 刚刚上面也提到了
+
+**传统的 Vibe-coding（如 Cursor、Windsurf）：** 是**主动式**的。你必须坐在电脑前，打开 IDE，输入 Prompt，然后盯着它改代码。你依然在"工作流"的中心。
+
+有了 OpenClaw，Vibe-coding 的场景变了。你可以在下班路上，掏出手机在 Telegram 里给你的 OpenClaw 发一条消息：*「帮我在本地跑一个 Redis 容器，然后把我刚才想到的那个购物车逻辑用 Python 写出来，测试通过后发个截图给我。」* 它会在你的老旧主机或 VPS 上默默执行一切。它让人类彻底脱离了 IDE 的物理束缚。
+
+可以和前面之前提的几个 Cloud Agentic 开发有点类似，但是他是跑再你个人设备上，你可以赋予他更多的权限
+
+## OpenClaw is risk
+
+Design OpenClaw prompt injection attack
+
+## OpenClaw alternatives
+
+- [nanoclaw](https://github.com/qwibitai/nanoclaw)
+  https://x.com/karpathy/status/2024997757757653224
+- [ironclaw](https://github.com/nearai/ironclaw)
+
+## 通过代码转包查看 claude 发送的内容
+
+使用本地代理抓包来运行 Claude
+
+```bash
+http_proxy=http://127.0.0.1:8888 https_proxy=http://127.0.0.1:8888 claude
+```
+
+TODO:
+
+refs: https://askubuntu.com/questions/73287/how-do-i-install-a-root-certificate
+
+```bash
+sudo openssl x509 -in charles.pem -inform PEM -out charles.crt
+```
+
+或
+
+```bash
+openssl x509 -inform DER -in charles.cer -out charles.crt
+```
