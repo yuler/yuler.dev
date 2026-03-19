@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://huacnlee.github.io/autocorrect/schema.json
+rules:
+  # Add spacing between CJK (Chinese, Japanese, Korean) and English words.
+  # 0 - off, 1 - error, 2 - warning
+  space-word: 1
+
+  # Add space between some punctuations.
+  space-punctuation: 1
+
+  # Add space between brackets () [] when near the CJK.
+  space-bracket: 1
+
+  # Add space between ``, when near the CJK.
+  space-backticks: 1
+
+  # Add space between dash '-'
+  space-dash: 1
+
+  # Convert to fullwidth (e.g. halfwidth punctuation to fullwidth).
+  fullwidth: 1
+
+  # Remove space near the fullwidth punctuations/quotes.
+  no-space-fullwidth: 1
+  no-space-fullwidth-quote: 1
+
+  # Optional: halfwidth conversions (helps when mixed with CJK text).
+  halfwidth-word: 1
+  halfwidth-punctuation: 1
+
+  # Spellcheck (keep off unless you want custom word suggestions).
+  spellcheck: 0
+
+context:
+  # Enable formatting inside code blocks in Markdown/AsciiDoc etc.
+  codeblock: 1
+
+textRules:
+  # No custom per-text rules.
+
+spellcheck:
+  words:
+    # Custom dictionary words (optional).
+
+fileTypes:
+  md: markdown
+  mdx: markdown

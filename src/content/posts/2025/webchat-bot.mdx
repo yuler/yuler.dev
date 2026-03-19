@@ -8,17 +8,17 @@ date: 2024-11-15
 
 ## 背景
 
-帮朋友调研微信机器人方案, 发了个 GitHub 仓库 [chatgpt-on-wechat](https://github.com/zhayujie/chatgpt-on-wechat) 让我部署下
-发现这个仓库是使用 Python 的 itchat 库实现的 web 版本的微信机器人, 并且做了一些相关的 patch 处理 参见 [lib/itchat](https://github.com/zhayujie/chatgpt-on-wechat/tree/master/lib/itchat)
+帮朋友调研微信机器人方案，发了个 GitHub 仓库 [chatgpt-on-wechat](https://github.com/zhayujie/chatgpt-on-wechat) 让我部署下
+发现这个仓库是使用 Python 的 itchat 库实现的 web 版本的微信机器人，并且做了一些相关的 patch 处理 参见 [lib/itchat](https://github.com/zhayujie/chatgpt-on-wechat/tree/master/lib/itchat)
 
-首先微信没有开放官方的 API, 社区上有一些三方库, 主要实现有以下集中
+首先微信没有开放官方的 API, 社区上有一些三方库，主要实现有以下集中
 
-1. Web 协议, 通过无头浏览器模拟 web 端发出请求和拦截请求
+1. Web 协议，通过无头浏览器模拟 web 端发出请求和拦截请求
 
 - [wechaty](https://github.com/wechaty/wechaty)
 - [ItChat](https://github.com/littlecodersh/ItChat)
 
-2. Windows 协议, 通过住
+2. Windows 协议，通过住
 
 - [WeChatFerry](https://github.com/lich0821/WeChatFerry)
 
@@ -26,11 +26,11 @@ date: 2024-11-15
 
 - [padlocal](https://wechaty.js.org/docs/puppet-services/padlocal)
 
-4. 直接 Hack Android 手机, 逆向微信
+4. 直接 Hack Android 手机，逆向微信
 
 ## Dokploy
 
-[Dokploy](https://github.com/Dokploy/dokploy) 是一个基于 Docker 自动化部署平台, 开源, 免费自行部署
+[Dokploy](https://github.com/Dokploy/dokploy) 是一个基于 Docker 自动化部署平台，开源，免费自行部署
 
 refs: https://www.reddit.com/r/SideProject/comments/1gq6o61/after_6_months_of_work_dokploy_cloud_is_live/
 
@@ -161,7 +161,7 @@ curl https://api.openai.com/v1/chat/completions \
   }'
 ```
 
-由于 OpenAI 禁止大陆 IP 访问, 所以需要使用代理
+由于 OpenAI 禁止大陆 IP 访问，所以需要使用代理
 
 refs: https://github.com/justjavac/openai-proxy
 
@@ -189,7 +189,7 @@ console.log({answer})
 
 ## 使用场景
 
-- 提供给外部接口, 发送消息(如: 日志报警, 定时通知等)
-- OCR 识别图片, 更具解析内容做处理(如: 打卡识别后发送一句话, 账单识别后落库记录等)
-- 记录群里面的消息, 落库, 然后每天定时总结
+- 提供给外部接口，发送消息 (如：日志报警，定时通知等)
+- OCR 识别图片，更具解析内容做处理 (如：打卡识别后发送一句话，账单识别后落库记录等)
+- 记录群里面的消息，落库，然后每天定时总结
 - 社群运营等
