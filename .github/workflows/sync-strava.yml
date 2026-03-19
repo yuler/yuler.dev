@@ -40,7 +40,7 @@ jobs:
         id: commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: sync strava activities'
+          commit_message: '🔄 Sync Strava activities'
           file_pattern: 'data/strava/activities/'
 
       - name: Trigger deploy workflow
