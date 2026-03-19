@@ -37,7 +37,22 @@ jobs:
         run: pnpm run sync:strava:activities
 
       - name: Commit and push changes
+        id: commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: sync strava activities'
           file_pattern: 'data/strava/activities/'
+
+      - name: Trigger deploy workflow
+        if: steps.commit.outputs.changes_detected == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              ref: 'main'
+            })
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
