@@ -1,12 +1,14 @@
 ---
-title: 'Strava 活动同步'
+title: 'Strava Activities Sync'
 description: ''
 tags: ['strava', 'AI']
 date: 2026-03-18
 ---
 
-import BeforeImage from '@/assets/before.jpg'
-import AfterImage from '@/assets/after.jpg'
+import BeforeImage from '@/assets/app-strava/before.jpg'
+import AfterImage from '@/assets/app-strava/after.jpg'
+import WorkoutsListImage from '@/assets/app-strava/workouts-activities.png'
+import WorkoutDetailImage from '@/assets/app-strava/workout-17765022168.png'
 
 ## 背景
 
@@ -45,6 +47,19 @@ import AfterImage from '@/assets/after.jpg'
 - 设计一个简单的拉取存储同步数据流程，支持增量，以 JSON 文件保存到本地，[data/strava/activities](https://github.com/yuler/yuler.dev/tree/7826afab3718abe6247a42206b771143908f9e92/data/strava/activities)。
 - 然后让 AI 基于 `/data/strava/activities/` 文件夹里的数据调整 workouts 卡片样式，并生成 workouts 页面（支持按周 filter）和详情页面（展示地图运动轨迹及详细数据）。
 - 最后让 AI 生成一个 GitHub Action workflow 每小时同步一次数据，支持手动触发。
+
+效果如下： 
+
+<div class="flex flex-col gap-4">
+  <div class="flex-1">
+    <p class="text-sm text-gray-500 mb-2 font-mono">Workouts list:</p>
+    <img src={WorkoutsListImage.src} alt="workouts list" class="w-full h-auto" />
+  </div>
+  <div class="flex-1">
+    <p class="text-sm text-gray-500 mb-2 font-mono">Latest activity detail:</p>
+    <img src={WorkoutDetailImage.src} alt="workouts detail" class="w-full h-auto" />
+  </div>
+</div>
 
 ## 简单总结
 
