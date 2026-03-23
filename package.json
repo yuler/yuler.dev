@@ -10,7 +10,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "up": "npx taze -I",
-    "autocorrect": "autocorrect --fix src/content/**/*.{md,mdx}",
+    "autocorrect": "autocorrect --fix src/content",
     "create:post": "node scripts/create-post.mjs",
     "export:pdf": "node scripts/export-post-pdf.mjs",
     "test:strava": "npx tsx --env-file=.env scripts/test-strava.mjs",

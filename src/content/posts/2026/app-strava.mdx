@@ -1,0 +1,72 @@
+---
+title: 'Strava Activities Sync'
+description: ''
+tags: ['strava', 'AI']
+date: 2026-03-18
+---
+
+import BeforeImage from '@/assets/app-strava/before.jpg'
+import AfterImage from '@/assets/app-strava/after.jpg'
+import WorkoutsListImage from '@/assets/app-strava/workouts-activities.png'
+import WorkoutDetailImage from '@/assets/app-strava/workout-17765022168.png'
+
+## 背景
+
+最近这两天在 Keep 上记录的骑行数据，分享的时候突然没有地图的轨迹数据显示。
+
+
+<div class="flex flex-col gap-4 md:flex-row">
+  <div class="flex-1">
+    <p class="text-sm text-gray-500 mb-2 font-mono">Before：</p>
+    <img src={BeforeImage.src} alt="before" class="w-full h-auto" />
+  </div>
+  <div class="flex-1">
+    <p class="text-sm text-gray-500 mb-2 font-mono">After：</p>
+    <img src={AfterImage.src} alt="after" class="w-full h-auto" />
+  </div>
+</div>
+
+在改造这个网站主题之前的时候，之前就有想法通过一些 App 来记录我的训练数据，然后通过接口或者代码的方式来同步到 Workouts 卡片上。
+
+之前就在 GitHub 上看到 [cyc.earth](https://cyc.earth/) 这个项目，可以用来记录骑行数据，了解到是通过 [Strava](https://www.strava.com/) 来记录骑行数据，就埋下过这个想法。
+
+更早之前也了解到 [yihong0618](https://github.com/yihong0618) 的 [running_page](https://github.com/yihong0618/running_page) 这个项目，那个时候也不运动（跑步，骑行），只知道是 python 写的，只了解到是通过 App 记录平时运动的数据，然后通过代码抓取数据。
+
+## 探索
+
+通过和 [Gemini 对话](https://gemini.google.com/share/fcb26b9c9e3c)，了解到 [Strava](https://www.strava.com/) 是有提供 API 的，可以通过 API 获取到我的 [activities](https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities) 数据，然后通过代码的方式来同步到 Workouts 卡片上。
+
+## 实现
+
+确认可行性后，先手动注册登录 [Strava](https://www.strava.com/)，去 [开发者中心](https://www.strava.com/settings/api) 申请 OAuth 应用，获取所需要的 `Client ID`，`Client Secret`，`Refresh Token` 等。
+
+然后就使用 AI 开始编写代码，步骤如下：
+
+- 先编写一个脚本测试是否能通过 API 获取到我的 `activities` 数据。
+- 然后抽象 [strava.ts](https://github.com/yuler/yuler.dev/blob/7826afab3718abe6247a42206b771143908f9e92/src/utils/strava.ts) 方便操作。
+- 设计一个简单的拉取存储同步数据流程，支持增量，以 JSON 文件保存到本地，[data/strava/activities](https://github.com/yuler/yuler.dev/tree/7826afab3718abe6247a42206b771143908f9e92/data/strava/activities)。
+- 然后让 AI 基于 `/data/strava/activities/` 文件夹里的数据调整 workouts 卡片样式，并生成 workouts 页面（支持按周 filter）和详情页面（展示地图运动轨迹及详细数据）。
+- 最后让 AI 生成一个 GitHub Action workflow 每小时同步一次数据，支持手动触发。
+
+效果如下： 
+
+<div class="flex flex-col gap-4">
+  <div class="flex-1">
+    <p class="text-sm text-gray-500 mb-2 font-mono">Workouts list:</p>
+    <img src={WorkoutsListImage.src} alt="workouts list" class="w-full h-auto" />
+  </div>
+  <div class="flex-1">
+    <p class="text-sm text-gray-500 mb-2 font-mono">Latest activity detail:</p>
+    <img src={WorkoutDetailImage.src} alt="workouts detail" class="w-full h-auto" />
+  </div>
+</div>
+
+## 简单总结
+
+有了 AI 之后从整个想法到部署上线，整个过程大概 1 个小时左右。
+
+- 和 Gemini 对话，~10min。
+- 代码部分可以说是完全 vibe-coding，~40min，参见 [PR#6](https://github.com/yuler/yuler.dev/pull/6)。
+- GitHub Action workflow 生成，~10min，参考 [PR#7](https://github.com/yuler/yuler.dev/pull/7)。
+
+如果没有 AI 的帮助，预计最少得 4h+，光阅读文档就得 1h+。去年的 AI coding 还没有这么强，AI 发展的速度太快了，还是得好好的利用好 AI。
