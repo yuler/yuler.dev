@@ -57,7 +57,7 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
               <li>
                 <a
                   href={`/posts/${post.slug}`}
-                  class="group flex items-center justify-between p-3 min-h-[52px] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                  class="group flex items-center justify-between p-3 min-h-[3.25rem] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
                 >
                   <div>
                     <h3 class="font-medium text-gray-900 group-hover:text-gray-700">
@@ -88,7 +88,7 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
               {page.url.prev ? (
                 <a
                   href={page.url.prev}
-                  class="inline-flex items-center gap-2 px-4 py-3 min-h-[44px] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
+                  class="inline-flex items-center gap-2 px-4 py-3 min-h-[2.75rem] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
                 >
                   <span>←</span>
                 <span>Prev</span>
@@ -104,7 +104,7 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
               {page.url.next ? (
                 <a
                   href={page.url.next}
-                  class="inline-flex items-center gap-2 px-4 py-3 min-h-[44px] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
+                  class="inline-flex items-center gap-2 px-4 py-3 min-h-[2.75rem] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
                 >
                   <span>Next</span>
                 <span>→</span>

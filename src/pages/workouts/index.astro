@@ -106,14 +106,14 @@ function formatPace(type: string, avgSpeed: number): string {
         <div class="flex items-center justify-between gap-2">
           <button
             id="week-prev"
-            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
+            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-[2.75rem] min-w-[44px]"
           >
             ← Prev
           </button>
           <div class="flex items-center gap-1 sm:gap-2">
             <select
               id="week-select"
-              class="appearance-none bg-transparent text-xs sm:text-sm font-mono text-gray-900 text-center cursor-pointer hover:text-gray-600 transition-colors focus:outline-none pr-1 min-h-[44px] py-1.5"
+              class="appearance-none bg-transparent text-xs sm:text-sm font-mono text-gray-900 text-center cursor-pointer hover:text-gray-600 transition-colors focus:outline-none pr-1 min-h-[2.75rem] py-1.5"
             >
               <option value="">All weeks</option>
               {
@@ -128,7 +128,7 @@ function formatPace(type: string, avgSpeed: number): string {
           </div>
           <button
             id="week-next"
-            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
+            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-[2.75rem] min-w-[44px]"
           >
             Next →
           </button>
@@ -157,7 +157,7 @@ function formatPace(type: string, avgSpeed: number): string {
               <li data-date={formatDate(new Date(activity.start_date_local))}>
                 <a
                   href={`/workouts/${activity.id}`}
-                  class="group flex items-center justify-between p-3 min-h-[52px] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                  class="group flex items-center justify-between p-3 min-h-[3.25rem] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
                 >
                   <div class="flex items-center gap-3 min-w-0">
                     <span class="text-lg shrink-0" title={activity.sport_type}>
