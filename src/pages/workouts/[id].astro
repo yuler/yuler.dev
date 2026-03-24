@@ -137,7 +137,7 @@ const stats = [
         <span class="text-gray-300">/</span>
         <a href="/workouts" class="hover:text-gray-900 transition-colors">workouts</a>
         <span class="text-gray-300">/</span>
-        <span class="text-gray-900 truncate max-w-[9.375rem] sm:max-w-[12.5rem]">{activity.name}</span>
+        <span class="text-gray-900 truncate max-w-37.5 sm:max-w-50">{activity.name}</span>
       </nav>
 
       <!-- Header Card -->
@@ -179,15 +179,15 @@ const stats = [
       <!-- Map Card -->
       {hasMap && (
         <div class="bg-white border border-gray-200 mb-4 relative">
-          <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400 z-[1000]"></div>
-          <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400 z-[1000]"></div>
-          <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400 z-[1000]"></div>
-          <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400 z-[1000]"></div>
+          <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400 z-1000"></div>
+          <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400 z-1000"></div>
+          <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400 z-1000"></div>
+          <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400 z-1000"></div>
 
           <div class="p-4 border-b border-gray-100">
             <h2 class="text-sm font-semibold text-gray-900 font-mono">Route</h2>
           </div>
-          <div id="activity-map" class="h-[15.625rem] sm:h-[18.75rem] md:h-[25rem] w-full"></div>
+          <div id="activity-map" class="h-62.5 sm:h-75 md:h-100 w-full"></div>
         </div>
       )}
 
@@ -219,7 +219,7 @@ const stats = [
         <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
         <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
 
-        <a href="/workouts" class="inline-flex items-center gap-2 px-4 py-2 min-h-[2.75rem] text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono">
+        <a href="/workouts" class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono">
           <span>←</span>
           <span>All workouts</span>
         </a>
@@ -227,7 +227,7 @@ const stats = [
           href={`https://www.strava.com/activities/${activity.id}`}
           target="_blank"
           rel="noreferrer"
-          class="inline-flex items-center gap-2 px-4 py-2 min-h-[2.75rem] text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
+          class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
         >
           <span>View on Strava</span>
           <span>↗</span>

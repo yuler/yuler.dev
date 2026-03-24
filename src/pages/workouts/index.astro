@@ -106,29 +106,45 @@ function formatPace(type: string, avgSpeed: number): string {
         <div class="flex items-center justify-between gap-2">
           <button
             id="week-prev"
-            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-[2.75rem] min-w-[2.75rem]"
+            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
           >
             ← Prev
           </button>
-          <div class="flex items-center gap-1 sm:gap-2">
-            <select
-              id="week-select"
-              class="appearance-none bg-transparent text-xs sm:text-sm font-mono text-gray-900 text-center cursor-pointer hover:text-gray-600 transition-colors focus:outline-none pr-1 min-h-[2.75rem] py-1.5"
-            >
-              <option value="">All weeks</option>
-              {
-                weeks.map(w => (
-                  <option value={`${w.start}~${w.end}`}>
-                    W{String(w.index).padStart(2, '0')}: {w.start} ~ {w.end}
-                  </option>
-                ))
-              }
-            </select>
-            <span id="filter-count" class="text-xs text-gray-400 font-mono"></span>
+          <div class="flex flex-col gap-1 items-center">
+            <div class="relative flex items-center">
+              <select
+                id="week-select"
+                class="appearance-none bg-transparent border border-gray-200 hover:border-gray-300 text-xs sm:text-sm font-mono text-gray-900 py-1 pl-2 pr-7 cursor-pointer transition-colors focus:outline-none focus:border-gray-400"
+              >
+                <option value="">All weeks</option>
+                {
+                  weeks.map(w => (
+                    <option value={`${w.start}~${w.end}`}>
+                      W{String(w.index).padStart(2, '0')}: {w.start} ~ {w.end}
+                    </option>
+                  ))
+                }
+              </select>
+              <svg
+                class="absolute right-2.5 w-3.5 h-3.5 text-gray-400 pointer-events-none"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </div>
+            <span
+              id="filter-count"
+              class="text-xs text-gray-400 font-mono whitespace-pre-line sm:whitespace-normal text-center sm:text-left leading-[1.1] sm:leading-normal"
+            ></span>
           </div>
           <button
             id="week-next"
-            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-[2.75rem] min-w-[2.75rem]"
+            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
           >
             Next →
           </button>
@@ -233,7 +249,7 @@ function formatPace(type: string, avgSpeed: number): string {
             li.style.display = 'none'
           }
         })
-        countEl.textContent = from ? visible + ' matched' : ''
+        countEl.textContent = from ? visible + 'matched' : ''
         activityCount.textContent = (from ? visible : total) + (visible === 1 ? ' activity' : ' activities')
         emptyState.classList.toggle('hidden', visible > 0)
 
