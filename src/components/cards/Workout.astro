@@ -132,7 +132,7 @@ const weeklyStats = weeks.map(([start, end], index) => {
                 <a
                   href={`/workouts?from=${week.start}&to=${week.end}`}
                   class:list={[
-                    'block size-4 transition-colors duration-200 cursor-pointer',
+                    'block size-6 sm:size-4 transition-colors duration-200 cursor-pointer',
                     {
                       'bg-emerald-100': week.level === 1,
                       'bg-emerald-200': week.level === 2,
