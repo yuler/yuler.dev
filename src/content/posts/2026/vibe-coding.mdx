@@ -6,6 +6,9 @@ date: 2026-03-11
 wip: true
 ---
 
+import OpenclawTgChannelImage from '@/assets/vibe-coding/openclaw-tg-channel.png'
+import OpenclawWechatReceiveImage from '@/assets/vibe-coding/openclaw-wechat-receive.png'
+
 # Vibe-coding
 
 ## What's vibe-coding
@@ -169,15 +172,187 @@ IDE Extensions, AI-Native IDEs, Terminals, Online SaaS, Others
 
 ## Spec-Driven Development
 
-::TODO: ::
-
-
-[Superpowers](https://github.com/obra/superpowers)：一套面向 AI Agent 编程的技能框架与软件开发工作流，强调用技能驱动需求澄清、方案设计、实现计划和代码审查。
+SDD: Spec-Driven Development, 规格驱动开发
 
 ---
 
-- [GitHub Spec Kit](https://github.com/github/spec-kit)：GitHub 官方出的 AI 编程助手，支持补全、重构和注释生成。
+[Superpowers](https://github.com/obra/superpowers)
 
+
+一套面向 AI Agent 编程的[技能框架](https://github.com/obra/superpowers?tab=readme-ov-file#skills-library)与[软件开发方法论(工作流)](https://github.com/obra/superpowers?tab=readme-ov-file#the-basic-workflow)，强调用**技能驱动**需求澄清、方案设计、实现计划和代码审查。
+
+- /brainstorm（头脑风暴）：在写任何代码之前使用。它会启动“苏格拉底式设计”，通过不断向你提问来完善粗糙的想法，探索替代方案，并最终保存一份设计文档。
+- /write-plan（编写计划）：根据设计文档，让 AI 生成详细的分步实施计划。
+- /execute-plan（执行计划）：按照计划一步一步执行，并在过程中自动调用所需的技能（如 TDD 编写测试、前端设计规范等）。
+
+
+---
+
+[GitHub Spec Kit](https://github.com/github/spec-kit)
+
+GitHub 开源的 Spec-Driven Development 工具包（Specify CLI + /speckit 工作流），强调先规格、后实现、分阶段与 AI 协作。
+
+---
+
+**核心思想可以概括成一条闭环：** 
+
+无论是 Superpowers 还是 Spec Kit，
+
+- 都是先和 Agent **澄清需求**，把要做的事落成一份具体的 **spec**，并**持久化到代码仓库**（随分支、PR、版本一起演进）。
+- 你点头之后，再产出 **plan/tasks List**（实施计划），让 Agent **按计划写代码**
+- 最后做 **review**
+- 有新需求或审查发现问题，就回到「澄清 → spec → plan → 实现 → review」，循环往复。
+
+---
+
+## Ralph Loop
+
+前一段时间在 AI 辅助编程圈里很火的一种做法，名字来自《辛普森一家》里的 **Ralph Wiggum(拉尔夫·韦根)**。创造者 [Geoffrey Huntley](https://ghuntley.com/ralph/) 用一句话概括：**「Ralph 就是一个 Bash 循环。」** 最简形式就是反复把同一份提示交给 Agent，让它在仓库里推进任务，直到满足退出条件（例如测试全绿、验收清单完成或达到最大轮次）：
+
+```bash
+while :; do cat PROMPT.md | claude-code ; done
+```
+
+**和「一条对话聊到底」的差别：** 每一轮往往是**新开会话、干净上下文**，避免长对话里工具调用、旧错误堆叠造成的 **context rot**（上下文劣化）。进度不靠模型「记住聊过什么」，而靠 **仓库里的真实状态**：代码、测试、`git` 历史、进度文件、spec——这和上一节「spec → plan → 实现 → review」的外化思路是同一类工程化：**状态在文件里，退出条件明确，可重复跑**。
+
+![Ralph 工作流程示意（snarktank/ralph）](https://raw.githubusercontent.com/snarktank/ralph/main/ralph-flowchart.png)
+
+交互式：[snarktank.github.io/ralph](https://snarktank.github.io/ralph/)
+
+参考阅读：
+
+- [The Loop | ralph (wiggum.dev)](http://wiggum.dev/concepts/the-loop/) — 逐步拆解循环、状态外化、为何「同一 prompt」不会原地打转  
+- [Ralph Wiggum as a software engineer](https://ghuntley.com/ralph/) — 原始叙述与 Bash one-liner；文中也有「Ralph 技术」示意图  
+- [snarktank/ralph](https://github.com/snarktank/ralph) — 可落地的 Bash 循环实现（Amp / Claude Code），用 `prd.json`、`progress.txt` 与 git 做轮次间记忆；仓库附带 [**交互式流程图**](https://snarktank.github.io/ralph/)  
+- [vercel-labs/ralph-loop-agent](https://github.com/vercel-labs/ralph-loop-agent) — 基于 AI SDK 的外层循环参考实现，README 带结构示意图（见下）  
+
+---
+
+[karpathy/autoresearch](https://github.com/karpathy/autoresearch)
+
+是一个“让 LLM/Agent 自己做研究”的实验框架：它把你要做的事缩成一个反复跑实验、用指标说话、好就保留坏就丢弃的循环。
+
+具体来说，每一轮它会在仓库里（主要是允许修改 train.py）做一次代码改动 -> 用单 GPU 跑一个固定时间预算（约 5 分钟） -> 用 prepare.py 里的评估器算出 val_bpb（越低越好） -> 然后根据结果决定“保留改动并前进分支”还是“放弃并回滚到原点”，循环继续直到人为中断。
+
+autoresearch 和 ralph loop 可谓是“异曲同工”：同样是把推进交给可重复、可验证的循环（好就前进，差就回滚），只是它把循环具体化成了 ML 实验的选择器
+
+## MCP & SKILLS
+
+[MCP](https://modelcontextprotocol.io/) & [SKILLS](https://agentskills.io/)
+
+这两个是 AI Agent 的标配，一个是标准化的接口，一个是标准化的技能库
+
+## SKILLS
+
+为智能体提供新能力与专业知识的一种简单、开放的格式。
+
+----
+
+**SKILL 的文件夹结构**
+
+本质上是包含 `SKILL.md` 文件的文件夹，下面是一个示例：
+
+```bash
+my-skill/
+├── SKILL.md          # Required: instructions + metadata
+├── scripts/          # Optional: executable code
+├── references/       # Optional: documentation
+└── assets/           # Optional: templates, resources
+```
+
+**SKILL.md 的组成**
+
+| 部分             | 说明                              |
+| ---------------- | --------------------------------- |
+| **Metadata**     | 元数据：name, description 等      |
+| **Instructions** | 指令：自描述、可扩展、可移植      |
+| **Resources**    | 资源：scripts, references, assets |
+
+**指令的核心特性**
+
+- **Self-documenting 自描述** — 用自然语言描述，作者和用户都能理解
+- **Extensible 可扩展** — 从简单文本指令到复杂代码执行、资源管理
+- **Portable 可移植** — 就是一个文件夹，轻松修改、版本迭代和分享
+
+---
+
+**SKILL 是如何工作的？**
+
+**渐进式披露 (Progressive Disclosure)**
+
+```mermaid
+flowchart LR
+    A["Discovery 发现"] --> B["Activation 激活"]
+    B --> C["Execution 执行"]
+
+    style A fill:#FF6B6B,color:#fff
+    style B fill:#4ECDC4,color:#000
+    style C fill:#45B7D1,color:#fff
+```
+
+**三个阶段详解**
+
+1. **Discovery 发现** — Agent 启动时，只加载所有 SKILL 的元数据 (name, description)。Agent 只需知道什么任务用哪个 SKILL。
+
+2. **Activation 激活** — 当 Agent 执行任务时，上下文匹配到元数据描述的 SKILL，此时才加载完整的 SKILL.md 到上下文中。
+
+3. **Execution 执行** — Agent 根据 SKILL.md 指令，按需加载引用文件或执行指定代码。
+
+---
+
+**社区更看好 SKILLS**
+
+YC CEO 抨击 MCP
+
+![YC CEO 抨击 MCP](./../../../assets/vibe-coding/mpc-yc-ceo-tweet.png)
+
+perplexity 宣布移除 MCP 支持
+
+![perplexity 宣布移除 MCP 支持](./../../../assets/vibe-coding/mcp-perplexity-cto-tweet.png)
+
+---
+
+现在大部分软件、框架和 SaaS 服务也会提供 MCP，或支持 skills，比如 Cursor、Claude、Gemini 等。
+
+## CLI skills
+
+跨平台工具：skills
+
+不同 Agent 需要放到不同目录，规则各异。可使用 skills CLI 工具：
+
+```bash
+npx skills add vercel-labs/agent-skills --skill web-design-guidelines
+npx skills add https://github.com/michalparkola/tapestry-skills-for-claude-code/tree/main/article-extractor
+```
+
+## Popular skills
+
+可以去 [skills.sh](https://skills.sh/) 或者 [GitHub](https://github.com/search?q=topic%3Askill+topic%3Askills&type=repositories&s=stars&o=desc) 上搜索一些流行的 skills
+
+例如： openclaw 内置的一些 [skills](https://github.com/openclaw/openclaw/tree/main/skills)
+
+一些有意思的 skills:
+
+- https://github.com/garrytan/gstack
+- https://github.com/tanweai/pua
+- https://github.com/slavingia/skills
+
+## Write your own skills
+
+- https://github.com/yuler/skills
+- https://github.com/yuler/dotfiles/blob/main/bin/aicommit
+
+
+**skill: ai-commit**
+
+![ai-commit](./../../../assets/vibe-coding/ai-commit.png)
+
+**skill: crawl-x, system-macro**
+
+<div class="flex flex-row gap-4">
+  <img src={OpenclawTgChannelImage.src} alt="openclaw-tg-channel" class="flex-1" />
+  <img src={OpenclawWechatReceiveImage.src} alt="openclaw-wechat-receive" class="flex-1" />
+</div>
 
 ## Git worktree
 
@@ -195,25 +370,6 @@ IDE Extensions, AI-Native IDEs, Terminals, Online SaaS, Others
 - 等 Agent 完成后，把对应分支提交上来，再进行人工 review 和合并，形成一条串起来的工程化工作流。
 
 我自己的日常用法可以通过编写 shell function 来实现：[git-worktree functions](https://github.com/yuler/dotfiles/blob/main/.functions#L56-L91) `gwa`, `gwd` 快速创建和删除 worktree
-
-## MCP & SKILLS
-
-::TODO: ::
-
-[MCP](https://modelcontextprotocol.io/) & [SKILLS](https://agentskills.io/)
-
-这两个是 AI Agent 的标配，一个是标准化的接口，一个是标准化的技能库。
-
-YC CEO 抨击 MCP, Prepelx 宣布移除 MCP 支持
-
-https://yuler.dev/posts/2026/agent-skills/
-
-https://github.com/tanweai/pua
-
-https://github.com/yuler/dotfiles/blob/main/bin/aicommit
-
-- List some popular skills
-- 演示自己写的一些 skills
 
 ## Voice Inputs
 
@@ -246,8 +402,6 @@ TODO:
 ---
 
 ## Code review by AI
-
-::TODO: ::
 
 集成到 GitHub PR 用 AI 做 code review 的方案：
 
