@@ -91,44 +91,60 @@ function formatPace(type: string, avgSpeed: number): string {
   <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
     <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
       <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8 font-mono">
+      <nav class="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 font-mono">
         <a href="/" class="hover:text-gray-900 transition-colors">~</a>
         <span class="text-gray-300">/</span>
         <span class="text-gray-900">workouts</span>
       </nav>
 
       <!-- Week Filter -->
-      <div class="mb-4 bg-white border border-gray-200 px-4 py-3 relative">
+      <div class="mb-4 bg-white border border-gray-200 px-3 py-2 sm:px-4 sm:py-3 relative">
         <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
         <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
         <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
         <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <button
             id="week-prev"
-            class="px-2 py-1 text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed"
+            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
           >
             ← Prev
           </button>
-          <div class="flex items-center gap-2">
-            <select
-              id="week-select"
-              class="appearance-none bg-transparent text-sm font-mono text-gray-900 text-center cursor-pointer hover:text-gray-600 transition-colors focus:outline-none pr-1"
-            >
-              <option value="">All weeks</option>
-              {
-                weeks.map(w => (
-                  <option value={`${w.start}~${w.end}`}>
-                    W{String(w.index).padStart(2, '0')}: {w.start} ~ {w.end}
-                  </option>
-                ))
-              }
-            </select>
-            <span id="filter-count" class="text-xs text-gray-400 font-mono"></span>
+          <div class="flex flex-col gap-1 items-center">
+            <div class="relative flex items-center">
+              <select
+                id="week-select"
+                class="appearance-none bg-transparent border border-gray-200 hover:border-gray-300 text-xs sm:text-sm font-mono text-gray-900 py-1 pl-2 pr-7 cursor-pointer transition-colors focus:outline-none focus:border-gray-400"
+              >
+                <option value="">All weeks</option>
+                {
+                  weeks.map(w => (
+                    <option value={`${w.start}~${w.end}`}>
+                      W{String(w.index).padStart(2, '0')}: {w.start} ~ {w.end}
+                    </option>
+                  ))
+                }
+              </select>
+              <svg
+                class="absolute right-2.5 w-3.5 h-3.5 text-gray-400 pointer-events-none"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </div>
+            <span
+              id="filter-count"
+              class="text-xs text-gray-400 font-mono whitespace-pre-line sm:whitespace-normal text-center sm:text-left leading-[1.1] sm:leading-normal"
+            ></span>
           </div>
           <button
             id="week-next"
-            class="px-2 py-1 text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed"
+            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
           >
             Next →
           </button>
@@ -136,7 +152,7 @@ function formatPace(type: string, avgSpeed: number): string {
       </div>
 
       <!-- Main Card -->
-      <div class="relative bg-white border border-gray-200 p-6">
+      <div class="relative bg-white border border-gray-200 p-4 sm:p-6">
         <!-- Corner Markers -->
         <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
         <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
@@ -157,7 +173,7 @@ function formatPace(type: string, avgSpeed: number): string {
               <li data-date={formatDate(new Date(activity.start_date_local))}>
                 <a
                   href={`/workouts/${activity.id}`}
-                  class="group flex items-center justify-between p-3 transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                  class="group flex items-center justify-between p-3 min-h-[3.25rem] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
                 >
                   <div class="flex items-center gap-3 min-w-0">
                     <span class="text-lg shrink-0" title={activity.sport_type}>
@@ -233,7 +249,7 @@ function formatPace(type: string, avgSpeed: number): string {
             li.style.display = 'none'
           }
         })
-        countEl.textContent = from ? visible + ' matched' : ''
+        countEl.textContent = from ? visible + 'matched' : ''
         activityCount.textContent = (from ? visible : total) + (visible === 1 ? ' activity' : ' activities')
         emptyState.classList.toggle('hidden', visible > 0)
 

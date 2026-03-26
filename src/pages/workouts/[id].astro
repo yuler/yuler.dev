@@ -132,16 +132,16 @@ const stats = [
   <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
     <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
       <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-sm text-gray-500 mb-8 font-mono">
+      <nav class="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 font-mono">
         <a href="/" class="hover:text-gray-900 transition-colors">~</a>
         <span class="text-gray-300">/</span>
         <a href="/workouts" class="hover:text-gray-900 transition-colors">workouts</a>
         <span class="text-gray-300">/</span>
-        <span class="text-gray-900 truncate max-w-[200px]">{activity.name}</span>
+        <span class="text-gray-900 truncate max-w-37.5 sm:max-w-50">{activity.name}</span>
       </nav>
 
       <!-- Header Card -->
-      <div class="bg-white border border-gray-200 p-6 md:p-8 mb-4 relative">
+      <div class="bg-white border border-gray-200 p-4 sm:p-6 md:p-8 mb-4 relative">
         <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
         <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
         <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
@@ -153,20 +153,21 @@ const stats = [
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 font-mono">
               {activity.name}
             </h1>
-            <div class="flex items-center gap-3 text-sm text-gray-500 font-mono mt-1">
-              <time datetime={activity.start_date_local}>
-                {formatDate(new Date(activity.start_date_local))}
-              </time>
-              <span class="text-gray-300">|</span>
-              <span>{activity.sport_type}</span>
-              {activity.device_name && (
-                <>
-                  <span class="text-gray-300">|</span>
-                  <span class="text-gray-400">{deviceEmoji(activity.device_name)} {activity.device_name}</span>
-                </>
-              )}
-            </div>
           </div>
+        </div>
+
+        <div class="flex items-center gap-3 text-xs text-gray-500 font-mono mt-1">
+          <time datetime={activity.start_date_local}>
+            {formatDate(new Date(activity.start_date_local))}
+          </time>
+          <span class="text-gray-300">|</span>
+          <span>{activity.sport_type}</span>
+          {activity.device_name && (
+            <>
+              <span class="text-gray-300">|</span>
+              <span class="text-gray-400">{deviceEmoji(activity.device_name)} {activity.device_name}</span>
+            </>
+          )}
         </div>
 
         {activity.description && (
@@ -179,20 +180,20 @@ const stats = [
       <!-- Map Card -->
       {hasMap && (
         <div class="bg-white border border-gray-200 mb-4 relative">
-          <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400 z-[1000]"></div>
-          <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400 z-[1000]"></div>
-          <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400 z-[1000]"></div>
-          <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400 z-[1000]"></div>
+          <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400 z-1000"></div>
+          <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400 z-1000"></div>
+          <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400 z-1000"></div>
+          <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400 z-1000"></div>
 
           <div class="p-4 border-b border-gray-100">
             <h2 class="text-sm font-semibold text-gray-900 font-mono">Route</h2>
           </div>
-          <div id="activity-map" class="h-[400px] w-full"></div>
+          <div id="activity-map" class="h-62.5 sm:h-75 md:h-100 w-full"></div>
         </div>
       )}
 
       <!-- Stats Card -->
-      <div class="bg-white border border-gray-200 p-6 md:p-8 mb-4 relative">
+      <div class="bg-white border border-gray-200 p-4 sm:p-6 md:p-8 mb-4 relative">
         <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
         <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
         <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
@@ -202,7 +203,7 @@ const stats = [
           Stats
         </h2>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {stats.map(stat => (
             <div class="p-3 bg-gray-50 border border-gray-100">
               <div class="text-xs text-gray-400 font-mono mb-1">{stat.label}</div>
@@ -219,7 +220,7 @@ const stats = [
         <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
         <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
 
-        <a href="/workouts" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono">
+        <a href="/workouts" class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono">
           <span>←</span>
           <span>All workouts</span>
         </a>
@@ -227,7 +228,7 @@ const stats = [
           href={`https://www.strava.com/activities/${activity.id}`}
           target="_blank"
           rel="noreferrer"
-          class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
+          class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
         >
           <span>View on Strava</span>
           <span>↗</span>
@@ -247,9 +248,11 @@ const stats = [
           attributionControl: true,
         })
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-          maxZoom: 19,
+        // Using CartoDB basemap as it's more accessible globally (including China)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: 'abcd',
+          maxZoom: 20,
         }).addTo(map)
 
         const latlngs = points.map(p => [p[0], p[1]])
@@ -263,13 +266,13 @@ const stats = [
         // Start/End markers
         const startIcon = L.divIcon({
           className: '',
-          html: '<div style="width:12px;height:12px;background:#10b981;border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>',
+          html: '<div style="width:0.75rem;height:0.75rem;background:#10b981;border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>',
           iconSize: [12, 12],
           iconAnchor: [6, 6],
         })
         const endIcon = L.divIcon({
           className: '',
-          html: '<div style="width:12px;height:12px;background:#ef4444;border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>',
+          html: '<div style="width:0.75rem;height:0.75rem;background:#ef4444;border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>',
           iconSize: [12, 12],
           iconAnchor: [6, 6],
         })
