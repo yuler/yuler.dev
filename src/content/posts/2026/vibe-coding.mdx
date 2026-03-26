@@ -357,9 +357,12 @@ npx skills add https://github.com/michalparkola/tapestry-skills-for-claude-code/
 
 一些有意思的 skills:
 
-- https://github.com/garrytan/gstack
+- https://github.com/garrytan/gstack YC CEO 开源的决策相关的
 - https://github.com/tanweai/pua
 - https://github.com/slavingia/skills
+- https://www.ui-skills.com/ UI
+- https://impeccable.style/ UI
+- https://github.com/Leonxlnx/taste-skill UI
 
 ## Write your own skills
 
@@ -410,21 +413,88 @@ npx skills add https://github.com/michalparkola/tapestry-skills-for-claude-code/
 来，咱们先现场演示一个简单的 **vibe-coding** 例子
 
 - 1. 我们先创建一个文件夹 `vibe-coding-demo-20260326`
+- 2. 下载我们这次分享的原始内容文件
 
-
-```text
-请生成一个单文件的前端页面这个当前文件（index.html，纯原生 JS + CSS，不要任何依赖）, 输出到当前目录的 `dist/index.html`
+```bash
+帮我下载这个文件, https://github.com/yuler/yuler.dev/blob/main/src/content/posts/2026/vibe-coding.mdx 以及相关源文件 https://github.com/yuler/yuler.dev/tree/main/src/assets/vibe-coding 保存到当前文件夹下
 ```
 
----
+- 3. 生成一个单文件的前端页面
 
-```text
-帮我用系统默认浏览器打开这个文件预览下
+```bash
+请生成一个单文件的前端页面这个当前文件（index.html，纯原生 JS + CSS，不要任何依赖）, 先不要使用任何 SKILL，输出到当前目录的 `dist/index.html`, 然后用浏览器打开预览下
 ```
 
----
+- 4. 创建 GitHub 仓库里的真实状态
 
-使用 gh 帮我创建一个仓库
+```bash
+使用 gh 帮我创建一个 GitHub 仓库, 仓库名称和当前目录名称一致, 并且使用 /git-commit skill 提交代码, push 到这个仓库
+```
+
+- 5. 通过 GitHub Pages 部署一个静态的网站
+
+
+```bash
+使用 /gh-pages skill 创建一个 GitHub Action workflow 部署这个静态网站
+```
+
+Push your main branch to GitHub.
+Go to your GitHub repository Settings > Pages.
+Under "Build and deployment", set the Source dropdown to GitHub Actions.
+
+- 6. 更新下仓库信息
+
+```bash
+创建一个 README.md 文件, 两句话介绍下这个项目，添加 gh pages 链接, 然后使用 gh 命令更新下仓库的 URL, 和 description
+```
+
+- 7. 图片引用错误
+
+
+```
+由于文档中关联的图片没有上传到 github pages， 所以显示错误， 帮我修复下
+```
+
+- 8. 通过 git worktree 创建多个工作区, 使用 UI SKILL 优化下网站样式
+
+- https://www.ui-skills.com/ UI
+- https://impeccable.style/ UI
+- https://github.com/Leonxlnx/taste-skill UI
+
+
+```bash
+gwa ui-1 && opencode .
+
+使用这个 https://www.ui-skills.com/ UI skill 来优化下网站样式, Skill 只安装到本地, 项目级别安装
+黑白风格, 完成后打开浏览器预览下
+
+gwa ui-2 && claude .
+使用这个 https://impeccable.style/ UI skill 来优化下网站样式, Skill 只安装到本地, 项目级别安装
+极客风格, 完成后打开浏览器预览下
+
+gwa ui-3 && codex
+使用这个 https://github.com/Leonxlnx/taste-skill UI skill 来优化下网站样式, Skill 只安装到本地, 项目级别安装
+大字报风格, 完成后打开浏览器预览下
+```
+
+```bash
+git add dist/index.html
+aicommit
+```
+
+- 9. 选择一个主题发送更新代码
+
+- 10. 通过 openclaw 远程边代码 review
+
+```bash
+在我的 GitHub 有一个 `vibe-coding-demo-20260326` repo
+你先去到 ~/Projects 目录， 然后 git clone 这个仓库, 这是一个静态网站 dist/index.html
+你帮我接取一个全屏幕的截图, 然后发送给我
+```
+
+```bash
+用 Codex 在这个 index.html，切一个新分支给这个网站添加作者信息和 GitHub 地址链接, 改好后直接发送搞一个 PR，然后我来 review 代码
+```
 
 ---
 
