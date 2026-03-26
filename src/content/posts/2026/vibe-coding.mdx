@@ -179,7 +179,7 @@ SDD: Spec-Driven Development, 规格驱动开发
 [Superpowers](https://github.com/obra/superpowers)
 
 
-一套面向 AI Agent 编程的[技能框架](https://github.com/obra/superpowers?tab=readme-ov-file#skills-library)与[软件开发方法论(工作流)](https://github.com/obra/superpowers?tab=readme-ov-file#the-basic-workflow)，强调用**技能驱动**需求澄清、方案设计、实现计划和代码审查。
+一套面向 AI Agent 编程的[技能框架](https://github.com/obra/superpowers?tab=readme-ov-file#skills-library)与[软件开发方法论 (工作流)](https://github.com/obra/superpowers?tab=readme-ov-file#the-basic-workflow)，强调用**技能驱动**需求澄清、方案设计、实现计划和代码审查。
 
 - /brainstorm（头脑风暴）：在写任何代码之前使用。它会启动“苏格拉底式设计”，通过不断向你提问来完善粗糙的想法，探索替代方案，并最终保存一份设计文档。
 - /write-plan（编写计划）：根据设计文档，让 AI 生成详细的分步实施计划。
@@ -314,6 +314,30 @@ perplexity 宣布移除 MCP 支持
 
 现在大部分软件、框架和 SaaS 服务也会提供 MCP，或支持 skills，比如 Cursor、Claude、Gemini 等。
 
+
+## 通过代码转包查看 claude 发送的内容
+
+::TODO: ::
+
+使用本地代理抓包来运行 Claude
+
+```bash
+http_proxy=http://127.0.0.1:8888 https_proxy=http://127.0.0.1:8888 claude
+```
+
+refs: https://askubuntu.com/questions/73287/how-do-i-install-a-root-certificate
+
+```bash
+sudo openssl x509 -in charles.pem -inform PEM -out charles.crt
+```
+
+或
+
+```bash
+openssl x509 -inform DER -in charles.cer -out charles.crt
+```
+
+
 ## CLI skills
 
 跨平台工具：skills
@@ -329,7 +353,7 @@ npx skills add https://github.com/michalparkola/tapestry-skills-for-claude-code/
 
 可以去 [skills.sh](https://skills.sh/) 或者 [GitHub](https://github.com/search?q=topic%3Askill+topic%3Askills&type=repositories&s=stars&o=desc) 上搜索一些流行的 skills
 
-例如： openclaw 内置的一些 [skills](https://github.com/openclaw/openclaw/tree/main/skills)
+例如：openclaw 内置的一些 [skills](https://github.com/openclaw/openclaw/tree/main/skills)
 
 一些有意思的 skills:
 
@@ -381,9 +405,12 @@ npx skills add https://github.com/michalparkola/tapestry-skills-for-claude-code/
 
 ## Show time: vibe-coding demo
 
-TODO:
+::TODO: ::
 
-来，咱们先现场演示一个简单的 vibe-coding 例子
+来，咱们先现场演示一个简单的 **vibe-coding** 例子
+
+- 1. 我们先创建一个文件夹 `vibe-coding-demo-20260326`
+
 
 ```text
 请生成一个单文件的前端页面这个当前文件（index.html，纯原生 JS + CSS，不要任何依赖）, 输出到当前目录的 `dist/index.html`
@@ -423,30 +450,10 @@ TODO:
 
 Design OpenClaw prompt injection attack
 
+[LLMlite 投毒](https://x.com/dotey/status/2036530915103612976)
+
 ## OpenClaw alternatives
 
 - [nanoclaw](https://github.com/qwibitai/nanoclaw)
   https://x.com/karpathy/status/2024997757757653224
 - [ironclaw](https://github.com/nearai/ironclaw)
-
-## 通过代码转包查看 claude 发送的内容
-
-::TODO: ::
-
-使用本地代理抓包来运行 Claude
-
-```bash
-http_proxy=http://127.0.0.1:8888 https_proxy=http://127.0.0.1:8888 claude
-```
-
-refs: https://askubuntu.com/questions/73287/how-do-i-install-a-root-certificate
-
-```bash
-sudo openssl x509 -in charles.pem -inform PEM -out charles.crt
-```
-
-或
-
-```bash
-openssl x509 -inform DER -in charles.cer -out charles.crt
-```
