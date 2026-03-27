@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe-coding</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #efe7d2;
+            --paper-color: #f6efdc;
+            --ink: #1b1b1b;
+            --muted-ink: #363636;
+            --accent-red: #9f1212;
+            --line: #c9bba1;
+            --code-bg: #101010;
+            --poster-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.6);
+        }
+        body {
+            font-family: 'Noto Sans SC', "PingFang SC", "Microsoft YaHei", sans-serif;
+            line-height: 1.85;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 15% 12%, rgba(159, 18, 18, 0.08), transparent 34%),
+                radial-gradient(circle at 86% 2%, rgba(43, 40, 35, 0.08), transparent 36%),
+                var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1020px;
+            width: 100%;
+            padding: 36px 20px 88px;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--ink);
+            margin-top: 1.8em;
+            margin-bottom: 0.7em;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+        h1 {
+            font-size: clamp(3rem, 10vw, 7.4rem);
+            text-align: left;
+            line-height: 0.95;
+            margin: 0 0 0.28em;
+            color: var(--accent-red);
+            text-transform: uppercase;
+        }
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            border-top: 6px solid var(--accent-red);
+            border-bottom: 2px solid var(--ink);
+            padding: 0.2em 0;
+            margin-top: 1.35em;
+        }
+        h3 {
+            font-size: clamp(1.35rem, 3.2vw, 2rem);
+            color: var(--ink);
+            border-left: 8px solid var(--accent-red);
+            padding-left: 12px;
+        }
+        p, li { color: var(--muted-ink); font-size: 1.06rem; }
+        strong { color: var(--ink); }
+        a { color: var(--accent-red); text-decoration: none; border-bottom: 1px dashed rgba(159, 18, 18, 0.55); transition: all 0.18s; }
+        a:hover { color: #7c0d0d; border-bottom-color: #7c0d0d; }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            border: 2px solid #1f1f1f;
+            box-shadow: var(--poster-shadow);
+            margin: 28px 0;
+            filter: contrast(1.03) saturate(0.96);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        img:hover { transform: translateY(-2px); box-shadow: 0 22px 42px -28px rgba(0, 0, 0, 0.65); }
+        pre {
+            background-color: var(--code-bg);
+            color: #ece6d6;
+            padding: 18px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 2px solid #272727;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
+        p code, li code { background-color: #e6dbc3; padding: 0.2em 0.45em; border-radius: 3px; color: #7b1515; }
+        blockquote {
+            border: 2px solid var(--ink);
+            border-left: 10px solid var(--accent-red);
+            color: #2b2b2b;
+            margin: 28px 0;
+            background: #f2e8cf;
+            padding: 14px 16px;
+            border-radius: 3px;
+        }
+        hr { border: 0; height: 2px; background: linear-gradient(to right, transparent, var(--ink), transparent); margin: 46px 0; }
+        ul, ol { padding-left: 24px; margin-bottom: 20px; }
+        li { margin-bottom: 10px; }
+        li::marker { color: var(--accent-red); font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; margin: 30px 0; background: #f8f1df; border: 2px solid var(--ink); }
+        th, td { border: 1px solid #8f826c; padding: 14px; text-align: left; }
+        th { background-color: #eadfca; font-weight: 700; color: var(--ink); }
+        
+        /* Layout utilities */
+        .flex { display: flex; }
+        .flex-row { flex-direction: row; }
+        .gap-4 { gap: 1rem; }
+        .flex-1 { flex: 1; }
+        
+        /* Animations */
+        .markdown-body {
+            animation: fadeInUp 0.65s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(10px);
+            background: var(--paper-color);
+            border: 3px solid var(--ink);
+            border-radius: 6px;
+            box-shadow: var(--poster-shadow);
+            padding: 24px;
+            position: relative;
+        }
+        .markdown-body::before {
+            content: "";
+            position: absolute;
+            inset: 10px;
+            border: 1px solid var(--line);
+            pointer-events: none;
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Glassmorphism elements */
+        .glass-panel {
+            background: #f3e8ce;
+            border: 2px solid var(--ink);
+            box-shadow: none;
+            border-radius: 3px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 18px 10px 30px; }
+            .markdown-body { padding: 16px; }
+            h1 { font-size: clamp(2.2rem, 14vw, 4.4rem); }
+            h2 { font-size: clamp(1.6rem, 8vw, 2.5rem); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container markdown-body">
+        <h1>Vibe-coding</h1>
+<h2>What&#39;s vibe-coding</h2>
+<p>什么是 vibe coding?</p>
+<hr>
+<p>我的理解：</p>
+<p><strong>你只需用自然语言输入你的意图（Vibe），AI 会帮你输出相应的代码，剩下的工作就交给它来完成。</strong></p>
+<hr>
+<p><strong>Andrej Karpathy</strong>（安德烈·卡帕斯）：AI 领域著名专家，被业界昵称为 &quot;KP&quot;，曾任 Tesla AI 总监，OpenAI 创始成员。</p>
+<p><img src="./vibe-code-karpathy-tweet.png" alt="Karpathy 关于 vibe coding 的推文"></p>
+<p><a href="https://x.com/karpathy/status/1886192184808149383?lang=en">https://x.com/karpathy/status/1886192184808149383?lang=en</a></p>
+<hr>
+<p>维基百科解释</p>
+<p><a href="https://zh.wikipedia.org/wiki/Vibe_coding">https://zh.wikipedia.org/wiki/Vibe_coding</a></p>
+<hr>
+<h2>Who&#39;s vibe-coding?</h2>
+<p>看看下面这张图</p>
+<p><img src="./who-is-vibe-coding.png" alt="who is vibe coding"></p>
+<hr>
+<p><strong>Linus Torvalds</strong>：Linux 之父，Git 的作者</p>
+<p><img src="./vibe-code-linus-repo.jpeg" alt="Linus vibe coding"></p>
+<p><a href="https://github.com/torvalds/AudioNoise#:~:text=basically%20written%20by-,vibe%2Dcoding,-.%20I%20know%20more">https://github.com/torvalds/AudioNoise#:~:text=basically%20written%20by-,vibe%2Dcoding,-.%20I%20know%20more</a></p>
+<hr>
+<p><strong>Tobi</strong>：Shopify 联合创始人兼 CEO</p>
+<p><img src="./vibe-code-tobi-tweet.png" alt="Tobi tweet"></p>
+<p><a href="https://x.com/tobi/status/2026148524140695973">https://x.com/tobi/status/2026148524140695973</a>, <a href="https://github.com/tobi">https://github.com/tobi</a></p>
+<hr>
+<p><strong>DHH</strong>：Ruby on Rails 之父</p>
+<p><img src="./vibe-code-ddh-tweet.png" alt="DHH tweet"></p>
+<p><a href="https://x.com/dhh/status/2028463162513871329">https://x.com/dhh/status/2028463162513871329</a></p>
+<hr>
+<p><strong>Ryan Dahl</strong>：Node.js 和 Deno 的作者</p>
+<p><img src="./vibe-code-ry-tweet.png" alt="Ryan Dahl tweet"></p>
+<p><a href="https://x.com/rough__sea/status/2013280952370573666">https://x.com/rough__sea/status/2013280952370573666</a></p>
+<hr>
+<h2>Awesome vibe-coding projects</h2>
+<p><a href="https://github.com/666ghj/BettaFish">BettaFish</a> 和 <a href="https://github.com/666ghj/MiroFish">MiroFish</a>：</p>
+<p>20 岁大学生花 10 天 VibeCoding 一个开源项目，获盛大资本 3000 万投资</p>
+<p>感兴趣的朋友可以去读下作者 BaiFu 的分享：<a href="https://mp.weixin.qq.com/s?__biz=MzY4NjA0NjIwMQ==&mid=2247483661&idx=1&sn=243099d64445cb678df265c93226cb78&scene=21&poc_token=HP_It2mjYUFCqSUM2Enc1XrrvBtUR-AFzsiMdMUL">https://mp.weixin.qq.com/s?__biz=MzY4NjA0NjIwMQ==&amp;mid=2247483661&amp;idx=1&amp;sn=243099d64445cb678df265c93226cb78&amp;scene=21&amp;poc_token=HP_It2mjYUFCqSUM2Enc1XrrvBtUR-AFzsiMdMUL</a></p>
+<hr>
+<p><a href="https://github.com/openclaw/openclaw">OpenClaw</a></p>
+<p>无疑是 2025 年到现在 GitHub 上最火的项目之一</p>
+<p><img src="https://api.star-history.com/svg?repos=openclaw/openclaw&type=date&legend=top-left" alt="OpenClaw GitHub stars"></p>
+<p>OpenClaw 是奥地利开发者 <strong>Peter Steinberger</strong> 起初当作「playground project」做出来的个人 AI 助手项目，跑在你自己的设备上，并通过 WhatsApp、Telegram、Discord 等聊天软件来收发指令——非常符合 vibe-coding 的典型场景：先把「我要一个能在各种聊天软件里帮我干活的本地 Agent」这个 vibe 丢给代码，再不断迭代。</p>
+<p>Peter 已于 2026 年 2 月正式加入 OpenAI，专注于「让普通人也能用上的 Agent」，同时继续以开源的方式推进 OpenClaw 生态，如今已由基金会托管，保持开源开放。</p>
+<hr>
+<p><a href="https://github.com/ryokun6/ryos">ryOS</a></p>
+<p>Cursor 设计负责人 Ryo Lu 用 Cursor 全流程 vibe 出来的「操作系统」—— 在浏览器里跑的怀旧风 OS（复刻 Mac OS X Aqua、System 7、Windows XP/98 等）</p>
+<p>内置 17 个应用（Finder、终端、iPod 模拟器、时光机浏览器等）、AI 助手 Ryo、虚拟文件系统与多主题，技术栈为 React 19 + TypeScript + three.js</p>
+<hr>
+<p>再看看 GitHub 热门榜单：<a href="https://github.com/trending?since=monthly">https://github.com/trending?since=monthly</a></p>
+<p>都有一个 <a href="https://github.com/claude">claude</a> 的头像</p>
+<h2>Vibe-coding tools</h2>
+<p>IDE Extensions, AI-Native IDEs, Terminals, Online SaaS, Others</p>
+<hr>
+<h3>IDE Extensions</h3>
+<ul>
+<li><strong>GitHub Copilot</strong> (VS Code, JetBrains) - <a href="https://github.com/features/copilot%EF%BC%9AGitHub">https://github.com/features/copilot：GitHub</a> 官方出的 AI 编程助手，支持补全、重构和注释生成。</li>
+<li><strong>Cline</strong> (VS Code) - <a href="https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev%EF%BC%9A%E5%9C%A8">https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev：在</a> VS Code 里和 Claude 协作写代码、跑命令、改项目结构的 Agent 插件。</li>
+<li><strong>Tabnine</strong> - <a href="https://www.tabnine.com/">https://www.tabnine.com/</a> ：早期老牌的本地/云端 AI 补全工具，支持多语言。</li>
+</ul>
+<hr>
+<h3>AI-Native IDEs</h3>
+<p><img src="./vibe-coding-ides.png" alt="vibe coding IDEs"></p>
+<ul>
+<li><a href="https://cursor.com/">Cursor</a>：基于 VS Code 的 AI 原生 IDE，支持多模型、Agent 模式和项目级重构</li>
+<li><a href="https://antigravity.google/">Antigravity</a>：Google 推出的 Agent-first IDE，深度集成 Gemini，支持多智能体协作开发</li>
+<li><a href="https://kiro.dev/">Kiro</a>：以规格驱动开发（Spec-Driven）为核心的 AI IDE，背后是 AWS，适合从原型到生产的端到端开发。</li>
+<li><a href="https://zed.dev/">Zed</a>：超快原生编辑器，内置协作和 AI 助手，适合需要低延迟的开发体验。</li>
+<li><a href="https://www.trae.ai/">Trae</a>：字节系的 AI IDE，支持 Claude、GPT 等模型，偏向全自动写项目和重构。</li>
+</ul>
+<hr>
+<h3>CLI / Terminals GUI</h3>
+<p><img src="./terminal-clis.png" alt="terminal CLIs"></p>
+<ul>
+<li><a href="https://open-code.ai/">OpenCode</a>：面向多模型、多 Agent 的终端 IDE，支持自动运行命令、改代码和管理会话。</li>
+<li><a href="https://claude.ai">Claude</a>：Anthropic 出的多模态 AI 助手，也可以配合命令行做代码生成和评审。</li>
+<li><a href="https://developers.openai.com/codex/cli/">Codex CLI</a>：OpenAI 推出的终端 AI 代理，可以读写代码、运行命令、做本地开发自动化。</li>
+<li><a href="https://cursor.com/cli">Cursor Agent CLI</a>：把 Cursor Agent 搬到终端里，在任意编辑器或纯命令行里 vibe-coding。</li>
+<li><a href="https://github.com/features/copilot">GitHub Copilot</a>：GitHub 官方 AI 助手，在终端配合 <code>gh</code> 等工具也能辅助开发流程。</li>
+<li><a href="https://ai.google.dev/">Gemini</a>：Google 的大模型家族，可通过官方或第三方 CLI 在终端中调用做代码/命令代理。</li>
+<li><a href="https://qwenlm.github.io/qwen-code-docs/">Qwen Code</a>：阿里出品的开源代码智能体，支持通过 CLI 对整个项目进行分析和修改。</li>
+<li><a href="https://github.com/MoonshotAI/kimi-cli">Kimi CLI</a>：MoonshotAI 官方终端 Agent，支持读写代码、执行命令和接入多种编辑器。</li>
+<li><a href="https://buildwithpi.ai/">pi.dev</a>：极简风格的开源终端 Agent，只带少量基础工具，适合自定义扩展和 embedding 到其他系统。</li>
+</ul>
+<hr>
+<h3>Online SaaS</h3>
+<ul>
+<li><a href="https://v0.dev">v0.dev</a>：Vercel 推出的文本到前端工具，在浏览器里用自然语言直接生成 React/Next.js 界面。</li>
+<li><a href="https://replit.com/agent">Replit Agent</a>：在网页里通过 Agent 生成、修改、运行代码，适合快速原型和教学场景。</li>
+<li><a href="https://aistudio.google.com/">Google Studio</a>：Google 推出的 AI 开发平台，支持通过 Agent 生成、修改、运行代码。</li>
+<li><a href="https://openhands.dev/">OpenHands</a>: 云端运行 Agentic 开发</li>
+<li><a href="https://bolt.new">Bolt.new</a>：StackBlitz 旗下的 AI Web IDE，支持一键从 Prompt 生成全栈应用并在线预览、迭代。</li>
+<li>Cursor, Codex, Claude 都支持 Cloud 模式运行 Agentic 开发</li>
+</ul>
+<hr>
+<h3>Others</h3>
+<ul>
+<li><a href="https://www.conductor.build/">Conductor</a>：在本地 Mac 上跑一支 AI 编码 Agent 团队，自动帮你在多个工作区并行改代码、跑测试和提 PR。</li>
+<li><a href="https://github.com/farion1231/cc-switch">cc-switch</a>：一个统一管理 Claude Code / Codex / OpenCode / Gemini CLI 的桌面工具，用来切换模型提供方、MCP/Skills 和系统 Prompt。</li>
+</ul>
+<h2>Spec-Driven Development</h2>
+<p>SDD: Spec-Driven Development, 规格驱动开发</p>
+<hr>
+<p><a href="https://github.com/obra/superpowers">Superpowers</a></p>
+<p>一套面向 AI Agent 编程的<a href="https://github.com/obra/superpowers?tab=readme-ov-file#skills-library">技能框架</a>与<a href="https://github.com/obra/superpowers?tab=readme-ov-file#the-basic-workflow">软件开发方法论 (工作流)</a>，强调用<strong>技能驱动</strong>需求澄清、方案设计、实现计划和代码审查。</p>
+<ul>
+<li>/brainstorm（头脑风暴）：在写任何代码之前使用。它会启动“苏格拉底式设计”，通过不断向你提问来完善粗糙的想法，探索替代方案，并最终保存一份设计文档。</li>
+<li>/write-plan（编写计划）：根据设计文档，让 AI 生成详细的分步实施计划。</li>
+<li>/execute-plan（执行计划）：按照计划一步一步执行，并在过程中自动调用所需的技能（如 TDD 编写测试、前端设计规范等）。</li>
+</ul>
+<hr>
+<p><a href="https://github.com/github/spec-kit">GitHub Spec Kit</a></p>
+<p>GitHub 开源的 Spec-Driven Development 工具包（Specify CLI + /speckit 工作流），强调先规格、后实现、分阶段与 AI 协作。</p>
+<hr>
+<p><strong>核心思想可以概括成一条闭环：</strong> </p>
+<p>无论是 Superpowers 还是 Spec Kit，</p>
+<ul>
+<li>都是先和 Agent <strong>澄清需求</strong>，把要做的事落成一份具体的 <strong>spec</strong>，并<strong>持久化到代码仓库</strong>（随分支、PR、版本一起演进）。</li>
+<li>你点头之后，再产出 <strong>plan/tasks List</strong>（实施计划），让 Agent <strong>按计划写代码</strong></li>
+<li>最后做 <strong>review</strong></li>
+<li>有新需求或审查发现问题，就回到「澄清 → spec → plan → 实现 → review」，循环往复。</li>
+</ul>
+<hr>
+<h2>Ralph Loop</h2>
+<p>前一段时间在 AI 辅助编程圈里很火的一种做法，名字来自《辛普森一家》里的 <strong>Ralph Wiggum(拉尔夫·韦根)</strong>。创造者 <a href="https://ghuntley.com/ralph/">Geoffrey Huntley</a> 用一句话概括：<strong>「Ralph 就是一个 Bash 循环。」</strong> 最简形式就是反复把同一份提示交给 Agent，让它在仓库里推进任务，直到满足退出条件（例如测试全绿、验收清单完成或达到最大轮次）：</p>
+<pre><code class="language-bash">while :; do cat PROMPT.md | claude-code ; done
+</code></pre>
+<p><strong>和「一条对话聊到底」的差别：</strong> 每一轮往往是<strong>新开会话、干净上下文</strong>，避免长对话里工具调用、旧错误堆叠造成的 <strong>context rot</strong>（上下文劣化）。进度不靠模型「记住聊过什么」，而靠 <strong>仓库里的真实状态</strong>：代码、测试、<code>git</code> 历史、进度文件、spec——这和上一节「spec → plan → 实现 → review」的外化思路是同一类工程化：<strong>状态在文件里，退出条件明确，可重复跑</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/snarktank/ralph/main/ralph-flowchart.png" alt="Ralph 工作流程示意（snarktank/ralph）"></p>
+<p>交互式：<a href="https://snarktank.github.io/ralph/">snarktank.github.io/ralph</a></p>
+<p>参考阅读：</p>
+<ul>
+<li><a href="http://wiggum.dev/concepts/the-loop/">The Loop | ralph (wiggum.dev)</a> — 逐步拆解循环、状态外化、为何「同一 prompt」不会原地打转  </li>
+<li><a href="https://ghuntley.com/ralph/">Ralph Wiggum as a software engineer</a> — 原始叙述与 Bash one-liner；文中也有「Ralph 技术」示意图  </li>
+<li><a href="https://github.com/snarktank/ralph">snarktank/ralph</a> — 可落地的 Bash 循环实现（Amp / Claude Code），用 <code>prd.json</code>、<code>progress.txt</code> 与 git 做轮次间记忆；仓库附带 <a href="https://snarktank.github.io/ralph/"><strong>交互式流程图</strong></a>  </li>
+<li><a href="https://github.com/vercel-labs/ralph-loop-agent">vercel-labs/ralph-loop-agent</a> — 基于 AI SDK 的外层循环参考实现，README 带结构示意图（见下）</li>
+</ul>
+<hr>
+<p><a href="https://github.com/karpathy/autoresearch">karpathy/autoresearch</a></p>
+<p>是一个“让 LLM/Agent 自己做研究”的实验框架：它把你要做的事缩成一个反复跑实验、用指标说话、好就保留坏就丢弃的循环。</p>
+<p>具体来说，每一轮它会在仓库里（主要是允许修改 train.py）做一次代码改动 -&gt; 用单 GPU 跑一个固定时间预算（约 5 分钟） -&gt; 用 prepare.py 里的评估器算出 val_bpb（越低越好） -&gt; 然后根据结果决定“保留改动并前进分支”还是“放弃并回滚到原点”，循环继续直到人为中断。</p>
+<p>autoresearch 和 ralph loop 可谓是“异曲同工”：同样是把推进交给可重复、可验证的循环（好就前进，差就回滚），只是它把循环具体化成了 ML 实验的选择器</p>
+<h2>MCP &amp; SKILLS</h2>
+<p><a href="https://modelcontextprotocol.io/">MCP</a> &amp; <a href="https://agentskills.io/">SKILLS</a></p>
+<p>这两个是 AI Agent 的标配，一个是标准化的接口，一个是标准化的技能库</p>
+<h2>SKILLS</h2>
+<p>为智能体提供新能力与专业知识的一种简单、开放的格式。</p>
+<hr>
+<p><strong>SKILL 的文件夹结构</strong></p>
+<p>本质上是包含 <code>SKILL.md</code> 文件的文件夹，下面是一个示例：</p>
+<pre><code class="language-bash">my-skill/
+├── SKILL.md          # Required: instructions + metadata
+├── scripts/          # Optional: executable code
+├── references/       # Optional: documentation
+└── assets/           # Optional: templates, resources
+</code></pre>
+<p><strong>SKILL.md 的组成</strong></p>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Metadata</strong></td>
+<td>元数据：name, description 等</td>
+</tr>
+<tr>
+<td><strong>Instructions</strong></td>
+<td>指令：自描述、可扩展、可移植</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>资源：scripts, references, assets</td>
+</tr>
+</tbody></table>
+<p><strong>指令的核心特性</strong></p>
+<ul>
+<li><strong>Self-documenting 自描述</strong> — 用自然语言描述，作者和用户都能理解</li>
+<li><strong>Extensible 可扩展</strong> — 从简单文本指令到复杂代码执行、资源管理</li>
+<li><strong>Portable 可移植</strong> — 就是一个文件夹，轻松修改、版本迭代和分享</li>
+</ul>
+<hr>
+<p><strong>SKILL 是如何工作的？</strong></p>
+<p><strong>渐进式披露 (Progressive Disclosure)</strong></p>
+<pre><code class="language-mermaid">flowchart LR
+    A[&quot;Discovery 发现&quot;] --&gt; B[&quot;Activation 激活&quot;]
+    B --&gt; C[&quot;Execution 执行&quot;]
+
+    style A fill:#FF6B6B,color:#fff
+    style B fill:#4ECDC4,color:#000
+    style C fill:#45B7D1,color:#fff
+</code></pre>
+<p><strong>三个阶段详解</strong></p>
+<ol>
+<li><p><strong>Discovery 发现</strong> — Agent 启动时，只加载所有 SKILL 的元数据 (name, description)。Agent 只需知道什么任务用哪个 SKILL。</p>
+</li>
+<li><p><strong>Activation 激活</strong> — 当 Agent 执行任务时，上下文匹配到元数据描述的 SKILL，此时才加载完整的 SKILL.md 到上下文中。</p>
+</li>
+<li><p><strong>Execution 执行</strong> — Agent 根据 SKILL.md 指令，按需加载引用文件或执行指定代码。</p>
+</li>
+</ol>
+<hr>
+<p><strong>社区更看好 SKILLS</strong></p>
+<p>YC CEO 抨击 MCP</p>
+<p><img src="./mpc-yc-ceo-tweet.png" alt="YC CEO 抨击 MCP"></p>
+<p>perplexity 宣布移除 MCP 支持</p>
+<p><img src="./mcp-perplexity-cto-tweet.png" alt="perplexity 宣布移除 MCP 支持"></p>
+<hr>
+<p>现在大部分软件、框架和 SaaS 服务也会提供 MCP，或支持 skills，比如 Cursor、Claude、Gemini 等。</p>
+<h2>通过代码转包查看 claude 发送的内容</h2>
+<p>::TODO: ::</p>
+<p>使用本地代理抓包来运行 Claude</p>
+<pre><code class="language-bash">http_proxy=http://127.0.0.1:8888 https_proxy=http://127.0.0.1:8888 claude
+</code></pre>
+<p>refs: <a href="https://askubuntu.com/questions/73287/how-do-i-install-a-root-certificate">https://askubuntu.com/questions/73287/how-do-i-install-a-root-certificate</a></p>
+<pre><code class="language-bash">sudo openssl x509 -in charles.pem -inform PEM -out charles.crt
+</code></pre>
+<p>或</p>
+<pre><code class="language-bash">openssl x509 -inform DER -in charles.cer -out charles.crt
+</code></pre>
+<h2>CLI skills</h2>
+<p>跨平台工具：skills</p>
+<p>不同 Agent 需要放到不同目录，规则各异。可使用 skills CLI 工具：</p>
+<pre><code class="language-bash">npx skills add vercel-labs/agent-skills --skill web-design-guidelines
+npx skills add https://github.com/michalparkola/tapestry-skills-for-claude-code/tree/main/article-extractor
+</code></pre>
+<h2>Popular skills</h2>
+<p>可以去 <a href="https://skills.sh/">skills.sh</a> 或者 <a href="https://github.com/search?q=topic%3Askill+topic%3Askills&type=repositories&s=stars&o=desc">GitHub</a> 上搜索一些流行的 skills</p>
+<p>例如：openclaw 内置的一些 <a href="https://github.com/openclaw/openclaw/tree/main/skills">skills</a></p>
+<p>一些有意思的 skills:</p>
+<ul>
+<li><a href="https://github.com/garrytan/gstack">https://github.com/garrytan/gstack</a></li>
+<li><a href="https://github.com/tanweai/pua">https://github.com/tanweai/pua</a></li>
+<li><a href="https://github.com/slavingia/skills">https://github.com/slavingia/skills</a></li>
+</ul>
+<h2>Write your own skills</h2>
+<ul>
+<li><a href="https://github.com/yuler/skills">https://github.com/yuler/skills</a></li>
+<li><a href="https://github.com/yuler/dotfiles/blob/main/bin/aicommit">https://github.com/yuler/dotfiles/blob/main/bin/aicommit</a></li>
+</ul>
+<p><strong>skill: ai-commit</strong></p>
+<p><img src="./ai-commit.png" alt="ai-commit"></p>
+<p><strong>skill: crawl-x, system-macro</strong></p>
+<div class="flex flex-row gap-4">
+  <img src="./openclaw-tg-channel.png" alt="openclaw-tg-channel" class="flex-1" />
+  <img src="./openclaw-wechat-receive.png" alt="openclaw-wechat-receive" class="flex-1" />
+</div>
+
+<h2>Git worktree</h2>
+<p>在日常开发中，如果你会同时用到多种工具、多个 AI Agent，最好避免大家「抢同一组文件」导致冲突。这时候就可以善用 <code>git worktree</code>：为同一个仓库快速创建多个独立工作目录，每个 worktree 绑定一个分支，各干各的。</p>
+<p>简单说，<code>git worktree</code> 能让你：</p>
+<ul>
+<li>为不同任务快速开一块干净的工作区，用完就删，不污染主仓库目录。</li>
+<li>同时在多个分支/工作区上开发、调试和试验，而不用频繁 <code>stash</code>/<code>checkout</code>。</li>
+</ul>
+<p>结合 AI 工具的一个好用法是：把每个 AI Agent 当作一个「数字员工」，给它分配一个专属 worktree 和分支，让它在自己的工作区里改代码、跑测试、提交 commit。我们作为「人类 tech lead」只需要负责分配任务、协调工作、进行人工 review 和合并即可。</p>
+<ul>
+<li>在主仓库开/删对应的 worktree，分配任务。</li>
+<li>让不同 Agent 在各自的 worktree 里并行工作。</li>
+<li>等 Agent 完成后，把对应分支提交上来，再进行人工 review 和合并，形成一条串起来的工程化工作流。</li>
+</ul>
+<p>我自己的日常用法可以通过编写 shell function 来实现：<a href="https://github.com/yuler/dotfiles/blob/main/.functions#L56-L91">git-worktree functions</a> <code>gwa</code>, <code>gwd</code> 快速创建和删除 worktree</p>
+<h2>Voice Inputs</h2>
+<p>通过语音输入，打字速度可以从每分钟 45 字提升到 220 字 (根据统计)，大幅加快了 vibe-coding 的效率</p>
+<ul>
+<li><a href="https://typeless.info/">Typeless</a>：跨应用的 AI 语音输入工具，在 VS Code、浏览器等任意输入框里直接把你的口语整理成高质量文本。</li>
+<li><a href="https://shandianshuo.cn/">闪电说</a>：国产本地优先的 AI 语音输入法，比键盘更快，自动去除口头禅、纠正错别字，适合长文本/指令输入。</li>
+<li><a href="https://handy.computer/">Handy</a>：开源跨平台语音输入工具，基于 Whisper 等模型在本地转写语音，按下快捷键说完就把文字粘贴到当前光标处。</li>
+</ul>
+<h2>Show time: vibe-coding demo</h2>
+<p>::TODO: ::</p>
+<p>来，咱们先现场演示一个简单的 <strong>vibe-coding</strong> 例子</p>
+<ul>
+<li><ol>
+<li>我们先创建一个文件夹 <code>vibe-coding-demo-20260326</code></li>
+</ol>
+</li>
+</ul>
+<pre><code class="language-text">请生成一个单文件的前端页面这个当前文件（index.html，纯原生 JS + CSS，不要任何依赖）, 输出到当前目录的 `dist/index.html`
+</code></pre>
+<hr>
+<pre><code class="language-text">帮我用系统默认浏览器打开这个文件预览下
+</code></pre>
+<hr>
+<p>使用 gh 帮我创建一个仓库</p>
+<hr>
+<h2>Code review by AI</h2>
+<p>集成到 GitHub PR 用 AI 做 code review 的方案：</p>
+<ul>
+<li><strong><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review">GitHub Copilot for Pull Requests</a></strong>：GitHub 官方，在 PR 中生成描述、建议 commit message、识别潜在问题，与 Issues/Projects 打通。</li>
+<li><strong><a href="https://developers.google.com/gemini-code-assist/docs/review-github-code">Google Code Assist</a></strong>: Google 官方出的 AI 代码审查工具，支持自动生成代码审查报告、识别潜在问题、建议改进方案。</li>
+<li><strong><a href="https://cursor.com/bugbot">Cursor BugBot</a></strong>: Cursor 官方出的 AI 代码审查工具，支持自动生成代码审查报告、识别潜在问题、建议改进方案。</li>
+</ul>
+<h2>番外：OpenClaw</h2>
+<p>首先这个项目就是 Vibe-Coding 出来的，刚刚上面也提到了</p>
+<p><strong>传统的 Vibe-coding（如 Cursor、Windsurf）：</strong> 是<strong>主动式</strong>的。你必须坐在电脑前，打开 IDE，输入 Prompt，然后盯着它改代码。你依然在&quot;工作流&quot;的中心。</p>
+<p>有了 OpenClaw，Vibe-coding 的场景变了。你可以在下班路上，掏出手机在 Telegram 里给你的 OpenClaw 发一条消息：<em>「帮我在本地跑一个 Redis 容器，然后把我刚才想到的那个购物车逻辑用 Python 写出来，测试通过后发个截图给我。」</em> 它会在你的老旧主机或 VPS 上默默执行一切。它让人类彻底脱离了 IDE 的物理束缚。</p>
+<p>可以和前面之前提的几个 Cloud Agentic 开发有点类似，但是他是跑再你个人设备上，你可以赋予他更多的权限</p>
+<h2>OpenClaw is risk</h2>
+<p>Design OpenClaw prompt injection attack</p>
+<p><a href="https://x.com/dotey/status/2036530915103612976">LLMlite 投毒</a></p>
+<h2>OpenClaw alternatives</h2>
+<ul>
+<li><a href="https://github.com/qwibitai/nanoclaw">nanoclaw</a>
+<a href="https://x.com/karpathy/status/2024997757757653224">https://x.com/karpathy/status/2024997757757653224</a></li>
+<li><a href="https://github.com/nearai/ironclaw">ironclaw</a></li>
+</ul>
+
+    </div>
+    <script>
+        document.querySelectorAll('a').forEach(link => {
+            if (link.hostname !== window.location.hostname && link.hostname !== '') {
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                
+                // Add external link icon indicator
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '12');
+                svg.setAttribute('height', '12');
+                svg.setAttribute('viewBox', '0 0 24 24');
+                svg.setAttribute('fill', 'none');
+                svg.setAttribute('stroke', 'currentColor');
+                svg.setAttribute('stroke-width', '2');
+                svg.setAttribute('stroke-linecap', 'round');
+                svg.setAttribute('stroke-linejoin', 'round');
+                svg.style.marginLeft = '4px';
+                svg.style.display = 'inline-block';
+                svg.style.verticalAlign = 'middle';
+                
+                const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path1.setAttribute('d', 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6');
+                
+                const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                polyline.setAttribute('points', '15 3 21 3 21 9');
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', '10');
+                line.setAttribute('y1', '14');
+                line.setAttribute('x2', '21');
+                line.setAttribute('y2', '3');
+                
+                svg.appendChild(path1);
+                svg.appendChild(polyline);
+                svg.appendChild(line);
+                
+                link.appendChild(svg);
+            }
+        });
+        
+        // Add subtle reveal animation to elements as they scroll into view
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('h2, h3, p, ul, ol, img, pre, blockquote').forEach(el => {
+            if (!el.closest('.markdown-body > *:first-child')) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(15px)';
+                el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+                observer.observe(el);
+            }
+        });
+    </script>
+</body>
+</html>
