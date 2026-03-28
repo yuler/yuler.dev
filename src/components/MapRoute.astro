@@ -1,0 +1,219 @@
+---
+interface Props {
+  points: number[][]
+  duration?: number
+  startTime?: string
+}
+
+const { points, duration = 0, startTime = '' } = Astro.props
+
+const randomId = Math.random().toString(36).slice(2, 9)
+const mapId = `activity-map-${randomId}`
+const btnId = `play-route-btn-${randomId}`
+---
+
+<div class="bg-white border border-gray-200 mb-4 relative">
+  <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400 z-1000"></div>
+  <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400 z-1000"></div>
+  <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400 z-1000"></div>
+  <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400 z-1000"></div>
+
+  <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+    <h2 class="text-sm font-semibold text-gray-900 font-mono">Route</h2>
+    <button
+      id={btnId}
+      class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none cursor-pointer"
+      aria-label="Play route trace"
+      title="Play route trace"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="play-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pause-icon hidden"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+    </button>
+  </div>
+  <div 
+    id={mapId} 
+    class="h-62.5 sm:h-75 md:h-100 w-full activity-map-container"
+    data-points={JSON.stringify(points)}
+    data-duration={duration}
+    data-start-time={startTime}
+    data-btn-id={btnId}
+  ></div>
+</div>
+
+<script>
+  import { addSeconds, format } from 'date-fns'
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const L = window.L
+    if (!L) return
+
+    document.querySelectorAll('.activity-map-container').forEach((el) => {
+      const pointsData = el.getAttribute('data-points')
+      if (!pointsData) return
+      
+      const points = JSON.parse(pointsData)
+      if (points.length === 0) return
+
+      const duration = parseInt(el.getAttribute('data-duration') || '0', 10)
+      let startTimeStr = el.getAttribute('data-start-time') || ''
+      
+      // start_date_local is exactly the local time string format but often comes with a "Z".
+      // We strip the "Z" to prevent the browser from interpreting it as UTC, creating an accurate date relative to 0 duration.
+      if (startTimeStr.endsWith('Z')) {
+        startTimeStr = startTimeStr.slice(0, -1)
+      }
+
+      const mapId = el.id
+      const btnId = el.getAttribute('data-btn-id')
+
+      const latlngs = points.map(p => L.latLng(p[0], p[1]))
+      const map = L.map(mapId, { zoomControl: true, attributionControl: true })
+      
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(map)
+
+      const routeLine = L.polyline(latlngs, {
+        color: '#10b981', weight: 3, opacity: 0.9, smoothFactor: 1
+      }).addTo(map)
+
+      addMarker(map, latlngs[0], '#10b981')
+      addMarker(map, latlngs[latlngs.length - 1], '#ef4444')
+
+      map.fitBounds(routeLine.getBounds(), { padding: [30, 30] })
+
+      setupMotionPlayer(map, latlngs, btnId, duration, startTimeStr)
+
+      // --- Helpers ---
+
+      function addMarker(map, position, color) {
+        const html = `<div style="width:0.75rem;height:0.75rem;background:${color};border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>`
+        L.marker(position, {
+          icon: L.divIcon({ html, className: '', iconSize: [12, 12], iconAnchor: [6, 6] })
+        }).addTo(map)
+      }
+
+      function setupMotionPlayer(map, pathPoints, actionBtnId, motionDuration, initialTimeStr) {
+        const motionBtn = document.getElementById(actionBtnId)
+        if (!motionBtn) return
+
+        const playIcon = motionBtn.querySelector('.play-icon')
+        const pauseIcon = motionBtn.querySelector('.pause-icon')
+        
+        let isPlaying = false
+        let currentProgress = 0
+        let lastTime = null
+        let animationFrameId = null
+        let motionMarker = null
+        let motionPolyline = null
+        
+        const DURATION_MS = 8000
+        let totalDist = 0
+        const dists = [0]
+        for (let i = 1; i < pathPoints.length; i++) {
+          totalDist += pathPoints[i-1].distanceTo(pathPoints[i])
+          dists.push(totalDist)
+        }
+
+        function formatTime(progressSeconds) {
+          if (initialTimeStr) {
+            const dateObj = new Date(initialTimeStr)
+            const currentObj = addSeconds(dateObj, progressSeconds)
+            return format(currentObj, 'HH:mm:ss')
+          }
+          const h = Math.floor(progressSeconds / 3600)
+          const m = Math.floor((progressSeconds % 3600) / 60)
+          const s = Math.round(progressSeconds % 60)
+          return h > 0 
+            ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+            : `${m}:${String(s).padStart(2, '0')}`
+        }
+
+        function togglePlayPause() {
+          if (isPlaying) {
+            cancelAnimationFrame(animationFrameId)
+            isPlaying = false
+            playIcon?.classList.remove('hidden')
+            pauseIcon?.classList.add('hidden')
+          } else {
+            if (currentProgress >= 1) currentProgress = 0
+            isPlaying = true
+            playIcon?.classList.add('hidden')
+            pauseIcon?.classList.remove('hidden')
+            lastTime = performance.now()
+            
+            if (!motionMarker) initMotionElements()
+            
+            animationFrameId = requestAnimationFrame(animate)
+          }
+        }
+
+        function initMotionElements() {
+          motionMarker = L.marker(pathPoints[0], {
+            icon: L.divIcon({
+              html: '<div style="width:0.875rem;height:0.875rem;background:#3b82f6;border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>',
+              className: '', iconSize: [14, 14], iconAnchor: [7, 7]
+            }),
+            interactive: false, zIndexOffset: 1000
+          }).addTo(map)
+          
+          if (motionDuration > 0 || initialTimeStr) {
+            motionMarker.bindTooltip(formatTime(0), {
+              permanent: true, direction: 'top', offset: [0, -10], className: 'font-mono text-xs font-semibold'
+            }).openTooltip()
+          }
+
+          motionPolyline = L.polyline([pathPoints[0]], {
+            color: '#3b82f6', weight: 3, opacity: 1, smoothFactor: 1, interactive: false
+          }).addTo(map)
+        }
+
+        function getInterpolatedPoint(targetDist) {
+          let i = 1
+          while (i < dists.length && dists[i] < targetDist) i++
+          
+          if (i >= dists.length) return { point: pathPoints[pathPoints.length - 1], index: pathPoints.length }
+          
+          const startDist = dists[i-1]
+          const endDist = dists[i]
+          const segmentProgress = (targetDist - startDist) / (endDist - startDist || 1)
+          const p1 = pathPoints[i-1]
+          const p2 = pathPoints[i]
+          const lat = p1.lat + (p2.lat - p1.lat) * segmentProgress
+          const lng = p1.lng + (p2.lng - p1.lng) * segmentProgress
+          
+          return { point: [lat, lng], index: i }
+        }
+
+        function animate(time) {
+          const delta = time - lastTime
+          lastTime = time
+          currentProgress += delta / DURATION_MS
+          
+          if (currentProgress >= 1) {
+            currentProgress = 1
+            isPlaying = false
+            playIcon?.classList.remove('hidden')
+            pauseIcon?.classList.add('hidden')
+          } else {
+            animationFrameId = requestAnimationFrame(animate)
+          }
+          
+          const { point, index } = getInterpolatedPoint(currentProgress * totalDist)
+          
+          motionMarker.setLatLng(point)
+          motionPolyline.setLatLngs([...pathPoints.slice(0, index), point])
+          
+          if ((motionDuration > 0 || initialTimeStr) && motionMarker.getTooltip()) {
+            const currentSeconds = Math.round(currentProgress * motionDuration)
+            motionMarker.setTooltipContent(formatTime(currentSeconds))
+          }
+        }
+
+        motionBtn.addEventListener('click', togglePlayPause)
+      }
+    })
+  })
+</script>

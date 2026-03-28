@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro'
 import { formatDate } from '../../utils/date'
 import { decodePolyline } from '../../utils/polyline'
 import ids from '../../../data/strava/activities/ids.json'
+import MapRoute from '../../components/MapRoute.astro'
 
 import type { GetStaticPaths } from 'astro'
 
@@ -178,19 +179,7 @@ const stats = [
       </div>
 
       <!-- Map Card -->
-      {hasMap && (
-        <div class="bg-white border border-gray-200 mb-4 relative">
-          <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400 z-1000"></div>
-          <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400 z-1000"></div>
-          <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400 z-1000"></div>
-          <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400 z-1000"></div>
-
-          <div class="p-4 border-b border-gray-100">
-            <h2 class="text-sm font-semibold text-gray-900 font-mono">Route</h2>
-          </div>
-          <div id="activity-map" class="h-62.5 sm:h-75 md:h-100 w-full"></div>
-        </div>
-      )}
+      {hasMap && <MapRoute points={points} duration={activity.moving_time} startTime={activity.start_date_local} />}
 
       <!-- Stats Card -->
       <div class="bg-white border border-gray-200 p-4 sm:p-6 md:p-8 mb-4 relative">
@@ -237,51 +226,5 @@ const stats = [
     </div>
   </div>
 
-  {hasMap && (
-    <script define:vars={{ points }}>
-      document.addEventListener('DOMContentLoaded', () => {
-        const L = window.L
-        if (!L || !points.length) return
 
-        const map = L.map('activity-map', {
-          zoomControl: true,
-          attributionControl: true,
-        })
-
-        // Using CartoDB basemap as it's more accessible globally (including China)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          subdomains: 'abcd',
-          maxZoom: 20,
-        }).addTo(map)
-
-        const latlngs = points.map(p => [p[0], p[1]])
-        const polyline = L.polyline(latlngs, {
-          color: '#10b981',
-          weight: 3,
-          opacity: 0.9,
-          smoothFactor: 1,
-        }).addTo(map)
-
-        // Start/End markers
-        const startIcon = L.divIcon({
-          className: '',
-          html: '<div style="width:0.75rem;height:0.75rem;background:#10b981;border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>',
-          iconSize: [12, 12],
-          iconAnchor: [6, 6],
-        })
-        const endIcon = L.divIcon({
-          className: '',
-          html: '<div style="width:0.75rem;height:0.75rem;background:#ef4444;border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>',
-          iconSize: [12, 12],
-          iconAnchor: [6, 6],
-        })
-
-        L.marker(latlngs[0], { icon: startIcon }).addTo(map).bindPopup('Start')
-        L.marker(latlngs[latlngs.length - 1], { icon: endIcon }).addTo(map).bindPopup('End')
-
-        map.fitBounds(polyline.getBounds(), { padding: [30, 30] })
-      })
-    </script>
-  )}
 </Layout>
