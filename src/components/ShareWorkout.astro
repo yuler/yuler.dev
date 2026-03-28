@@ -30,7 +30,8 @@ const downloadBtnId = `download-btn-${activityId}`
 const closeBtnId = `close-btn-${activityId}`
 
 // Only pass core stats to poster to keep it clean
-const coreStats = stats.slice(0, 6)
+const POSTER_STATS_COUNT = 6
+const coreStats = stats.slice(0, POSTER_STATS_COUNT)
 ---
 
 <!-- Trigger Button -->
@@ -158,9 +159,11 @@ const coreStats = stats.slice(0, 6)
 </div>
 
 <script>
-  import { toPng } from 'html-to-image'
   import QRCode from 'qrcode'
   import L from 'leaflet'
+
+  // Hoist dynamic import so the module is only loaded once
+  const htmlToImagePromise = import('html-to-image')
 
   // ── Dialog open/close ──────────────────────────────────────────────────────
 
@@ -169,7 +172,7 @@ const coreStats = stats.slice(0, 6)
     if (!dialog) return
     dialog.classList.remove('hidden')
     dialog.classList.add('flex')
-    document.body.style.overflow = 'hidden'
+    document.body.classList.add('overflow-hidden')
 
     // Init poster contents when dialog first opens
     const wrapper = dialog.querySelector('.poster-wrapper') as HTMLElement | null
@@ -184,7 +187,7 @@ const coreStats = stats.slice(0, 6)
     if (!dialog) return
     dialog.classList.add('hidden')
     dialog.classList.remove('flex')
-    document.body.style.overflow = ''
+    document.body.classList.remove('overflow-hidden')
   }
 
   // Wire triggers
@@ -222,7 +225,15 @@ const coreStats = stats.slice(0, 6)
         margin: 1,
         color: { light: '#00000000', dark: '#111827ff' },
         errorCorrectionLevel: 'M',
-      }).catch(console.error)
+      }).catch(err => {
+        console.error('Failed to generate QR code:', err)
+        const ctx = qrCanvas.getContext('2d')
+        if (ctx) {
+          ctx.fillStyle = '#ef4444'
+          ctx.font = '8px monospace'
+          ctx.fillText('QR error', 2, 32)
+        }
+      })
     }
 
     // 2. Route map (dark style, no controls)
@@ -232,7 +243,8 @@ const coreStats = stats.slice(0, 6)
     let points: number[][] = []
     try {
       points = JSON.parse(pointsRaw)
-    } catch {
+    } catch (e) {
+      console.error('Failed to parse points data for poster map:', e)
       return
     }
     if (points.length === 0) return
@@ -262,15 +274,13 @@ const coreStats = stats.slice(0, 6)
     }).addTo(map)
 
     // Start marker
-    const startHtml =
-      '<div style="width:8px;height:8px;background:#10b981;border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.4)"></div>'
+    const startHtml = '<div class="poster-map-marker start-marker"></div>'
     L.marker(latlngs[0], {
       icon: L.divIcon({ html: startHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
     }).addTo(map)
 
     // End marker
-    const endHtml =
-      '<div style="width:8px;height:8px;background:#ef4444;border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.4)"></div>'
+    const endHtml = '<div class="poster-map-marker end-marker"></div>'
     L.marker(latlngs[latlngs.length - 1], {
       icon: L.divIcon({ html: endHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
     }).addTo(map)
@@ -283,7 +293,7 @@ const coreStats = stats.slice(0, 6)
   async function capturePosterBlob(wrapperId: string): Promise<Blob> {
     const wrapper = document.getElementById(wrapperId)
     if (!wrapper) throw new Error('Poster wrapper not found')
-    const { toBlob } = await import('html-to-image')
+    const { toBlob } = await htmlToImagePromise
     const blob = await toBlob(wrapper, { cacheBust: true, pixelRatio: 2, skipFonts: false })
     if (!blob) throw new Error('Failed to generate image blob')
     return blob
@@ -310,9 +320,12 @@ const coreStats = stats.slice(0, 6)
         URL.revokeObjectURL(url)
       } catch (err) {
         console.error('Failed to download poster:', err)
+        if (label) {
+          label.textContent = 'Failed'
+          setTimeout(() => { if (label) label.textContent = originalText }, 2000)
+        }
       } finally {
         btn.disabled = false
-        if (label) label.textContent = originalText
       }
     })
   })
@@ -324,7 +337,7 @@ const coreStats = stats.slice(0, 6)
       const wrapperId = btn.dataset.copyId!
       const label = btn.querySelector('.copy-label')
       const originalText = label?.textContent ?? 'Copy'
-      ;(btn as HTMLButtonElement).disabled = true
+      btn.disabled = true
       if (label) label.textContent = 'Copying…'
 
       try {
@@ -341,8 +354,24 @@ const coreStats = stats.slice(0, 6)
           if (label) label.textContent = originalText
         }, 2000)
       } finally {
-        ;(btn as HTMLButtonElement).disabled = false
+        btn.disabled = false
       }
     })
   })
 </script>
+
+<style>
+  .poster-map-marker {
+    width: 8px;
+    height: 8px;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+  .start-marker {
+    background: #10b981;
+  }
+  .end-marker {
+    background: #ef4444;
+  }
+</style>

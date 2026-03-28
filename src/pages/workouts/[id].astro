@@ -232,17 +232,15 @@ const pageUrl = `${Astro.site ?? 'https://yuler.dev'}/workouts/${activity.id}`
           <span>All workouts</span>
         </a>
 
-        <div class="flex items-center">
-          <a
-            href={`https://www.strava.com/activities/${activity.id}`}
-            target="_blank"
-            rel="noreferrer"
-            class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
-          >
-            <span>View on Strava</span>
-            <span>↗</span>
-          </a>
-        </div>
+        <a
+          href={`https://www.strava.com/activities/${activity.id}`}
+          target="_blank"
+          rel="noreferrer"
+          class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
+        >
+          <span>View on Strava</span>
+          <span>↗</span>
+        </a>
       </div>
     </div>
   </div>
