@@ -180,7 +180,21 @@ const pageUrl = `${Astro.site ?? 'https://yuler.dev'}/workouts/${activity.id}`
       </div>
 
       <!-- Map Card -->
-      {hasMap && <MapRoute points={points} duration={activity.moving_time} startTime={activity.start_date_local} />}
+      {hasMap && (
+        <MapRoute points={points} duration={activity.moving_time} startTime={activity.start_date_local}>
+          <ShareWorkout
+            slot="header-actions"
+            activityId={activity.id}
+            activityName={activity.name}
+            sportType={activity.sport_type}
+            sportIcon={sportIcon}
+            date={formatDate(new Date(activity.start_date_local))}
+            stats={stats}
+            points={points}
+            pageUrl={pageUrl}
+          />
+        </MapRoute>
+      )}
 
       <!-- Stats Card -->
       <div class="bg-white border border-gray-200 p-4 sm:p-6 md:p-8 mb-4 relative">
@@ -219,16 +233,6 @@ const pageUrl = `${Astro.site ?? 'https://yuler.dev'}/workouts/${activity.id}`
         </a>
 
         <div class="flex items-center">
-          <ShareWorkout
-            activityId={activity.id}
-            activityName={activity.name}
-            sportType={activity.sport_type}
-            sportIcon={sportIcon}
-            date={formatDate(new Date(activity.start_date_local))}
-            stats={stats}
-            points={points}
-            pageUrl={pageUrl}
-          />
           <a
             href={`https://www.strava.com/activities/${activity.id}`}
             target="_blank"

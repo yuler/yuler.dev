@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro'
 import ChevronRight from '../../components/icons/ChevronRight.astro'
+import ChevronDown from '../../components/icons/ChevronDown.astro'
 import { formatDate } from '../../utils/date'
 import ids from '../../../data/strava/activities/ids.json'
 
@@ -125,17 +126,7 @@ function formatPace(type: string, avgSpeed: number): string {
                   ))
                 }
               </select>
-              <svg
-                class="absolute right-2.5 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-gray-400 pointer-events-none"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
+              <ChevronDown class="absolute right-2.5 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-gray-400 pointer-events-none" />
             </div>
             <span
               id="filter-count"
