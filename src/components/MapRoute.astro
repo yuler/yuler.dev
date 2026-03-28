@@ -1,5 +1,7 @@
 ---
 import 'leaflet/dist/leaflet.css'
+import Play from './icons/Play.astro'
+import Pause from './icons/Pause.astro'
 interface Props {
   points: number[][]
   duration?: number
@@ -21,38 +23,18 @@ const btnId = `play-route-btn-${randomId}`
 
   <div class="p-4 border-b border-gray-100 flex items-center justify-between">
     <h2 class="text-sm font-semibold text-gray-900 font-mono">Route</h2>
-    <button
-      id={btnId}
-      class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none cursor-pointer"
-      aria-label="Play route trace"
-      title="Play route trace"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="play-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg
+    <div class="flex items-center gap-4">
+      <slot name="header-actions" />
+      <button
+        id={btnId}
+        class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none cursor-pointer"
+        aria-label="Play route trace"
+        title="Play route trace"
       >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="pause-icon hidden"
-        ><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg
-      >
-    </button>
+        <Play class="play-icon" />
+        <Pause class="pause-icon hidden" />
+      </button>
+    </div>
   </div>
   <div
     id={mapId}
@@ -70,7 +52,6 @@ const btnId = `play-route-btn-${randomId}`
   import L from 'leaflet'
 
   document.addEventListener('DOMContentLoaded', () => {
-
     document.querySelectorAll('.activity-map-container').forEach(el => {
       const pointsData = el.getAttribute('data-points')
       if (!pointsData) return

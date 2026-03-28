@@ -8,11 +8,7 @@ interface Props {
   subtitle?: string
 }
 
-const {
-  href = 'https://github.com/yuler',
-  title = 'GitHub',
-  subtitle = '@yuler',
-} = Astro.props
+const { href = 'https://github.com/yuler', title = 'GitHub', subtitle = '@yuler' } = Astro.props
 ---
 
 <a
@@ -39,9 +35,7 @@ const {
   </div>
 
   <!-- Arrow -->
-  <div
-    class="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
-  >
+  <div class="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
     <ArrowUpRight class="size-4 text-gray-400" />
   </div>
 </a>
