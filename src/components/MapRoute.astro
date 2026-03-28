@@ -1,4 +1,5 @@
 ---
+import 'leaflet/dist/leaflet.css'
 interface Props {
   points: number[][]
   duration?: number
@@ -66,10 +67,9 @@ const btnId = `play-route-btn-${randomId}`
 
 <script>
   import { addSeconds, format } from 'date-fns'
+  import L from 'leaflet'
 
   document.addEventListener('DOMContentLoaded', () => {
-    const L = (window as any).L
-    if (!L) return
 
     document.querySelectorAll('.activity-map-container').forEach(el => {
       const pointsData = el.getAttribute('data-points')
