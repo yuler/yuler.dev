@@ -5,14 +5,14 @@
   "packageManager": "pnpm@10.28.1",
   "scripts": {
     "dev": "astro dev",
-    "start": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
+    "check": "astro check",
     "astro": "astro",
     "up": "npx taze -I",
     "autocorrect": "autocorrect --fix src/content",
     "create:post": "node scripts/create-post.mjs",
-    "export:pdf": "node scripts/export-post-pdf.mjs",
+    "export:pdf": "npm run build && node scripts/export-post-pdf.mjs",
     "test:strava": "npx tsx --env-file=.env scripts/test-strava.mjs",
     "sync:strava:activities": "npx tsx --env-file=.env scripts/sync-strava-activities.mjs",
     "commit": "opencode run git commit"

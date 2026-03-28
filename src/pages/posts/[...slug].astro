@@ -1,8 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
 import LayoutPost from '../../layouts/LayoutPost.astro'
-import ChevronRight from '../../components/icons/ChevronRight.astro'
-import { formatDate } from '../../utils/date'
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('posts')
