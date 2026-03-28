@@ -4,6 +4,7 @@ import { formatDate } from '../../utils/date'
 import { decodePolyline } from '../../utils/polyline'
 import ids from '../../../data/strava/activities/ids.json'
 import MapRoute from '../../components/MapRoute.astro'
+import ShareWorkout from '../../components/ShareWorkout.astro'
 
 import type { GetStaticPaths } from 'astro'
 
@@ -120,6 +121,9 @@ const stats = [
     : []),
   ...(activity.calories ? [{ label: 'Calories', value: `${activity.calories} kcal` }] : []),
 ]
+
+const sportIcon = sportIcons[activity.sport_type] || '💪'
+const pageUrl = `${Astro.site ?? 'https://yuler.dev'}/workouts/${activity.id}`
 ---
 
 <Layout title={`${activity.name} — Workouts`}>
@@ -156,19 +160,23 @@ const stats = [
           </time>
           <span class="text-gray-300">|</span>
           <span>{activity.sport_type}</span>
-          {activity.device_name && (
-            <>
-              <span class="text-gray-300">|</span>
-              <span class="text-gray-400">{deviceEmoji(activity.device_name)} {activity.device_name}</span>
-            </>
-          )}
+          {
+            activity.device_name && (
+              <>
+                <span class="text-gray-300">|</span>
+                <span class="text-gray-400">
+                  {deviceEmoji(activity.device_name)} {activity.device_name}
+                </span>
+              </>
+            )
+          }
         </div>
 
-        {activity.description && (
-          <p class="text-gray-600 border-l-2 border-gray-300 pl-4 mt-4">
-            {activity.description}
-          </p>
-        )}
+        {
+          activity.description && (
+            <p class="text-gray-600 border-l-2 border-gray-300 pl-4 mt-4">{activity.description}</p>
+          )
+        }
       </div>
 
       <!-- Map Card -->
@@ -181,17 +189,17 @@ const stats = [
         <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
         <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
 
-        <h2 class="text-sm font-semibold text-gray-900 font-mono mb-4 pb-3 border-b border-gray-100">
-          Stats
-        </h2>
+        <h2 class="text-sm font-semibold text-gray-900 font-mono mb-4 pb-3 border-b border-gray-100">Stats</h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {stats.map(stat => (
-            <div class="p-3 bg-gray-50 border border-gray-100">
-              <div class="text-xs text-gray-400 font-mono mb-1">{stat.label}</div>
-              <div class="text-lg font-semibold text-gray-900 font-mono">{stat.value}</div>
-            </div>
-          ))}
+          {
+            stats.map(stat => (
+              <div class="p-3 bg-gray-50 border border-gray-100">
+                <div class="text-xs text-gray-400 font-mono mb-1">{stat.label}</div>
+                <div class="text-lg font-semibold text-gray-900 font-mono">{stat.value}</div>
+              </div>
+            ))
+          }
         </div>
       </div>
 
@@ -202,22 +210,36 @@ const stats = [
         <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
         <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
 
-        <a href="/workouts" class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono">
+        <a
+          href="/workouts"
+          class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
+        >
           <span>←</span>
           <span>All workouts</span>
         </a>
-        <a
-          href={`https://www.strava.com/activities/${activity.id}`}
-          target="_blank"
-          rel="noreferrer"
-          class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
-        >
-          <span>View on Strava</span>
-          <span>↗</span>
-        </a>
+
+        <div class="flex items-center">
+          <ShareWorkout
+            activityId={activity.id}
+            activityName={activity.name}
+            sportType={activity.sport_type}
+            sportIcon={sportIcon}
+            date={formatDate(new Date(activity.start_date_local))}
+            stats={stats}
+            points={points}
+            pageUrl={pageUrl}
+          />
+          <a
+            href={`https://www.strava.com/activities/${activity.id}`}
+            target="_blank"
+            rel="noreferrer"
+            class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"
+          >
+            <span>View on Strava</span>
+            <span>↗</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>
-
-
 </Layout>

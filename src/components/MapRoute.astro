@@ -70,7 +70,6 @@ const btnId = `play-route-btn-${randomId}`
   import L from 'leaflet'
 
   document.addEventListener('DOMContentLoaded', () => {
-
     document.querySelectorAll('.activity-map-container').forEach(el => {
       const pointsData = el.getAttribute('data-points')
       if (!pointsData) return

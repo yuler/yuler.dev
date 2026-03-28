@@ -1,0 +1,389 @@
+---
+interface Stat {
+  label: string
+  value: string
+}
+
+interface Props {
+  activityId: number
+  activityName: string
+  sportType: string
+  sportIcon: string
+  date: string
+  stats: Stat[]
+  points: number[][]
+  pageUrl: string
+}
+
+const {
+  activityId,
+  activityName,
+  sportType,
+  sportIcon,
+  date,
+  stats,
+  points,
+  pageUrl,
+} = Astro.props
+
+const dialogId = `share-dialog-${activityId}`
+const triggerId = `share-trigger-${activityId}`
+const posterWrapperId = `poster-wrapper-${activityId}`
+const posterMapId = `poster-map-${activityId}`
+const qrCodeId = `qr-code-${activityId}`
+const downloadBtnId = `download-btn-${activityId}`
+const closeBtnId = `close-btn-${activityId}`
+
+// Only pass core stats to poster to keep it clean
+const coreStats = stats.slice(0, 6)
+---
+
+<!-- Trigger Button -->
+<button
+  id={triggerId}
+  data-dialog-id={dialogId}
+  class="inline-flex items-center gap-2 px-4 py-2 min-h-11 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono cursor-pointer"
+  aria-label="Share workout"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <circle cx="18" cy="5" r="3"></circle>
+    <circle cx="6" cy="12" r="3"></circle>
+    <circle cx="18" cy="19" r="3"></circle>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+  </svg>
+  <span>Share</span>
+</button>
+
+<!-- Dialog Overlay -->
+<div
+  id={dialogId}
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby={`share-title-${activityId}`}
+  class="fixed inset-0 z-[9999] flex items-center justify-center p-4 hidden"
+>
+  <!-- Backdrop -->
+  <div
+    class="absolute inset-0 bg-black/60 backdrop-blur-sm share-backdrop"
+    data-dialog-close={dialogId}
+  >
+  </div>
+
+  <!-- Dialog Panel -->
+  <div
+    class="relative z-10 bg-white w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col"
+  >
+    <!-- Dialog Header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <h2 id={`share-title-${activityId}`} class="text-sm font-semibold font-mono text-gray-900">
+        Share Workout
+      </h2>
+      <button
+        id={closeBtnId}
+        data-dialog-close={dialogId}
+        class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none cursor-pointer"
+        aria-label="Close share dialog"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Poster Preview Area -->
+    <div class="p-5">
+      <p class="text-xs text-gray-400 font-mono mb-3">Preview</p>
+
+      <!-- The actual poster element that gets captured -->
+      <div
+        id={posterWrapperId}
+        class="poster-wrapper relative bg-gray-950 overflow-hidden"
+        style="width: 100%; aspect-ratio: 3/4;"
+        data-points={JSON.stringify(points)}
+        data-page-url={pageUrl}
+        data-map-id={posterMapId}
+        data-qr-id={qrCodeId}
+      >
+        <!-- Top gradient accent -->
+        <div
+          class="absolute top-0 left-0 right-0 h-1 z-10"
+          style="background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6)"
+        >
+        </div>
+
+        <!-- Map background (renders into this div) -->
+        <div
+          id={posterMapId}
+          class="absolute inset-0 opacity-30"
+          style="z-index: 0;"
+        >
+        </div>
+
+        <!-- Content overlay -->
+        <div class="absolute inset-0 flex flex-col justify-between p-5 z-10">
+          <!-- Top: sport icon + title -->
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-2xl">{sportIcon}</span>
+              <span
+                class="text-[10px] font-mono text-emerald-400 uppercase tracking-widest"
+              >
+                {sportType}
+              </span>
+            </div>
+            <h3 class="text-white font-bold font-mono text-lg leading-tight line-clamp-2">
+              {activityName}
+            </h3>
+            <p class="text-gray-400 font-mono text-[10px] mt-1">{date}</p>
+          </div>
+
+          <!-- Core Stats Grid -->
+          <div class="grid grid-cols-3 gap-2 my-auto">
+            {
+              coreStats.map(stat => (
+                <div class="bg-white/5 border border-white/10 p-2">
+                  <div class="text-[9px] text-gray-400 font-mono mb-0.5 truncate">
+                    {stat.label}
+                  </div>
+                  <div class="text-white font-mono font-semibold text-sm leading-tight">
+                    {stat.value}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+
+          <!-- Bottom: QR code + branding -->
+          <div class="flex items-end justify-between">
+            <div>
+              <p class="text-[9px] font-mono text-gray-500 mb-1">yuler.dev</p>
+              <p class="text-[8px] font-mono text-gray-600">Scan to view activity</p>
+            </div>
+            <canvas
+              id={qrCodeId}
+              width="60"
+              height="60"
+              class="block"
+              style="image-rendering: pixelated;"
+            >
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="px-5 pb-5 flex gap-3">
+      <button
+        id={downloadBtnId}
+        data-wrapper-id={posterWrapperId}
+        data-activity-name={activityName}
+        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white text-sm font-mono hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-label="Download poster"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="download-icon"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span class="btn-label">Download</span>
+      </button>
+
+      <button
+        data-dialog-close={dialogId}
+        class="px-4 py-3 text-sm font-mono text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors cursor-pointer"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { toPng } from 'html-to-image'
+  import QRCode from 'qrcode'
+  import L from 'leaflet'
+
+  // ── Dialog open/close ──────────────────────────────────────────────────────
+
+  function openDialog(dialogId: string) {
+    const dialog = document.getElementById(dialogId)
+    if (!dialog) return
+    dialog.classList.remove('hidden')
+    dialog.classList.add('flex')
+    document.body.style.overflow = 'hidden'
+
+    // Init poster contents when dialog first opens
+    const wrapper = dialog.querySelector('.poster-wrapper') as HTMLElement | null
+    if (wrapper && !wrapper.dataset.initialized) {
+      wrapper.dataset.initialized = 'true'
+      initPoster(wrapper)
+    }
+  }
+
+  function closeDialog(dialogId: string) {
+    const dialog = document.getElementById(dialogId)
+    if (!dialog) return
+    dialog.classList.add('hidden')
+    dialog.classList.remove('flex')
+    document.body.style.overflow = ''
+  }
+
+  // Wire triggers
+  document.querySelectorAll<HTMLButtonElement>('[data-dialog-id]').forEach(btn => {
+    btn.addEventListener('click', () => openDialog(btn.dataset.dialogId!))
+  })
+
+  // Wire close buttons & backdrops
+  document.querySelectorAll<HTMLElement>('[data-dialog-close]').forEach(el => {
+    el.addEventListener('click', () => closeDialog(el.dataset.dialogClose!))
+  })
+
+  // Close on Escape
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll<HTMLElement>('[role="dialog"]:not(.hidden)').forEach(dialog => {
+        closeDialog(dialog.id)
+      })
+    }
+  })
+
+  // ── Poster initializer ─────────────────────────────────────────────────────
+
+  function initPoster(wrapper: HTMLElement) {
+    const mapId = wrapper.dataset.mapId!
+    const qrId = wrapper.dataset.qrId!
+    const pageUrl = wrapper.dataset.pageUrl!
+    const pointsRaw = wrapper.dataset.points!
+
+    // 1. QR Code
+    const qrCanvas = document.getElementById(qrId) as HTMLCanvasElement | null
+    if (qrCanvas) {
+      QRCode.toCanvas(qrCanvas, pageUrl, {
+        width: 60,
+        margin: 1,
+        color: { light: '#00000000', dark: '#ffffffff' },
+        errorCorrectionLevel: 'M',
+      }).catch(console.error)
+    }
+
+    // 2. Route map (dark style, no controls)
+    const mapEl = document.getElementById(mapId)
+    if (!mapEl) return
+
+    let points: number[][] = []
+    try {
+      points = JSON.parse(pointsRaw)
+    } catch {
+      return
+    }
+    if (points.length === 0) return
+
+    const map = L.map(mapId, {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      touchZoom: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      keyboard: false,
+    })
+
+    // Dark monochrome tile layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 20,
+    }).addTo(map)
+
+    const latlngs = points.map((p: number[]) => L.latLng(p[0], p[1]))
+
+    const routeLine = L.polyline(latlngs, {
+      color: '#10b981',
+      weight: 2.5,
+      opacity: 0.9,
+    }).addTo(map)
+
+    // Start marker
+    const startHtml =
+      '<div style="width:8px;height:8px;background:#10b981;border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.4)"></div>'
+    L.marker(latlngs[0], {
+      icon: L.divIcon({ html: startHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
+    }).addTo(map)
+
+    // End marker
+    const endHtml =
+      '<div style="width:8px;height:8px;background:#ef4444;border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.4)"></div>'
+    L.marker(latlngs[latlngs.length - 1], {
+      icon: L.divIcon({ html: endHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
+    }).addTo(map)
+
+    map.fitBounds(routeLine.getBounds(), { padding: [20, 20] })
+  }
+
+  // ── Download ───────────────────────────────────────────────────────────────
+
+  document.querySelectorAll<HTMLButtonElement>('[data-wrapper-id]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const wrapperId = btn.dataset.wrapperId!
+      const activityName = btn.dataset.activityName || 'workout'
+      const wrapper = document.getElementById(wrapperId)
+      if (!wrapper) return
+
+      const label = btn.querySelector('.btn-label')
+      const originalText = label?.textContent ?? 'Download'
+      btn.disabled = true
+      if (label) label.textContent = 'Generating…'
+
+      try {
+        const dataUrl = await toPng(wrapper, {
+          cacheBust: true,
+          pixelRatio: 2,
+          skipFonts: false,
+        })
+
+        const link = document.createElement('a')
+        link.download = `workout-${activityName.replace(/\s+/g, '-').toLowerCase()}.png`
+        link.href = dataUrl
+        link.click()
+      } catch (err) {
+        console.error('Failed to generate poster image:', err)
+      } finally {
+        btn.disabled = false
+        if (label) label.textContent = originalText
+      }
+    })
+  })
+</script>

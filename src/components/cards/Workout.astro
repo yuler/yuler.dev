@@ -147,10 +147,7 @@ const weeklyStats = weeks.map(([start, end], index) => {
                 />
               ) : (
                 <div
-                  class:list={[
-                    'size-4 bg-gray-100',
-                    { 'ring-1 ring-black/50 dark:ring-white/50': week.isCurrentWeek },
-                  ]}
+                  class:list={['size-4 bg-gray-100', { 'ring-1 ring-black/50 dark:ring-white/50': week.isCurrentWeek }]}
                 />
               )}
               {/* Tooltip */}

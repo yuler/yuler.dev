@@ -35,21 +35,10 @@ const posts = (
             <div>
               <h3 class="font-medium text-gray-900 group-hover:text-gray-700">
                 {post.data.title}
-                {post.data.draft && (
-                  <span class="ml-2 px-1.5 py-0.5 text-xs bg-gray-200 text-gray-600">
-                    Draft
-                  </span>
-                )}
-                {post.data.wip && (
-                  <span class="ml-2 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700">
-                    WIP
-                  </span>
-                )}
+                {post.data.draft && <span class="ml-2 px-1.5 py-0.5 text-xs bg-gray-200 text-gray-600">Draft</span>}
+                {post.data.wip && <span class="ml-2 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700">WIP</span>}
               </h3>
-              <time
-                class="text-xs text-gray-500 font-mono"
-                datetime={post.data.date.toISOString()}
-              >
+              <time class="text-xs text-gray-500 font-mono" datetime={post.data.date.toISOString()}>
                 {formatDate(post.data.date)}
               </time>
             </div>
