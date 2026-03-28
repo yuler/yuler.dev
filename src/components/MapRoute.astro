@@ -44,7 +44,7 @@ const btnId = `play-route-btn-${randomId}`
   import { addSeconds, format } from 'date-fns'
 
   document.addEventListener('DOMContentLoaded', () => {
-    const L = window.L
+    const L = (window as any).L
     if (!L) return
 
     document.querySelectorAll('.activity-map-container').forEach((el) => {
@@ -66,7 +66,7 @@ const btnId = `play-route-btn-${randomId}`
       const mapId = el.id
       const btnId = el.getAttribute('data-btn-id')
 
-      const latlngs = points.map(p => L.latLng(p[0], p[1]))
+      const latlngs = points.map((p: any) => L.latLng(p[0], p[1]))
       const map = L.map(mapId, { zoomControl: true, attributionControl: true })
       
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -88,14 +88,14 @@ const btnId = `play-route-btn-${randomId}`
 
       // --- Helpers ---
 
-      function addMarker(map, position, color) {
+      function addMarker(map: any, position: any, color: any) {
         const html = `<div style="width:0.75rem;height:0.75rem;background:${color};border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>`
         L.marker(position, {
           icon: L.divIcon({ html, className: '', iconSize: [12, 12], iconAnchor: [6, 6] })
         }).addTo(map)
       }
 
-      function setupMotionPlayer(map, pathPoints, actionBtnId, motionDuration, initialTimeStr) {
+      function setupMotionPlayer(map: any, pathPoints: any, actionBtnId: any, motionDuration: any, initialTimeStr: any) {
         const motionBtn = document.getElementById(actionBtnId)
         if (!motionBtn) return
 
@@ -104,10 +104,10 @@ const btnId = `play-route-btn-${randomId}`
         
         let isPlaying = false
         let currentProgress = 0
-        let lastTime = null
-        let animationFrameId = null
-        let motionMarker = null
-        let motionPolyline = null
+        let lastTime: any = null
+        let animationFrameId: any = null
+        let motionMarker: any = null
+        let motionPolyline: any = null
         
         const DURATION_MS = 8000
         let totalDist = 0
@@ -117,7 +117,7 @@ const btnId = `play-route-btn-${randomId}`
           dists.push(totalDist)
         }
 
-        function formatTime(progressSeconds) {
+        function formatTime(progressSeconds: number) {
           if (initialTimeStr) {
             const dateObj = new Date(initialTimeStr)
             const currentObj = addSeconds(dateObj, progressSeconds)
@@ -170,7 +170,7 @@ const btnId = `play-route-btn-${randomId}`
           }).addTo(map)
         }
 
-        function getInterpolatedPoint(targetDist) {
+        function getInterpolatedPoint(targetDist: number) {
           let i = 1
           while (i < dists.length && dists[i] < targetDist) i++
           
@@ -187,7 +187,7 @@ const btnId = `play-route-btn-${randomId}`
           return { point: [lat, lng], index: i }
         }
 
-        function animate(time) {
+        function animate(time: number) {
           const delta = time - lastTime
           lastTime = time
           currentProgress += delta / DURATION_MS
