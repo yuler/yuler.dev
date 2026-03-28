@@ -11,6 +11,10 @@ Personal site at https://yuler.dev — Astro 5, MDX, Tailwind CSS 4, TypeScript.
 - Use `pnpm export:pdf` to export PDF for a specific post.
 - Run `pnpm sync:strava:activities` to sync Strava activities to local data.
 
+## Icons
+
+Every icons should a simple astro component locate in [`src/components/icons`](./src/components/)
+
 ## Git Commit
 
 Every commit needs to invoke the `/git-commit` skill.
