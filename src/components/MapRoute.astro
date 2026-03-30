@@ -56,8 +56,14 @@ const btnId = `play-route-btn-${randomId}`
       const pointsData = el.getAttribute('data-points')
       if (!pointsData) return
 
-      const points = JSON.parse(pointsData)
-      if (points.length === 0) return
+      let points: number[][]
+      try {
+        points = JSON.parse(pointsData)
+      } catch (e) {
+        console.error('Failed to parse route points:', e)
+        return
+      }
+      if (!Array.isArray(points) || points.length === 0) return
 
       const duration = parseInt(el.getAttribute('data-duration') || '0', 10)
       let startTimeStr = el.getAttribute('data-start-time') || ''
