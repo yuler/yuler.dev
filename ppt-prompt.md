@@ -7,9 +7,9 @@
 3. `content` 中的链接都要保留为可点击文本；代码块按原样保留。
 4. 如果 `images: none`，请自动用图标/流程图/信息图补位。
 5. 所有本地图片路径已替换为 `https://yuler.dev/vibe-coding/...` 绝对地址。
-6. 整体风格： 简单大气，需要严格遵守 id5-company-template.pptx, 文件模板， 左上角都添加 id5-logo.png 文件
+6. 整体风格： 简单大气，需要严格遵守 id5-company-template.pptx, 文件模板，背景白色
 
-P1: Vibe-coding
+## P1: Vibe-coding
 text: 内容要点：“**我有一个 idea，就差一个程序员了。**”这句话曾在网上很流行 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   “**我有一个 idea，就差一个程序员了。**”这句话曾在网上很流行
@@ -19,7 +19,7 @@ images: none
 
 ---
 
-P2: What's vibe-coding
+## P2: What's vibe-coding
 text: 内容要点：什么是 vibe coding? 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   什么是 vibe coding?
@@ -27,7 +27,7 @@ images: none
 
 ---
 
-P3: 分隔页
+## P3: 分隔页
 text: 内容要点：我的理解： 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   我的理解：
@@ -37,7 +37,7 @@ images: none
 
 ---
 
-P4: 分隔页
+## P4: 分隔页
 text: 内容要点：**Andrej Karpathy**（安德烈·卡帕斯）：AI 领域著名专家，被业界昵称为 "KP"，曾任 Tesla AI 总监，OpenAI 创始成员。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   **Andrej Karpathy**（安德烈·卡帕斯）：AI 领域著名专家，被业界昵称为 "KP"，曾任 Tesla AI 总监，OpenAI 创始成员。
@@ -49,7 +49,7 @@ images: https://yuler.dev/vibe-coding/vibe-code-karpathy-tweet.png
 
 ---
 
-P5: 分隔页
+## P5: 分隔页
 text: 内容要点：维基百科解释 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   维基百科解释
@@ -59,7 +59,7 @@ images: none
 
 ---
 
-P6: 分隔页
+## P6: 分隔页
 text: 内容要点：承接上下文的过渡页。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   （本页为分隔/过渡页）
@@ -67,7 +67,7 @@ images: none
 
 ---
 
-P7: Who's vibe-coding?
+## P7: Who's vibe-coding?
 text: 内容要点：看看下面这张图 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   看看下面这张图
@@ -77,7 +77,7 @@ images: https://yuler.dev/vibe-coding/who-is-vibe-coding.png
 
 ---
 
-P8: 分隔页
+## P8: 分隔页
 text: 内容要点：**Linus Torvalds**：Linux 之父，Git 的作者 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   **Linus Torvalds**：Linux 之父，Git 的作者
@@ -89,7 +89,7 @@ images: https://yuler.dev/vibe-coding/vibe-code-linus-repo.jpeg
 
 ---
 
-P9: 分隔页
+## P9: 分隔页
 text: 内容要点：**Tobi**：Shopify 联合创始人兼 CEO 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   **Tobi**：Shopify 联合创始人兼 CEO
@@ -101,7 +101,7 @@ images: https://yuler.dev/vibe-coding/vibe-code-tobi-tweet.png
 
 ---
 
-P10: 分隔页
+## P10: 分隔页
 text: 内容要点：**DHH**：Ruby on Rails 之父 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   **DHH**：Ruby on Rails 之父
@@ -113,7 +113,7 @@ images: https://yuler.dev/vibe-coding/vibe-code-ddh-tweet.png
 
 ---
 
-P11: 分隔页
+## P11: 分隔页
 text: 内容要点：**Ryan Dahl**：Node.js 和 Deno 的作者 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   **Ryan Dahl**：Node.js 和 Deno 的作者
@@ -125,7 +125,7 @@ images: https://yuler.dev/vibe-coding/vibe-code-ry-tweet.png
 
 ---
 
-P12: 分隔页
+## P12: 分隔页
 text: 内容要点：承接上下文的过渡页。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   （本页为分隔/过渡页）
@@ -133,7 +133,7 @@ images: none
 
 ---
 
-P13: Awesome vibe-coding projects
+## P13: Awesome vibe-coding projects
 text: 内容要点：[BettaFish](https://github.com/666ghj/BettaFish) 和 [MiroFish](https://github.com/666ghj/MiroFish)： 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   [BettaFish](https://github.com/666ghj/BettaFish) 和 [MiroFish](https://github.com/666ghj/MiroFish)：
@@ -145,7 +145,7 @@ images: none
 
 ---
 
-P14: 分隔页
+## P14: 分隔页
 text: 内容要点：[OpenClaw](https://github.com/openclaw/openclaw) 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   [OpenClaw](https://github.com/openclaw/openclaw)
@@ -161,7 +161,7 @@ images: https://api.star-history.com/svg?repos=openclaw/openclaw&type=date&legen
 
 ---
 
-P15: 分隔页
+## P15: 分隔页
 text: 内容要点：[ryOS](https://github.com/ryokun6/ryos) 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   [ryOS](https://github.com/ryokun6/ryos)
@@ -173,7 +173,7 @@ images: none
 
 ---
 
-P16: 分隔页
+## P16: 分隔页
 text: 内容要点：再看看 GitHub 热门榜单：https://github.com/trending?since=monthly 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   再看看 GitHub 热门榜单：https://github.com/trending?since=monthly
@@ -183,7 +183,7 @@ images: none
 
 ---
 
-P17: Vibe-coding tools
+## P17: Vibe-coding tools
 text: 内容要点：IDE Extensions, AI-Native IDEs, Terminals, Online SaaS, Others 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   IDE Extensions, AI-Native IDEs, Terminals, Online SaaS, Others
@@ -191,7 +191,7 @@ images: none
 
 ---
 
-P18: 分隔页
+## P18: 分隔页
 text: 内容要点：承接上下文的过渡页。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   （本页为分隔/过渡页）
@@ -199,7 +199,7 @@ images: none
 
 ---
 
-P19: IDE Extensions
+## P19: IDE Extensions
 text: 内容要点：- **GitHub Copilot** (VS Code, JetBrains) - https://github.com/features/copilot：GitHub 官方出的 AI 编程助手，支持补全、重构和注释生成。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   - **GitHub Copilot** (VS Code, JetBrains) - https://github.com/features/copilot：GitHub 官方出的 AI 编程助手，支持补全、重构和注释生成。
@@ -209,7 +209,7 @@ images: none
 
 ---
 
-P20: 分隔页
+## P20: 分隔页
 text: 内容要点：承接上下文的过渡页。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   （本页为分隔/过渡页）
@@ -217,7 +217,7 @@ images: none
 
 ---
 
-P21: AI-Native IDEs
+## P21: AI-Native IDEs
 text: 内容要点：- [Cursor](https://cursor.com/)：基于 VS Code 的 AI 原生 IDE，支持多模型、Agent 模式和项目级重构 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   ![vibe coding IDEs](https://yuler.dev/vibe-coding/vibe-coding-ides.png)
@@ -231,7 +231,7 @@ images: https://yuler.dev/vibe-coding/vibe-coding-ides.png
 
 ---
 
-P22: 分隔页
+## P22: 分隔页
 text: 内容要点：承接上下文的过渡页。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   （本页为分隔/过渡页）
@@ -239,7 +239,7 @@ images: none
 
 ---
 
-P23: CLI / Terminals GUI
+## P23: CLI / Terminals GUI
 text: 内容要点：- [OpenCode](https://open-code.ai/)：面向多模型、多 Agent 的终端 IDE，支持自动运行命令、改代码和管理会话。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   ![terminal CLIs](https://yuler.dev/vibe-coding/terminal-clis.png)
@@ -257,7 +257,7 @@ images: https://yuler.dev/vibe-coding/terminal-clis.png
 
 ---
 
-P24: 分隔页
+## P24: 分隔页
 text: 内容要点：承接上下文的过渡页。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   （本页为分隔/过渡页）
@@ -265,7 +265,7 @@ images: none
 
 ---
 
-P25: Online SaaS
+## P25: Online SaaS
 text: 内容要点：- [v0.dev](https://v0.dev)：Vercel 推出的文本到前端工具，在浏览器里用自然语言直接生成 React/Next.js 界面。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   - [v0.dev](https://v0.dev)：Vercel 推出的文本到前端工具，在浏览器里用自然语言直接生成 React/Next.js 界面。
@@ -278,7 +278,7 @@ images: none
 
 ---
 
-P26: 分隔页
+## P26: 分隔页
 text: 内容要点：承接上下文的过渡页。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   （本页为分隔/过渡页）
@@ -286,7 +286,7 @@ images: none
 
 ---
 
-P27: Others
+## P27: Others
 text: 内容要点：- [Conductor](https://www.conductor.build/)：在本地 Mac 上跑一支 AI 编码 Agent 团队，自动帮你在多个工作区并行改代码、跑测试和提 PR。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   - [Conductor](https://www.conductor.build/)：在本地 Mac 上跑一支 AI 编码 Agent 团队，自动帮你在多个工作区并行改代码、跑测试和提 PR。
@@ -295,7 +295,7 @@ images: none
 
 ---
 
-P28: Code review by AI
+## P28: Code review by AI
 text: 内容要点：集成到 GitHub PR 用 AI 做 code review 的方案： 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   集成到 GitHub PR 用 AI 做 code review 的方案：
@@ -307,7 +307,7 @@ images: none
 
 ---
 
-P29: AGENTS.md
+## P29: AGENTS.md
 text: 内容要点：[AGENTS.md](https://agents.md/) 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   [AGENTS.md](https://agents.md/)
@@ -325,7 +325,7 @@ images: none
 
 ---
 
-P30: Spec-Driven Development
+## P30: Spec-Driven Development
 text: 内容要点：SDD: Spec-Driven Development, 规格驱动开发 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   SDD: Spec-Driven Development, 规格驱动开发
@@ -333,7 +333,7 @@ images: none
 
 ---
 
-P31: 分隔页
+## P31: 分隔页
 text: 内容要点：[Superpowers](https://github.com/obra/superpowers) 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   [Superpowers](https://github.com/obra/superpowers)
@@ -348,7 +348,7 @@ images: none
 
 ---
 
-P32: 分隔页
+## P32: 分隔页
 text: 内容要点：[GitHub Spec Kit](https://github.com/github/spec-kit) 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   [GitHub Spec Kit](https://github.com/github/spec-kit)
@@ -358,7 +358,7 @@ images: none
 
 ---
 
-P33: 分隔页
+## P33: 分隔页
 text: 内容要点：**核心思想可以概括成一条闭环：** 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   **核心思想可以概括成一条闭环：** 
@@ -373,7 +373,7 @@ images: none
 
 ---
 
-P34: 分隔页
+## P34: 分隔页
 text: 内容要点：承接上下文的过渡页。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   （本页为分隔/过渡页）
@@ -381,7 +381,7 @@ images: none
 
 ---
 
-P35: Ralph Loop
+## P35: Ralph Loop
 text: 内容要点：前一段时间在 AI 辅助编程圈里很火的一种做法，名字来自《辛普森一家》里的 **Ralph Wiggum(拉尔夫·韦根)**。创造者 [Geoffrey Huntley](https://ghuntley.com/ralph/) 用一句话概括：**「Ralph 就是一个 Bash 循环。」** 最简形式就是反复把同一份提示交给 Agent，让它在仓库里推进任务，直到满足退出条件（例如测试全绿、验收清单完成或达到最大轮次）： 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   前一段时间在 AI 辅助编程圈里很火的一种做法，名字来自《辛普森一家》里的 **Ralph Wiggum(拉尔夫·韦根)**。创造者 [Geoffrey Huntley](https://ghuntley.com/ralph/) 用一句话概括：**「Ralph 就是一个 Bash 循环。」** 最简形式就是反复把同一份提示交给 Agent，让它在仓库里推进任务，直到满足退出条件（例如测试全绿、验收清单完成或达到最大轮次）：
@@ -406,7 +406,7 @@ images: https://raw.githubusercontent.com/snarktank/ralph/main/ralph-flowchart.p
 
 ---
 
-P36: 分隔页
+## P36: 分隔页
 text: 内容要点：[karpathy/autoresearch](https://github.com/karpathy/autoresearch) 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   [karpathy/autoresearch](https://github.com/karpathy/autoresearch)
@@ -420,7 +420,7 @@ images: none
 
 ---
 
-P37: MCP & SKILLS
+## P37: MCP & SKILLS
 text: 内容要点：[MCP](https://modelcontextprotocol.io/) & [SKILLS](https://agentskills.io/) 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   [MCP](https://modelcontextprotocol.io/) & [SKILLS](https://agentskills.io/)
@@ -430,7 +430,7 @@ images: none
 
 ---
 
-P38: SKILLS
+## P38: SKILLS
 text: 内容要点：为智能体提供新能力与专业知识的一种简单、开放的格式。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   为智能体提供新能力与专业知识的一种简单、开放的格式。
@@ -438,7 +438,7 @@ images: none
 
 ---
 
-P39: 分隔页
+## P39: 分隔页
 text: 内容要点：**SKILL 的文件夹结构** 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   **SKILL 的文件夹结构**
@@ -470,7 +470,7 @@ images: none
 
 ---
 
-P40: 分隔页
+## P40: 分隔页
 text: 内容要点：**SKILL 是如何工作的？** 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   **SKILL 是如何工作的？**
@@ -498,7 +498,7 @@ images: none
 
 ---
 
-P41: 分隔页
+## P41: 分隔页
 text: 内容要点：**社区更看好 SKILLS** 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   **社区更看好 SKILLS**
@@ -514,7 +514,7 @@ images: https://yuler.dev/vibe-coding/mpc-yc-ceo-tweet.png, https://yuler.dev/vi
 
 ---
 
-P42: 分隔页
+## P42: 分隔页
 text: 内容要点：现在大部分软件、框架和 SaaS 服务也会提供 MCP，或支持 skills，比如 Cursor、Claude、Gemini 等。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   现在大部分软件、框架和 SaaS 服务也会提供 MCP，或支持 skills，比如 Cursor、Claude、Gemini 等。
@@ -522,7 +522,7 @@ images: none
 
 ---
 
-P43: 通过抓包查看 claude 发送的内容，来看 SKILL 是如何工作的
+## P43: 通过抓包查看 claude 发送的内容，来看 SKILL 是如何工作的
 text: 内容要点：我们使用 Charles 来抓包 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   我们使用 Charles 来抓包
@@ -570,7 +570,7 @@ images: none
 
 ---
 
-P44: 分隔页
+## P44: 分隔页
 text: 内容要点：<system-reminder> 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   ```text
@@ -599,7 +599,7 @@ images: none
 
 ---
 
-P45: 分隔页
+## P45: 分隔页
 text: 内容要点：<system-reminder> 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   ```text
@@ -630,7 +630,7 @@ images: none
 
 ---
 
-P46: CLI skills
+## P46: CLI skills
 text: 内容要点：跨平台工具：skills 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   跨平台工具：skills
@@ -645,7 +645,7 @@ images: none
 
 ---
 
-P47: Popular skills
+## P47: Popular skills
 text: 内容要点：可以去 [skills.sh](https://skills.sh/) 或者 [GitHub](https://github.com/search?q=topic%3Askill+topic%3Askills&type=repositories&s=stars&o=desc) 上搜索一些流行的 skills 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   可以去 [skills.sh](https://skills.sh/) 或者 [GitHub](https://github.com/search?q=topic%3Askill+topic%3Askills&type=repositories&s=stars&o=desc) 上搜索一些流行的 skills
@@ -664,7 +664,7 @@ images: none
 
 ---
 
-P48: Write your own skills
+## P48: Write your own skills
 text: 内容要点：- https://github.com/yuler/skills 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   - https://github.com/yuler/skills
@@ -685,7 +685,7 @@ images: https://yuler.dev/vibe-coding/ai-commit.png, https://yuler.dev/vibe-codi
 
 ---
 
-P49: Git worktree
+## P49: Git worktree
 text: 内容要点：在日常开发中，如果你会同时用到多种工具、多个 AI Agent，最好避免大家「抢同一组文件」导致冲突。这时候就可以善用 `git worktree`：为同一个仓库快速创建多个独立工作目录，每个 worktree 绑定一个分支，各干各的。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   在日常开发中，如果你会同时用到多种工具、多个 AI Agent，最好避免大家「抢同一组文件」导致冲突。这时候就可以善用 `git worktree`：为同一个仓库快速创建多个独立工作目录，每个 worktree 绑定一个分支，各干各的。
@@ -706,7 +706,7 @@ images: none
 
 ---
 
-P50: Voice Inputs
+## P50: Voice Inputs
 text: 内容要点：通过语音输入，打字速度可以从每分钟 45 字提升到 220 字 (根据统计)，大幅加快了 vibe-coding 的效率 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   通过语音输入，打字速度可以从每分钟 45 字提升到 220 字 (根据统计)，大幅加快了 vibe-coding 的效率
@@ -718,7 +718,7 @@ images: none
 
 ---
 
-P51: Show time: vibe-coding demo
+## P51: Show time: vibe-coding demo
 text: 内容要点：来，咱们先现场演示一个简单的 **vibe-coding** 例子 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   来，咱们先现场演示一个简单的 **vibe-coding** 例子
@@ -816,7 +816,7 @@ images: none
 
 ---
 
-P52: 分隔页
+## P52: 分隔页
 text: 内容要点：承接上下文的过渡页。 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   （本页为分隔/过渡页）
@@ -824,7 +824,7 @@ images: none
 
 ---
 
-P53: 番外：OpenClaw
+## P53: 番外：OpenClaw
 text: 内容要点：首先这个项目就是 Vibe-Coding 出来的，刚刚上面也提到了 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   首先这个项目就是 Vibe-Coding 出来的，刚刚上面也提到了
@@ -838,7 +838,7 @@ images: none
 
 ---
 
-P54: OpenClaw is risk
+## P54: OpenClaw is risk
 text: 内容要点：设计一个简单的 SKILL 攻击 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   设计一个简单的 SKILL 攻击
@@ -878,7 +878,7 @@ images: https://yuler.dev/vibe-coding/skills-attack-01.png, https://yuler.dev/vi
 
 ---
 
-P55: OpenClaw alternatives
+## P55: OpenClaw alternatives
 text: 内容要点：- [nanoclaw](https://github.com/qwibitai/nanoclaw) Karpathy [推荐](https://x.com/karpathy/status/2024997757757653224) 因为它的核心引擎有~4000 行代码（这既符合我和 AI 代理的思维 生成要求：围绕本页 content 生成 1 页可讲解的演示页，提炼 3-6 个要点。
 content: |
   - [nanoclaw](https://github.com/qwibitai/nanoclaw) Karpathy [推荐](https://x.com/karpathy/status/2024997757757653224) 因为它的核心引擎有~4000 行代码（这既符合我和 AI 代理的思维
