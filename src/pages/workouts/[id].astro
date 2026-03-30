@@ -154,18 +154,19 @@ const pageUrl = `${Astro.site ?? 'https://yuler.dev'}/workouts/${activity.id}`
           </div>
         </div>
 
-        <div class="flex items-center gap-3 text-xs text-gray-500 font-mono mt-1">
-          <time datetime={activity.start_date_local}>
+        <div class="flex items-center gap-2 text-xs text-gray-500 font-mono mt-1 min-w-0 overflow-hidden whitespace-nowrap">
+          <time datetime={activity.start_date_local} class="shrink-0 whitespace-nowrap">
             {formatDate(new Date(activity.start_date_local))}
           </time>
-          <span class="text-gray-300">|</span>
-          <span>{activity.sport_type}</span>
+          <span class="text-gray-300 shrink-0">|</span>
+          <span class="shrink-0 whitespace-nowrap">{activity.sport_type}</span>
           {
             activity.device_name && (
               <>
-                <span class="text-gray-300">|</span>
-                <span class="text-gray-400">
-                  {deviceEmoji(activity.device_name)} {activity.device_name}
+                <span class="text-gray-300 shrink-0">|</span>
+                <span class="inline-flex items-center gap-1 min-w-0 overflow-hidden text-gray-400">
+                  <span class="shrink-0">{deviceEmoji(activity.device_name)}</span>
+                  <span class="truncate">{activity.device_name}</span>
                 </span>
               </>
             )
