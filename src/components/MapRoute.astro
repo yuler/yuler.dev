@@ -2,6 +2,7 @@
 import 'leaflet/dist/leaflet.css'
 import Play from './icons/Play.astro'
 import Pause from './icons/Pause.astro'
+import LocateFixed from './icons/LocateFixed.astro'
 interface Props {
   points: number[][]
   duration?: number
@@ -13,6 +14,7 @@ const { points, duration = 0, startTime = '' } = Astro.props
 const randomId = Math.random().toString(36).slice(2, 9)
 const mapId = `activity-map-${randomId}`
 const btnId = `play-route-btn-${randomId}`
+const resetBtnId = `reset-map-btn-${randomId}`
 ---
 
 <div class="bg-white border border-gray-200 mb-4 relative">
@@ -36,14 +38,25 @@ const btnId = `play-route-btn-${randomId}`
       </button>
     </div>
   </div>
-  <div
-    id={mapId}
-    class="h-62.5 sm:h-75 md:h-100 w-full activity-map-container"
-    data-points={JSON.stringify(points)}
-    data-duration={duration}
-    data-start-time={startTime}
-    data-btn-id={btnId}
-  >
+  <div class="relative">
+    <div
+      id={mapId}
+      class="h-62.5 sm:h-75 md:h-100 w-full activity-map-container"
+      data-points={JSON.stringify(points)}
+      data-duration={duration}
+      data-start-time={startTime}
+      data-btn-id={btnId}
+      data-reset-btn-id={resetBtnId}
+    >
+    </div>
+    <button
+      id={resetBtnId}
+      class="absolute bottom-3 right-3 z-1000 bg-white/95 text-gray-600 hover:text-gray-900 hover:bg-white border border-gray-200 rounded-md p-2.5 shadow-sm transition-colors focus:outline-none cursor-pointer"
+      aria-label="Reset map center"
+      title="Reset map center"
+    >
+      <LocateFixed class="w-5 h-5" />
+    </button>
   </div>
 </div>
 
@@ -76,6 +89,7 @@ const btnId = `play-route-btn-${randomId}`
 
       const mapId = el.id
       const btnId = el.getAttribute('data-btn-id')
+      const resetBtnId = el.getAttribute('data-reset-btn-id')
 
       const latlngs = points.map((p: any) => L.latLng(p[0], p[1]))
       const map = L.map(mapId, { zoomControl: true, attributionControl: true })
@@ -99,6 +113,7 @@ const btnId = `play-route-btn-${randomId}`
       map.fitBounds(routeLine.getBounds(), { padding: [30, 30] })
 
       setupMotionPlayer(map, latlngs, btnId, duration, startTimeStr)
+      setupResetCenter(map, routeLine, resetBtnId)
 
       // --- Helpers ---
 
@@ -245,6 +260,17 @@ const btnId = `play-route-btn-${randomId}`
         }
 
         motionBtn.addEventListener('click', togglePlayPause)
+      }
+
+      function setupResetCenter(map: any, route: any, resetActionBtnId: string | null) {
+        if (!resetActionBtnId) return
+
+        const resetBtn = document.getElementById(resetActionBtnId)
+        if (!resetBtn) return
+
+        resetBtn.addEventListener('click', () => {
+          map.fitBounds(route.getBounds(), { padding: [30, 30] })
+        })
       }
     })
   })
