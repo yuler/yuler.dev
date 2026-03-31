@@ -53,6 +53,9 @@ import Close from './icons/Close.astro'
   const CLOSE_BTN_ID = 'image-preview-close-btn'
 
   const SELECTOR = 'article.prose img'
+  const CLOSE_SELECTOR = '[data-image-preview-close]'
+
+  let lastFocusedElement: HTMLElement | null = null
 
   function getDialog(): HTMLElement | null {
     return document.getElementById(DIALOG_ID)
@@ -64,6 +67,8 @@ import Close from './icons/Close.astro'
     const caption = document.getElementById(CAPTION_ID)
     const closeBtn = document.getElementById(CLOSE_BTN_ID) as HTMLButtonElement | null
     if (!dialog || !full || !caption) return
+
+    lastFocusedElement = document.activeElement as HTMLElement | null
 
     const src = source.currentSrc || source.src
     full.src = src
@@ -93,14 +98,48 @@ import Close from './icons/Close.astro'
     document.body.classList.remove('overflow-hidden')
     full.removeAttribute('src')
     full.alt = ''
+
+    // Restore keyboard focus to where the user came from.
+    lastFocusedElement?.focus()
+    lastFocusedElement = null
   }
 
   function onKeydown(e: KeyboardEvent) {
-    if (e.key !== 'Escape') return
     const dialog = getDialog()
     if (!dialog || dialog.classList.contains('hidden')) return
-    e.preventDefault()
-    closePreview()
+
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      closePreview()
+      return
+    }
+
+    // Focus trap: keep Tab navigation inside the dialog.
+    if (e.key === 'Tab') {
+      const focusables = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1 && el.offsetParent !== null)
+
+      // If we can't find focusable elements, avoid breaking tabbing behavior.
+      if (focusables.length === 0) return
+
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          last.focus()
+          e.preventDefault()
+        }
+      } else {
+        if (document.activeElement === last) {
+          first.focus()
+          e.preventDefault()
+        }
+      }
+    }
   }
 
   function enhanceImages(root: ParentNode = document) {
@@ -137,8 +176,13 @@ import Close from './icons/Close.astro'
     })
   }
 
-  document.querySelectorAll<HTMLElement>('[data-image-preview-close]').forEach(el => {
-    el.addEventListener('click', () => closePreview())
+  document.addEventListener('click', e => {
+    const target = e.target as HTMLElement | null
+    if (!target) return
+
+    const dialog = getDialog()
+    if (!dialog || dialog.classList.contains('hidden')) return
+    if (target.closest(CLOSE_SELECTOR)) closePreview()
   })
 
   window.addEventListener('keydown', onKeydown)
