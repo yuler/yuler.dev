@@ -1,0 +1,151 @@
+---
+import Close from './icons/Close.astro'
+---
+
+<div
+  id="image-preview-dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Image preview"
+  class="fixed inset-0 z-[9998] hidden flex-col items-center justify-center p-4 sm:p-8"
+>
+  <div
+    class="absolute inset-0 bg-black/75 backdrop-blur-sm"
+    data-image-preview-close
+    aria-hidden="true"
+  >
+  </div>
+
+  <div
+    class="relative z-10 flex max-h-[min(92vh,56rem)] w-full max-w-[min(96vw,72rem)] flex-col bg-white shadow-2xl ring-1 ring-gray-200"
+  >
+    <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-3">
+      <p
+        id="image-preview-caption"
+        class="min-w-0 flex-1 truncate text-sm font-mono text-gray-600"
+      >
+      </p>
+      <button
+        type="button"
+        id="image-preview-close-btn"
+        class="shrink-0 text-gray-400 transition-colors hover:text-gray-900 focus:outline-none cursor-pointer"
+        aria-label="Close image preview"
+        data-image-preview-close
+      >
+        <Close />
+      </button>
+    </div>
+    <div class="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-gray-100 p-3 sm:p-6">
+      <img
+        id="image-preview-img"
+        class="max-h-[min(85vh,52rem)] w-auto max-w-full object-contain"
+        alt=""
+        decoding="async"
+      />
+    </div>
+  </div>
+</div>
+
+<script>
+  const DIALOG_ID = 'image-preview-dialog'
+  const IMG_ID = 'image-preview-img'
+  const CAPTION_ID = 'image-preview-caption'
+  const CLOSE_BTN_ID = 'image-preview-close-btn'
+
+  const SELECTOR = 'article.prose img'
+
+  function getDialog(): HTMLElement | null {
+    return document.getElementById(DIALOG_ID)
+  }
+
+  function openPreview(source: HTMLImageElement) {
+    const dialog = getDialog()
+    const full = document.getElementById(IMG_ID) as HTMLImageElement | null
+    const caption = document.getElementById(CAPTION_ID)
+    const closeBtn = document.getElementById(CLOSE_BTN_ID) as HTMLButtonElement | null
+    if (!dialog || !full || !caption) return
+
+    const src = source.currentSrc || source.src
+    full.src = src
+    full.alt = source.alt || ''
+    const text = (source.alt || '').trim()
+    if (text) {
+      caption.textContent = text
+      caption.classList.remove('text-gray-400', 'italic')
+    } else {
+      caption.textContent = 'No description'
+      caption.classList.add('text-gray-400', 'italic')
+    }
+
+    dialog.classList.remove('hidden')
+    dialog.classList.add('flex')
+    document.body.classList.add('overflow-hidden')
+    closeBtn?.focus()
+  }
+
+  function closePreview() {
+    const dialog = getDialog()
+    const full = document.getElementById(IMG_ID) as HTMLImageElement | null
+    if (!dialog || !full) return
+
+    dialog.classList.add('hidden')
+    dialog.classList.remove('flex')
+    document.body.classList.remove('overflow-hidden')
+    full.removeAttribute('src')
+    full.alt = ''
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key !== 'Escape') return
+    const dialog = getDialog()
+    if (!dialog || dialog.classList.contains('hidden')) return
+    e.preventDefault()
+    closePreview()
+  }
+
+  function enhanceImages(root: ParentNode = document) {
+    root.querySelectorAll<HTMLImageElement>(SELECTOR).forEach(img => {
+      if (img.closest(`#${DIALOG_ID}`)) return
+      if (img.dataset.previewBound === 'true') return
+      img.dataset.previewBound = 'true'
+
+      img.classList.add(
+        'cursor-zoom-in',
+        'transition-transform',
+        'duration-200',
+        'hover:brightness-[0.98]',
+      )
+
+      const open = (e: Event) => {
+        e.preventDefault()
+        e.stopPropagation()
+        openPreview(img)
+      }
+
+      img.addEventListener('click', open)
+      img.tabIndex = 0
+      img.setAttribute('role', 'button')
+      const label = img.alt?.trim() ? `Enlarge image: ${img.alt}` : 'Enlarge image'
+      img.setAttribute('aria-label', label)
+
+      img.addEventListener('keydown', ke => {
+        if (ke.key === 'Enter' || ke.key === ' ') {
+          ke.preventDefault()
+          openPreview(img)
+        }
+      })
+    })
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-image-preview-close]').forEach(el => {
+    el.addEventListener('click', () => closePreview())
+  })
+
+  window.addEventListener('keydown', onKeydown)
+
+  enhanceImages()
+
+  document.addEventListener('astro:page-load', () => {
+    enhanceImages()
+  })
+</script>

@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
+import LightBox from '../../components/LightBox.astro'
 import LayoutPost from '../../layouts/LayoutPost.astro'
 
 export async function getStaticPaths() {
@@ -129,6 +130,7 @@ try {
             </span>
           </div>
         )}
+        <LightBox />
         <article class="prose prose-gray max-w-none
           prose-headings:font-bold prose-headings:text-gray-900 prose-headings:font-mono
           prose-h1:text-3xl prose-h1:md:text-4xl prose-h1:mb-6
