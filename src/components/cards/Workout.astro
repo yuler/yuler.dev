@@ -35,8 +35,13 @@ const activities: Activity[] = (ids as number[])
   })
   .filter(Boolean) as Activity[]
 
-// Build 52 weeks for 2026 starting from Jan 1st
-const firstWeek: [string, string] = ['2026-01-01', '2026-01-04']
+// Build 52 weeks for the current year starting from Jan 1st
+const currentYear = new Date().getFullYear()
+const jan1 = new Date(currentYear, 0, 1)
+// First week ends on the nearest Saturday (or Jan 4 at latest to keep weeks ≤7 days)
+const jan1Day = jan1.getDay() // 0=Sun
+const firstWeekEnd = new Date(currentYear, 0, 1 + ((6 - jan1Day + 7) % 7 || 6))
+const firstWeek: [string, string] = [formatDate(jan1), formatDate(firstWeekEnd)]
 const weeks: [string, string][] = [firstWeek]
 
 let lastEnd = new Date(firstWeek[1])
@@ -61,13 +66,13 @@ function formatDuration(totalSeconds: number) {
   return `${m}m`
 }
 
-// Aggregate weekly moving time + activity names (2026 only)
+// Aggregate weekly moving time + activity names (current year only)
 const weeklySeconds = new Array(weeks.length).fill(0) as number[]
 const weeklyNames = new Array(weeks.length).fill(0).map(() => []) as string[][]
 
 for (const activity of activities) {
   const date = new Date(activity.start_date_local)
-  if (date.getFullYear() !== 2026) continue
+  if (date.getFullYear() !== currentYear) continue
 
   const dateStr = formatDate(date)
   const weekIndex = weeks.findIndex(([start, end]) => dateStr >= start && dateStr <= end)
@@ -118,7 +123,7 @@ const weeklyStats = weeks.map(([start, end], index) => {
         >
           View all →
         </a>
-        <span class="text-xs text-gray-400 font-mono">2026</span>
+        <span class="text-xs text-gray-400 font-mono">{currentYear}</span>
       </div>
     </div>
 

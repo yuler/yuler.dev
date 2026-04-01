@@ -38,8 +38,12 @@ const activities: Activity[] = (ids as number[])
 
 activities.sort((a, b) => new Date(b.start_date_local).getTime() - new Date(a.start_date_local).getTime())
 
-// Build 52 weeks for 2026 and keep only weeks that have activities
-const firstWeek: [string, string] = ['2026-01-01', '2026-01-04']
+// Build 52 weeks for the current year and keep only weeks that have activities
+const currentYear = new Date().getFullYear()
+const jan1 = new Date(currentYear, 0, 1)
+const jan1Day = jan1.getDay()
+const firstWeekEnd = new Date(currentYear, 0, 1 + ((6 - jan1Day + 7) % 7 || 6))
+const firstWeek: [string, string] = [formatDate(jan1), formatDate(firstWeekEnd)]
 const allWeeks: [string, string][] = [firstWeek]
 let lastEnd = new Date(firstWeek[1])
 for (let i = 0; i < 51; i++) {

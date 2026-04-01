@@ -1,12 +1,15 @@
 ---
 interface Props {
   class?: string
+  size?: number
 }
-const { class: className = '' } = Astro.props
+const { class: className = '', size = 16 } = Astro.props
 ---
 
 <svg
   xmlns="http://www.w3.org/2000/svg"
+  width={size}
+  height={size}
   viewBox="0 0 24 24"
   fill="none"
   stroke="currentColor"
@@ -14,6 +17,7 @@ const { class: className = '' } = Astro.props
   stroke-linecap="round"
   stroke-linejoin="round"
   class:list={[className]}
+  aria-hidden="true"
 >
   <path d="M7 17L17 7"></path>
   <path d="M7 7h10v10"></path>
