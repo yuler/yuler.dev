@@ -4,6 +4,12 @@ import ChevronRight from '../icons/ChevronRight.astro'
 import { formatDate } from '../../utils/date'
 import CornerMarkers from '../CornerMarkers.astro'
 
+interface Props {
+  limit?: number
+}
+
+const { limit = 5 } = Astro.props
+
 const posts = (
   await getCollection('posts', ({ data }) => {
     return import.meta.env.PROD ? data.draft !== true : true
@@ -23,7 +29,7 @@ const posts = (
 
   <ul class="flex-1 space-y-1">
     {
-      posts.slice(0, 5).map(post => (
+      posts.slice(0, limit).map(post => (
         <li>
           <a
             href={`/posts/${post.slug}`}
