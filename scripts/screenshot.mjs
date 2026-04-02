@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import { execSync } from 'child_process';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, statSync } from 'fs';
 import { createServer } from 'http';
 import { readFile } from 'fs/promises';
 import { extname, resolve } from 'path';
@@ -14,7 +14,7 @@ export const OUT_DIR = 'shots';
 export const PAGES = [
   { url: '/', slug: 'home' },
   { url: '/posts', slug: 'posts' },
-  { url: '/posts/2025/explore-rails-with-vue', slug: 'posts-2025-explore-rails-with-vue' },
+  { url: '/posts/2026/vibe-coding', slug: 'posts-2026-vibe-coding' },
   { url: '/workouts', slug: 'workouts' },
   { url: '/workouts/17751421152', slug: 'workouts-17751421152' },
 ];
@@ -83,10 +83,28 @@ function startServer(port) {
 
     // Resolve the candidate path and ensure it stays within distRoot.
     // We explicitly prefix with '.' to avoid issues with absolute paths.
-    const candidate = resolve(distRoot, `.${pathname}`);
-    const relative = candidate.slice(distRoot.length);
+    const directCandidate = resolve(distRoot, `.${pathname}`);
+    const relative = directCandidate.slice(distRoot.length);
     const isWithinDist = relative === '' || relative.startsWith('/') || relative.startsWith('\\');
     if (!isWithinDist) return null;
+
+    // Astro static output uses directories with `index.html` (e.g. `/posts/index.html`).
+    // When we request `/posts` (no trailing slash), `pathname` doesn't end with `/`,
+    // so we need to fall back to `/posts/index.html`.
+    let candidate = directCandidate;
+    if (!pathname.endsWith('/') && extname(directCandidate) === '') {
+      try {
+        if (statSync(directCandidate).isDirectory()) {
+          candidate = resolve(distRoot, `.${pathname}/index.html`);
+        } else {
+          // If it exists but isn't a directory, keep the direct file.
+          candidate = directCandidate;
+        }
+      } catch {
+        // If it doesn't exist yet, later readFile will return 404.
+        candidate = directCandidate;
+      }
+    }
 
     const ext = extname(candidate).toLowerCase();
     const contentType = mimeTypes[ext] || 'application/octet-stream';
