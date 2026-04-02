@@ -3,11 +3,11 @@ import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { createServer } from 'http';
 import { readFile } from 'fs/promises';
-import { join, extname, resolve } from 'path';
+import { extname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const PORT = 4173;
-const DIST = 'dist';
+const DIST = process.env.SCREENSHOT_DIST_DIR ?? 'dist';
 
 export const OUT_DIR = 'shots';
 
@@ -40,10 +40,19 @@ function isMainModule() {
 
 // Helper: ensure the site is built
 function ensureBuilt() {
+  const skipBuild = process.env.SCREENSHOT_SKIP_BUILD === 'true';
+
   if (existsSync(DIST)) {
     console.log(`✓ ${DIST}/ exists, skipping build`);
     return;
   }
+
+  if (skipBuild) {
+    throw new Error(
+      `Screenshot server cannot start: ${DIST}/ is missing and SCREENSHOT_SKIP_BUILD=true`,
+    );
+  }
+
   console.log(`Building site...`);
   execSync('pnpm run build', { stdio: 'inherit' });
 }
@@ -61,25 +70,57 @@ function startServer(port) {
     '.ico': 'image/x-icon',
   };
 
+  const distRoot = resolve(DIST);
+
+  function resolveRequestedFile(reqUrl) {
+    // Parse URL to strip querystrings/fragments before path resolution.
+    const url = new URL(reqUrl, `http://localhost:${port}`);
+
+    // Handle directory requests and default index page.
+    let pathname = decodeURIComponent(url.pathname);
+    if (pathname === '/' || pathname === '') pathname = '/index.html';
+    if (pathname.endsWith('/')) pathname = `${pathname}index.html`;
+
+    // Resolve the candidate path and ensure it stays within distRoot.
+    // We explicitly prefix with '.' to avoid issues with absolute paths.
+    const candidate = resolve(distRoot, `.${pathname}`);
+    const relative = candidate.slice(distRoot.length);
+    const isWithinDist = relative === '' || relative.startsWith('/') || relative.startsWith('\\');
+    if (!isWithinDist) return null;
+
+    const ext = extname(candidate).toLowerCase();
+    const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+    return { filePath: candidate, contentType };
+  }
+
   const server = createServer(async (req, res) => {
-    let filePath = join(DIST, req.url === '/' ? 'index.html' : req.url);
-
-    // Handle directory requests
-    if (!extname(filePath)) {
-      filePath = join(filePath, 'index.html');
-    }
-
     try {
-      const content = await readFile(filePath);
-      const ext = extname(filePath);
-      const contentType = mimeTypes[ext] || 'application/octet-stream';
+      if (!req.url) {
+        res.writeHead(400);
+        res.end('Bad Request');
+        return;
+      }
 
-      res.writeHead(200, { 'Content-Type': contentType });
+      req.socket?.setTimeout(10_000);
+
+      const resolved = resolveRequestedFile(req.url);
+      if (!resolved) {
+        res.writeHead(403);
+        res.end('Forbidden');
+        return;
+      }
+
+      const content = await readFile(resolved.filePath);
+      res.writeHead(200, { 'Content-Type': resolved.contentType });
       res.end(content);
     } catch (err) {
-      if (err.code === 'ENOENT') {
+      if (err && err.code === 'ENOENT') {
         res.writeHead(404);
         res.end('Not Found');
+      } else if (err instanceof URIError) {
+        res.writeHead(400);
+        res.end('Bad Request');
       } else {
         res.writeHead(500);
         res.end('Internal Server Error');
@@ -88,6 +129,11 @@ function startServer(port) {
   });
 
   return new Promise((resolve, reject) => {
+    server.on('clientError', (_err, socket) => {
+      socket.end('HTTP/1.1 400 Bad Request');
+    });
+
+    server.on('error', reject);
     server.listen(port, (err) => {
       if (err) {
         reject(err);
@@ -122,7 +168,10 @@ async function captureShots(baseUrl) {
         const url = `${baseUrl}${pageInfo.url}`;
         console.log(`Capturing ${pageInfo.slug} @ ${viewport.name} (${viewport.width}×${viewport.height})`);
 
-        await page.goto(url, { waitUntil: 'networkidle' });
+        // Use bounded waits to avoid indefinite hangs on long-lived connections.
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+        await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
+
         const outputFile = outputPath(pageInfo.slug, viewport.name);
         await page.screenshot({ path: outputFile, fullPage: true });
       }

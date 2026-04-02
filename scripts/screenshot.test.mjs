@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { existsSync, renameSync, rmSync, statSync } from 'fs';
+import { existsSync, statSync } from 'fs';
 import { test, expect } from 'vitest';
 import { OUT_DIR, PAGES, VIEWPORTS, outputPath } from '@scripts/screenshot.mjs';
 
@@ -93,28 +93,22 @@ test('second gen:screenshot run exits 0 and screenshot files remain or are refre
 });
 
 test('gen:screenshot exits 1 when dist/ is temporarily unavailable', () => {
-  const distBackup = 'dist-backup-test';
+  const missingDistDir = `dist-missing-test-${Date.now()}`;
   let exitCode = 0;
 
   try {
-    if (existsSync('dist')) {
-      renameSync('dist', distBackup);
-    }
+    const env = {
+      ...process.env,
+      SCREENSHOT_DIST_DIR: missingDistDir,
+      SCREENSHOT_SKIP_BUILD: 'true',
+    };
 
-    try {
-      execSync('pnpm run gen:screenshot', { stdio: 'pipe' });
-      exitCode = 0;
-    } catch (error) {
-      exitCode = error.status || 1;
-    }
-
-    expect(exitCode).toBe(1);
-  } finally {
-    if (existsSync(distBackup)) {
-      if (existsSync('dist')) {
-        rmSync('dist', { recursive: true, force: true });
-      }
-      renameSync(distBackup, 'dist');
-    }
+    execSync('pnpm run gen:screenshot', { stdio: 'pipe', env });
+    exitCode = 0;
+  } catch (error) {
+    exitCode = error.status || 1;
   }
+
+  expect(exitCode).toBe(1);
+
 });
