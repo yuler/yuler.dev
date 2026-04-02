@@ -128,22 +128,23 @@ jobs:
               return `${artifactUrl}/download?path=${encodeURIComponent(file)}`;
             };
 
+            const pageCell = (slug) => {
+              return `<b>${slug}</b>`;
+            };
+
             const cell = (slug, vp) => {
               const file = shotsByPage.get(slug)?.[vp];
               if (!file) return '-';
               const src = imgSrc(file);
-              if (vp === 'iphone') {
-                return `<b>${slug}</b><br/><img src="${src}" alt="${slug} ${vp}" width="260" />`;
-              }
               return `<img src="${src}" alt="${slug} ${vp}" width="260" />`;
             };
 
             const table = [
-              '| iphone | ipad | pc |',
-              '| --- | --- | --- |',
+              '| page | iphone | ipad | pc |',
+              '| --- | --- | --- | --- |',
               ...pageSlugs.map(
                 (slug) =>
-                  `| ${cell(slug, 'iphone')} | ${cell(slug, 'ipad')} | ${cell(slug, 'pc')} |`,
+                  `| ${pageCell(slug)} | ${cell(slug, 'iphone')} | ${cell(slug, 'ipad')} | ${cell(slug, 'pc')} |`,
               ),
             ].join('\n');
 
