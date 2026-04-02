@@ -96,13 +96,9 @@ function startServer(port) {
       try {
         if (statSync(directCandidate).isDirectory()) {
           candidate = resolve(distRoot, `.${pathname}/index.html`);
-        } else {
-          // If it exists but isn't a directory, keep the direct file.
-          candidate = directCandidate;
         }
       } catch {
         // If it doesn't exist yet, later readFile will return 404.
-        candidate = directCandidate;
       }
     }
 
@@ -189,6 +185,17 @@ async function captureScreenshots(baseUrl) {
         // Use bounded waits to avoid indefinite hangs on long-lived connections.
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45_000 });
         await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
+
+        // Some pages render the route map via `MapRoute.astro` which initializes Leaflet after DOMContentLoaded.
+        // Wait for our explicit readiness flag so screenshots capture the route polyline/bounds.
+        if (await page.$('.activity-map-container')) {
+          await page
+            .waitForFunction(
+              () => document.querySelector('.activity-map-container')?.dataset?.routeReady === 'true',
+              { timeout: 30_000 },
+            )
+            .catch(() => {});
+        }
 
         const outputFile = outputPath(pageInfo.slug, viewport.name);
         await page.screenshot({ path: outputFile, fullPage: true });
