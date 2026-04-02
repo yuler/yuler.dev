@@ -1,0 +1,103 @@
+name: PR Screenshots
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-screenshots-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          cache: true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Generate screenshots
+        run: pnpm run gen:screenshot
+
+      - name: Upload shots artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-${{ github.event.pull_request.number }}-shots
+          path: shots/*.png
+          if-no-files-found: error
+
+      - name: Comment on PR with shots link
+        uses: actions/github-script@v7
+        env:
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            const marker = '<!-- yuler.dev/pr-screenshots -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            const artifactId = process.env.ARTIFACT_ID;
+            const artifactUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}/artifacts/${artifactId}`;
+
+            const files = fs
+              .readdirSync('shots')
+              .filter((f) => f.endsWith('.png'))
+              .sort((a, b) => a.localeCompare(b));
+
+            const body = [
+              marker,
+              `### 📸 Screenshots for PR #${issue_number}`,
+              ``,
+              `Download artifact: ${artifactUrl}`,
+              ``,
+              `Generated ${files.length} image(s):`,
+              ...files.map((f) => `- \`${f}\``),
+            ].join('\n');
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
