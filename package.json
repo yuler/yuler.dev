@@ -13,9 +13,14 @@
     "autocorrect": "autocorrect --fix src/content",
     "create:post": "node scripts/create-post.mjs",
     "export:pdf": "pnpm build && node scripts/export-post-pdf.mjs",
-    "test:strava": "tsx --env-file=.env scripts/test-strava.mjs",
+    "gen:screenshot": "node scripts/screenshot.mjs",
     "sync:strava:activities": "tsx --env-file=.env scripts/sync-strava-activities.mjs",
-    "commit": "opencode run git commit"
+    "test": "vitest",
+    "test:strava": "vitest run scripts/sync-strava.test.mjs",
+    "clean": "pnpm clean:dist && pnpm clean:pdfs && pnpm clean:shots",
+    "clean:dist": "rm -rf dist",
+    "clean:pdfs": "rm -rf pdfs",
+    "clean:shots": "rm -rf shots"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
@@ -38,6 +43,8 @@
     "@types/leaflet": "^1.9.21",
     "playwright": "^1.59.1",
     "sharp": "^0.34.5",
-    "tsx": "^4.21.0"
+    "tsx": "^4.21.0",
+    "vite": "7.3.1",
+    "vitest": "^3.2.4"
   }
 }
