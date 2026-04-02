@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 const PORT = 4173;
 const DIST = process.env.SCREENSHOT_DIST_DIR ?? 'dist';
 
-export const OUT_DIR = 'shots';
+export const OUT_DIR = 'screenshots';
 
 export const PAGES = [
   { url: '/', slug: 'home' },
@@ -173,7 +173,7 @@ function startServer(port) {
 }
 
 // Main: capture all screenshots
-async function captureShots(baseUrl) {
+async function captureScreenshots(baseUrl) {
   console.log('Launching browser...');
   const browser = await chromium.launch();
 
@@ -215,7 +215,7 @@ if (isMainModule()) {
 
       serverHandle = await startServer(PORT);
 
-      await captureShots(`http://localhost:${PORT}`);
+      await captureScreenshots(`http://localhost:${PORT}`);
 
       await serverHandle.close();
       process.exit(0);

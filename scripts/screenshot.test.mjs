@@ -51,7 +51,7 @@ test('outputPath matches OUT_DIR/{slug}.{vp}.png for many slug/viewport pairs', 
   }
 });
 
-// Needs a prior successful gen:screenshot run
+// Needs a prior successful gen:screenshots run
 test('every configured page and viewport has a screenshot file', () => {
   for (const page of PAGES) {
     for (const vp of VIEWPORTS) {
@@ -60,7 +60,7 @@ test('every configured page and viewport has a screenshot file', () => {
   }
 });
 
-test('second gen:screenshot run exits 0 and screenshot files remain or are refreshed', async () => {
+test('second gen:screenshots run exits 0 and screenshot files remain or are refreshed', async () => {
   const initialMtimes = {};
   for (const page of PAGES) {
     for (const viewport of VIEWPORTS) {
@@ -74,7 +74,7 @@ test('second gen:screenshot run exits 0 and screenshot files remain or are refre
   await new Promise(resolve => setTimeout(resolve, 100));
 
   try {
-    execSync('pnpm run gen:screenshot', { stdio: 'pipe' });
+    execSync('pnpm run gen:screenshots', { stdio: 'pipe' });
   } catch (error) {
     expect.fail(`Script failed on second run: ${error.message}`);
   }
@@ -92,7 +92,7 @@ test('second gen:screenshot run exits 0 and screenshot files remain or are refre
   }
 });
 
-test('gen:screenshot exits 1 when dist/ is temporarily unavailable', () => {
+test('gen:screenshots exits 1 when dist/ is temporarily unavailable', () => {
   const missingDistDir = `dist-missing-test-${Date.now()}`;
   let exitCode = 0;
 
@@ -103,7 +103,7 @@ test('gen:screenshot exits 1 when dist/ is temporarily unavailable', () => {
       SCREENSHOT_SKIP_BUILD: 'true',
     };
 
-    execSync('pnpm run gen:screenshot', { stdio: 'pipe', env });
+    execSync('pnpm run gen:screenshots', { stdio: 'pipe', env });
     exitCode = 0;
   } catch (error) {
     exitCode = error.status || 1;

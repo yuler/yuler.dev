@@ -13,14 +13,14 @@
     "autocorrect": "autocorrect --fix src/content",
     "create:post": "node scripts/create-post.mjs",
     "export:pdf": "pnpm build && node scripts/export-post-pdf.mjs",
-    "gen:screenshot": "node scripts/screenshot.mjs",
+    "gen:screenshots": "node scripts/screenshot.mjs",
     "sync:strava:activities": "tsx --env-file=.env scripts/sync-strava-activities.mjs",
     "test": "vitest",
     "test:strava": "vitest run scripts/sync-strava.test.mjs",
-    "clean": "pnpm clean:dist && pnpm clean:pdfs && pnpm clean:shots",
+    "clean": "pnpm clean:dist && pnpm clean:pdfs && pnpm clean:screenshots",
     "clean:dist": "rm -rf dist",
     "clean:pdfs": "rm -rf pdfs",
-    "clean:shots": "rm -rf shots"
+    "clean:screenshots": "rm -rf screenshots"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
