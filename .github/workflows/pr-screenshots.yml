@@ -150,11 +150,13 @@ jobs:
 
             const body = [
               marker,
-              `### 📸 Screenshots for PR #${issue_number}`,
+              `<details>`,
+              `<summary>📸 Screenshots for PR #${issue_number}</summary>`,
               ``,
               table,
               ``,
               `Download artifact: ${artifactUrl}`,
+              `</details>`,
             ].join('\n');
 
             const comments = await github.paginate(github.rest.issues.listComments, {
