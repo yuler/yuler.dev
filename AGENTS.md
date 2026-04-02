@@ -18,3 +18,12 @@ Every icons should a simple astro component locate in [`src/components/icons`](.
 ## Git Commit
 
 Every commit needs to invoke the `/git-commit` skill.
+
+## Cursor Cloud specific instructions
+
+- **Node.js**: `.nvmrc` specifies `v24`. Use `source ~/.nvm/nvm.sh && nvm use 24` before running any commands.
+- **sharp build approval**: `package.json` includes `pnpm.onlyBuiltDependencies` to allow `sharp` and `esbuild` postinstall scripts. Without this, `pnpm install` will warn about ignored build scripts and image optimization will fail.
+- **Dev server**: `pnpm dev --host 0.0.0.0` starts Astro on port 4321. No external services (databases, APIs) are required for local development.
+- **Lint/check**: `pnpm check` runs `astro check` (TypeScript diagnostics). There are no separate ESLint or Prettier configs.
+- **Build**: `pnpm build` runs `astro check && astro build`. Output goes to `dist/`.
+- **No automated test suite**: This project has no unit/integration test framework configured. Validation is done via `pnpm check` and `pnpm build`.
