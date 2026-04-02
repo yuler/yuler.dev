@@ -1,6 +1,7 @@
 ---
 import { formatDate } from '../../utils/date'
 import ids from '../../../data/strava/activities/ids.json'
+import CornerMarkers from '../CornerMarkers.astro'
 
 interface Props {
   class?: string
@@ -106,11 +107,7 @@ const weeklyStats = weeks.map(([start, end], index) => {
 <div
   class={`relative bg-white border border-gray-200 p-6 transition-all duration-300 hover:border-gray-400 ${className}`}
 >
-  <!-- Corner Markers -->
-  <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
-  <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
-  <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
-  <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+  <CornerMarkers />
 
   <div class="flex flex-col gap-2">
     <!-- Header -->

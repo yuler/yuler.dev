@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content'
 import ChevronRight from '../icons/ChevronRight.astro'
 import { formatDate } from '../../utils/date'
+import CornerMarkers from '../CornerMarkers.astro'
 
 const posts = (
   await getCollection('posts', ({ data }) => {
@@ -11,11 +12,7 @@ const posts = (
 ---
 
 <div class="relative bg-white border border-gray-200 p-6 h-full flex flex-col">
-  <!-- Corner Markers -->
-  <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
-  <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
-  <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
-  <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+  <CornerMarkers />
 
   <div class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
     <h2 class="text-lg font-semibold text-gray-900 font-mono">Posts</h2>

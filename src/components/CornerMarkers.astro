@@ -1,0 +1,11 @@
+---
+interface Props {
+  class?: string
+}
+const { class: className } = Astro.props
+---
+
+<div class:list={['absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400', className]}></div>
+<div class:list={['absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400', className]}></div>
+<div class:list={['absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400', className]}></div>
+<div class:list={['absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400', className]}></div>
