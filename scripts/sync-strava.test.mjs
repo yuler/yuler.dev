@@ -13,10 +13,13 @@ describe.skipIf(!stravaEnvReady())('Strava API (sync)', () => {
   test('getStravaActivities returns activities from the API', async () => {
     const activities = await getStravaActivities();
 
-    console.log(
-      'Strava activities JSON:',
-      JSON.stringify(activities, null, 2),
-    );
+    // CI logs can be very noisy (and slow). Keep local runs verbose.
+    if (!process.env.CI) {
+      console.log(
+        'Strava activities JSON:',
+        JSON.stringify(activities, null, 2),
+      );
+    }
 
     expect(Array.isArray(activities)).toBe(true);
 
