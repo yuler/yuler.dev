@@ -1,6 +1,9 @@
 ---
 import { formatDate } from '../../utils/date'
-import ids from '../../../data/strava/activities/_index.json'
+import { loadAllStoredActivities } from '../../utils/strava-activities'
+import type { StoredActivitySummary } from '../../utils/strava-activities'
+import { formatDurationHeatmap } from '../../utils/workout-display'
+import { getWeekRangesForYear } from '../../utils/week-grid'
 import CornerMarkers from '../CornerMarkers.astro'
 
 interface Props {
@@ -9,65 +12,13 @@ interface Props {
 
 const { class: className } = Astro.props
 
-// Load all activity JSON files and pick the ones referenced by ids.json
-const activityModules = import.meta.glob('../../../data/strava/activities/*.json', {
-  eager: true,
-})
+type Activity = Pick<StoredActivitySummary, 'id' | 'name' | 'moving_time' | 'start_date_local'>
 
-type Activity = {
-  id: number
-  name: string
-  moving_time: number
-  start_date_local: string
-}
+const activities = loadAllStoredActivities<Activity>()
 
-const activities: Activity[] = (ids as number[])
-  .map(id => {
-    const mod = activityModules[`../../../data/strava/activities/${id}.json`] as
-      | { default?: Activity }
-      | Activity
-      | undefined
-
-    if (!mod) return undefined
-
-    // Vite JSON imports can be either the value itself or { default: value }
-    const data = 'default' in (mod as any) ? (mod as any).default : mod
-    return data as Activity
-  })
-  .filter(Boolean) as Activity[]
-
-// Build 52 weeks for the current year starting from Jan 1st
 const currentYear = new Date().getFullYear()
-const jan1 = new Date(currentYear, 0, 1)
-// First week ends on the nearest Saturday (or Jan 4 at latest to keep weeks ≤7 days)
-const jan1Day = jan1.getDay() // 0=Sun
-const firstWeekEnd = new Date(currentYear, 0, 1 + ((6 - jan1Day + 7) % 7 || 6))
-const firstWeek: [string, string] = [formatDate(jan1), formatDate(firstWeekEnd)]
-const weeks: [string, string][] = [firstWeek]
+const weeks = getWeekRangesForYear(currentYear)
 
-let lastEnd = new Date(firstWeek[1])
-
-for (let i = 0; i < 51; i++) {
-  const start = new Date(lastEnd)
-  start.setDate(start.getDate() + 1)
-  const end = new Date(start)
-  end.setDate(end.getDate() + 6)
-
-  weeks.push([formatDate(start), formatDate(end)])
-  lastEnd = end
-}
-
-function formatDuration(totalSeconds: number) {
-  const s = Math.max(0, Math.floor(totalSeconds))
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-
-  if (h > 0 && m > 0) return `${h}h ${m}m`
-  if (h > 0) return `${h}h`
-  return `${m}m`
-}
-
-// Aggregate weekly moving time + activity names (current year only)
 const weeklySeconds = new Array(weeks.length).fill(0) as number[]
 const weeklyNames = new Array(weeks.length).fill(0).map(() => []) as string[][]
 
@@ -83,7 +34,6 @@ for (const activity of activities) {
   weeklyNames[weekIndex].push(activity.name)
 }
 
-// Map total hours to level 0–7 (rounded up, capped at 7)
 const weeklyStats = weeks.map(([start, end], index) => {
   const hours = weeklySeconds[index] / 3600
   const level = hours === 0 ? 0 : Math.min(7, Math.ceil(hours))
@@ -96,7 +46,7 @@ const weeklyStats = weeks.map(([start, end], index) => {
     start,
     end,
     dateStr: `${start} ~ ${end}`,
-    durationStr: formatDuration(weeklySeconds[index]),
+    durationStr: formatDurationHeatmap(weeklySeconds[index]),
     names: weeklyNames[index],
     level,
     isCurrentWeek,
