@@ -1,95 +1,30 @@
 ---
 import Layout from '../../layouts/Layout.astro'
+import CornerMarkers from '../../components/CornerMarkers.astro'
 import ChevronRight from '../../components/icons/ChevronRight.astro'
 import ChevronDown from '../../components/icons/ChevronDown.astro'
 import { formatDate } from '../../utils/date'
-import ids from '../../../data/strava/activities/_index.json'
+import { loadAllStoredActivities } from '../../utils/strava-activities'
+import type { StoredActivitySummary } from '../../utils/strava-activities'
+import {
+  formatDistanceMetersCompact,
+  formatMovingDuration,
+  formatPaceOrSpeed,
+  sportIcons,
+} from '../../utils/workout-display'
+import { getWeekRangesWithIndex } from '../../utils/week-grid'
 
-const activityModules = import.meta.glob('../../../data/strava/activities/*.json', {
-  eager: true,
-})
-
-type Activity = {
-  id: number
-  name: string
-  type: string
-  sport_type: string
-  distance: number
-  moving_time: number
-  start_date_local: string
-  average_speed: number
-  total_elevation_gain: number
-  has_heartrate: boolean
-  average_heartrate?: number
-  map: { polyline: string; summary_polyline: string }
-}
-
-const activities: Activity[] = (ids as number[])
-  .map(id => {
-    const mod = activityModules[`../../../data/strava/activities/${id}.json`] as
-      | { default?: Activity }
-      | Activity
-      | undefined
-    if (!mod) return undefined
-    const data = 'default' in (mod as any) ? (mod as any).default : mod
-    return data as Activity
-  })
-  .filter(Boolean) as Activity[]
+const activities = loadAllStoredActivities<StoredActivitySummary>()
 
 activities.sort((a, b) => new Date(b.start_date_local).getTime() - new Date(a.start_date_local).getTime())
 
-// Build 52 weeks for the current year and keep only weeks that have activities
 const currentYear = new Date().getFullYear()
-const jan1 = new Date(currentYear, 0, 1)
-const jan1Day = jan1.getDay()
-const firstWeekEnd = new Date(currentYear, 0, 1 + ((6 - jan1Day + 7) % 7 || 6))
-const firstWeek: [string, string] = [formatDate(jan1), formatDate(firstWeekEnd)]
-const allWeeks: [string, string][] = [firstWeek]
-let lastEnd = new Date(firstWeek[1])
-for (let i = 0; i < 51; i++) {
-  const start = new Date(lastEnd)
-  start.setDate(start.getDate() + 1)
-  const end = new Date(start)
-  end.setDate(end.getDate() + 6)
-  allWeeks.push([formatDate(start), formatDate(end)])
-  lastEnd = end
-}
+const allWeeks = getWeekRangesWithIndex(currentYear)
 
 const activityDates = new Set(activities.map(a => formatDate(new Date(a.start_date_local))))
-const weeks = allWeeks
-  .map(([start, end], i) => ({ start, end, index: i + 1 }))
-  .filter(({ start, end }) => [...activityDates].some(d => d >= start && d <= end))
-
-const sportIcons: Record<string, string> = {
-  Run: '🏃',
-  Ride: '🚴',
-  Walk: '🚶',
-  Swim: '🏊',
-  Hike: '🥾',
-  Yoga: '🧘',
-  WeightTraining: '🏋️',
-}
-
-function formatDuration(seconds: number): string {
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  if (h > 0) return `${h}h ${m}m`
-  return `${m}m`
-}
-
-function formatDistance(meters: number): string {
-  if (meters < 1000) return `${Math.round(meters)}m`
-  return `${(meters / 1000).toFixed(2)}km`
-}
-
-function formatPace(type: string, avgSpeed: number): string {
-  if (avgSpeed === 0) return '-'
-  if (type === 'Ride') return `${(avgSpeed * 3.6).toFixed(1)} km/h`
-  const paceSeconds = 1000 / avgSpeed
-  const paceMin = Math.floor(paceSeconds / 60)
-  const paceSec = Math.round(paceSeconds % 60)
-  return `${paceMin}'${String(paceSec).padStart(2, '0')}"/km`
-}
+const weeks = allWeeks.filter(({ start, end }) =>
+  [...activityDates].some(d => d >= start && d <= end),
+)
 ---
 
 <Layout title="Workouts — Yu Le">
@@ -104,10 +39,7 @@ function formatPace(type: string, avgSpeed: number): string {
 
       <!-- Week Filter -->
       <div class="mb-4 bg-white border border-gray-200 px-3 py-2 sm:px-4 sm:py-3 relative">
-        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
-        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
-        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
-        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+        <CornerMarkers />
         <div class="flex items-center justify-between gap-2">
           <button
             id="week-prev"
@@ -148,11 +80,7 @@ function formatPace(type: string, avgSpeed: number): string {
 
       <!-- Main Card -->
       <div class="relative bg-white border border-gray-200 p-4 sm:p-6">
-        <!-- Corner Markers -->
-        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
-        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
-        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
-        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+        <CornerMarkers />
 
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
@@ -181,12 +109,14 @@ function formatPace(type: string, avgSpeed: number): string {
                           {formatDate(new Date(activity.start_date_local))}
                         </time>
                         <span class="text-gray-300 shrink-0">|</span>
-                        <span class="shrink-0 whitespace-nowrap">{formatDistance(activity.distance)}</span>
+                        <span class="shrink-0 whitespace-nowrap">{formatDistanceMetersCompact(activity.distance)}</span>
                         <span class="text-gray-300 shrink-0">|</span>
-                        <span class="shrink-0 whitespace-nowrap">{formatDuration(activity.moving_time)}</span>
+                        <span class="shrink-0 whitespace-nowrap">
+                          {formatMovingDuration(activity.moving_time, 'list')}
+                        </span>
                         <span class="hidden sm:inline text-gray-300 shrink-0">|</span>
                         <span class="hidden sm:inline shrink-0 whitespace-nowrap">
-                          {formatPace(activity.sport_type, activity.average_speed)}
+                          {formatPaceOrSpeed(activity.sport_type, activity.average_speed)}
                         </span>
                       </div>
                     </div>

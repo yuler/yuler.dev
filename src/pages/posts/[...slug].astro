@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content'
+import CornerMarkers from '../../components/CornerMarkers.astro'
 import LightBox from '../../components/LightBox.astro'
 import LayoutPost from '../../layouts/LayoutPost.astro'
 
@@ -53,11 +54,7 @@ try {
 
       <!-- Article Header Card -->
       <div class="bg-white border border-gray-200 p-6 md:p-8 mb-8 relative">
-        <!-- Corner Markers -->
-        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
-        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
-        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
-        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+        <CornerMarkers />
 
         {/* Title */}
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight font-mono">
@@ -116,11 +113,7 @@ try {
 
       <!-- Article Content Card -->
       <div class="bg-white border border-gray-200 p-5 sm:p-6 md:p-8 lg:p-12 relative">
-        <!-- Corner Markers -->
-        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
-        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
-        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
-        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+        <CornerMarkers />
 
         {entry.data.wip && (
           <div class="mb-8 p-4 bg-amber-50 border-l-4 border-amber-400 text-amber-800 text-sm font-mono flex items-start">
@@ -156,11 +149,7 @@ try {
 
       <!-- Navigation Footer -->
       <div class="mt-8 flex items-center justify-between bg-white border border-gray-200 p-4 relative">
-        <!-- Corner Markers -->
-        <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
-        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
-        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
-        <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+        <CornerMarkers />
 
         <a href="/posts" class="inline-flex items-center gap-2 px-4 py-2 min-h-[2.75rem] text-sm text-gray-500 hover:text-gray-900 transition-colors">
           <span>←</span>
