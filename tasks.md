@@ -18,9 +18,9 @@ Scan date: 2026-04-02. Personal Astro site (`yuler.dev`). Items are ordered roug
 
 ## Performance / bundles
 
-- [ ] **Defer heavy client JS on posts** — `LayoutPost.astro` loads and runs Mermaid on every post. Consider lazy init (e.g. `requestIdleCallback` / Intersection Observer) or only including the script when the page has Mermaid blocks.
-- [ ] **Workout detail: Leaflet + share** — `MapRoute.astro` and `ShareWorkout.astro` pull in non-trivial client code. Audit whether poster/QR/html-to-image can load only when the share dialog opens.
-- [ ] **Font/CSS** — `global.css` imports four Inter weights; confirm all weights are used and trim unused `@fontsource` imports if any.
+- [x] **Defer heavy client JS on posts** — `LayoutPost.astro` loads and runs Mermaid on every post. Consider lazy init (e.g. `requestIdleCallback` / Intersection Observer) or only including the script when the page has Mermaid blocks.
+- [x] **Workout detail: Leaflet + share** — `MapRoute.astro` and `ShareWorkout.astro` pull in non-trivial client code. Audit whether poster/QR/html-to-image can load only when the share dialog opens.
+- [x] **Font/CSS** — `global.css` imports four Inter weights; confirm all weights are used and trim unused `@fontsource` imports if any.
 
 ## Types & tooling
 
