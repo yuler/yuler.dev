@@ -27,7 +27,7 @@ const resetBtnId = `reset-map-btn-${randomId}`
       <slot name="header-actions" />
       <button
         id={btnId}
-        class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none cursor-pointer"
+        class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 rounded-sm cursor-pointer"
         aria-label="Play route trace"
         title="Play route trace"
       >
@@ -49,7 +49,7 @@ const resetBtnId = `reset-map-btn-${randomId}`
     </div>
     <button
       id={resetBtnId}
-      class="absolute bottom-3 left-3 z-1000 flex size-[26px] items-center justify-center bg-white/95 p-0 text-gray-600 hover:bg-white hover:text-gray-900 border border-gray-200 rounded-md shadow-sm transition-colors focus:outline-none cursor-pointer"
+      class="absolute bottom-3 left-3 z-1000 flex size-[26px] items-center justify-center bg-white/95 p-0 text-gray-600 hover:bg-white hover:text-gray-900 border border-gray-200 rounded-md shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 cursor-pointer"
       aria-label="Reset map center"
       title="Reset map center"
     >
