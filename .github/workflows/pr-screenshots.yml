@@ -2,7 +2,7 @@ name: PR Screenshots
 
 on:
   pull_request:
-    types: [opened]
+    branches: [main]
 
 permissions:
   contents: read
