@@ -1,5 +1,21 @@
 ---
 import Layout from './Layout.astro'
+
+interface Props {
+  frontmatter: {
+    title: string
+    description?: string
+    date: Date
+    tags?: string[]
+    draft?: boolean
+    wip?: boolean
+    image?: {
+      url: string
+      alt: string
+    }
+  }
+}
+
 const { frontmatter } = Astro.props
 ---
 
