@@ -162,7 +162,7 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
   import QRCode from 'qrcode'
   import L from 'leaflet'
 
-  // Hoist dynamic import so the module is only loaded once
+  /** Poster capture only runs after the share dialog opens; html-to-image stays dynamic. */
   const htmlToImagePromise = import('html-to-image')
 
   // ── Dialog open/close ──────────────────────────────────────────────────────
