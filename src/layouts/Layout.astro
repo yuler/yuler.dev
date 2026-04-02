@@ -5,10 +5,19 @@ import Footer from '../components/Footer.astro'
 interface Props {
   title: string
   description?: string
+  /** Absolute URL for og:image */
   image?: string
+  /** Full canonical URL; defaults to current path on `site` */
+  canonicalURL?: string
+  ogType?: 'website' | 'article'
+  articlePublishedTime?: string
 }
 
-const { title, description, image } = Astro.props
+const { title, description, image, canonicalURL, ogType = 'website', articlePublishedTime } = Astro.props
+
+const site = Astro.site ?? new URL('https://yuler.dev')
+const canonical = canonicalURL ?? new URL(Astro.url.pathname, site).href
+const ogImageAbsolute = image && !image.startsWith('http') ? new URL(image, site).href : image
 ---
 
 <html lang="en">
@@ -17,11 +26,19 @@ const { title, description, image } = Astro.props
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
-    {image && <meta property="og:image" content={image} />}
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content={ogType} />
+    {ogImageAbsolute && <meta property="og:image" content={ogImageAbsolute} />}
+    {articlePublishedTime && <meta property="article:published_time" content={articlePublishedTime} />}
+    <meta name="twitter:card" content={ogImageAbsolute ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    {ogImageAbsolute && <meta name="twitter:image" content={ogImageAbsolute} />}
     <slot name="head" />
   </head>
   <body class="grid grid-cols-1 h-full">

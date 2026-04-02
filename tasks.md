@@ -30,8 +30,8 @@ Scan date: 2026-04-02. Personal Astro site (`yuler.dev`). Items are ordered roug
 
 ## Security / SEO / meta
 
-- [ ] **Mermaid `securityLevel`** — `LayoutPost.astro` sets `securityLevel: 'loose'`. For untrusted MDX content this is permissive; if posts are only author-controlled, document that; otherwise consider stricter settings per Mermaid docs.
-- [ ] **Social / SEO metadata** — `Layout.astro` sets basic `og:title` / `og:description` / `og:image`. Optional improvements: `og:url`, `twitter:card`, canonical URL, and `article:published_time` on posts.
+- [x] **Mermaid `securityLevel`** — `LayoutPost.astro` sets `securityLevel: 'loose'`. For untrusted MDX content this is permissive; if posts are only author-controlled, document that; otherwise consider stricter settings per Mermaid docs.
+- [x] **Social / SEO metadata** — `Layout.astro` sets basic `og:title` / `og:description` / `og:image`. Optional improvements: `og:url`, `twitter:card`, canonical URL, and `article:published_time` on posts.
 
 ## UX / accessibility
 
