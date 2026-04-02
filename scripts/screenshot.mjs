@@ -14,7 +14,7 @@ export const OUT_DIR = 'screenshots';
 export const PAGES = [
   { url: '/', slug: 'home' },
   { url: '/posts', slug: 'posts' },
-  { url: '/posts/2026/vibe-coding', slug: 'posts-2026-vibe-coding' },
+  { url: '/posts/2025/hi', slug: 'posts-2025-hi' },
   { url: '/workouts', slug: 'workouts' },
   { url: '/workouts/17751421152', slug: 'workouts-17751421152' },
 ];
