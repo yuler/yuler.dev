@@ -1,0 +1,308 @@
+{
+  "resource_state": 3,
+  "athlete": {
+    "id": 1596917895,
+    "resource_state": 1
+  },
+  "name": "Evening Ride",
+  "distance": 2574.7,
+  "moving_time": 788,
+  "elapsed_time": 853,
+  "total_elevation_gain": 3.6,
+  "type": "Ride",
+  "sport_type": "Ride",
+  "workout_type": null,
+  "device_name": "Apple Watch Series 7",
+  "id": 17948026184,
+  "start_date": "2026-04-02T10:29:31Z",
+  "start_date_local": "2026-04-02T18:29:31Z",
+  "timezone": "(GMT+08:00) Asia/Shanghai",
+  "utc_offset": 28800,
+  "location_city": null,
+  "location_state": null,
+  "location_country": null,
+  "achievement_count": 0,
+  "kudos_count": 0,
+  "comment_count": 0,
+  "athlete_count": 1,
+  "photo_count": 0,
+  "map": {
+    "id": "a17948026184",
+    "polyline": "ic|rFwgieUBBLEBKH@LCn@@^AHBLZ@`DFjD?PBdADNBf@AP@tBEr@FlBAb@@tAAFB~@CPKLGBkAAECs@CI@i@Gc@@i@IO@ICa@Cg@Ii@@i@Eq@Ca@E_@AYIIBECc@Ge@AIEUAECg@I_CGSEGKK]OI?IALGFE?EHBM@BDEH?ABJCDKCeCE\\FxAA\\CAMLCJSLEBOAMH?AUEg@Aa@EEEGCQ?MQEWIECEEPQ@KGCFE?WCaA]O?a@Hy@@oCQq@CG@GEe@?YCM@OEED[WUGEJC@c@KGBUAEBSGUBGEI@[EQ@m@CQCI@OGO?KCYAQBIAGMS?EGEDOHEEMEOHI@GAQ?IDGGW?UEKGKCEJOME?MDCFI?MCEBAFWCW?GCGFOBGCE@M??DM@YOQ?QKGFG?GGI?IKE@IIEFK?AEGAIBEE@BC@?EE@GGCFAFBT?NIPAH?XF^ATCD?DE?EC@HIG@BA?I?KDO?C@A^CDDnBIT?FB@AAABCM",
+    "resource_state": 3,
+    "summary_polyline": "ic|rFwgieUBBLEBKH@LCn@@^AHBLZ@`DFjD?PBdADNBf@AP@tBEr@FlBAb@@tAAFB~@CPKLGBkAAECs@CI@i@Gc@@i@IO@ICa@Cg@Ii@@i@Eq@Ca@E_@AYIIBECc@Ge@AIEUAECg@I_CGSEGKK]OI?IALGFE?EHBM@BDEH?ABJCDKCeCE\\FxAA\\CAMLCJSLEBOAMH?AUEg@Aa@EEEGCQ?MQEWIECEEPQ@KGCFE?WCaA]O?a@Hy@@oCQq@CG@GEe@?YCM@OEED[WUGEJC@c@KGBUAEBSGUBGEI@[EQ@m@CQCI@OGO?KCYAQBIAGMS?EGEDOHEEMEOHI@GAQ?IDGGW?UEKGKCEJOME?MDCFI?MCEBAFWCW?GCGFOBGCE@M??DM@YOQ?QKGFG?GGI?IKE@IIEFK?AEGAIBEE@BC@?EE@GGCFAFBT?NIPAH?XF^ATCD?DE?EC@HIG@BA?I?KDO?C@A^CDDnBIT?FB@AAABCM"
+  },
+  "trainer": false,
+  "commute": false,
+  "manual": false,
+  "private": false,
+  "visibility": "everyone",
+  "flagged": false,
+  "gear_id": null,
+  "start_latlng": [
+    39.962299,
+    116.379006
+  ],
+  "end_latlng": [
+    39.97562,
+    116.373735
+  ],
+  "average_speed": 3.267,
+  "max_speed": 6.8,
+  "has_heartrate": true,
+  "average_heartrate": 135.9,
+  "max_heartrate": 157,
+  "heartrate_opt_out": false,
+  "display_hide_heartrate_option": true,
+  "elev_high": 56.7,
+  "elev_low": 51.5,
+  "upload_id": 19048168927,
+  "upload_id_str": "19048168927",
+  "external_id": "2BD43076-1641-41FA-890B-E239ADB7F1CA-activity.fit",
+  "from_accepted_tag": false,
+  "pr_count": 0,
+  "total_photo_count": 0,
+  "has_kudoed": false,
+  "suffer_score": 7,
+  "description": null,
+  "calories": 0,
+  "perceived_exertion": null,
+  "prefer_perceived_exertion": null,
+  "segment_efforts": [
+    {
+      "id": 3474736854908738600,
+      "resource_state": 2,
+      "name": "马甸桥搓衣板路climb",
+      "activity": {
+        "id": 17948026184,
+        "visibility": "everyone",
+        "resource_state": 1
+      },
+      "athlete": {
+        "id": 1596917895,
+        "resource_state": 1
+      },
+      "elapsed_time": 203,
+      "moving_time": 191,
+      "start_date": "2026-04-02T10:34:01Z",
+      "start_date_local": "2026-04-02T18:34:01Z",
+      "distance": 304.1,
+      "start_index": 267,
+      "end_index": 463,
+      "device_watts": false,
+      "average_heartrate": 132.2,
+      "max_heartrate": 156,
+      "segment": {
+        "id": 26437611,
+        "resource_state": 2,
+        "name": "马甸桥搓衣板路climb",
+        "activity_type": "Ride",
+        "distance": 304.1,
+        "average_grade": 0,
+        "maximum_grade": 15.9,
+        "elevation_high": 57.3,
+        "elevation_low": 53.2,
+        "start_latlng": [
+          39.965885,
+          116.374407
+        ],
+        "end_latlng": [
+          39.968039,
+          116.374801
+        ],
+        "elevation_profile": null,
+        "elevation_profiles": null,
+        "climb_category": 0,
+        "city": "Xicheng Qu",
+        "state": "Beijing Shi",
+        "country": "China",
+        "private": false,
+        "hazardous": false,
+        "starred": false
+      },
+      "pr_rank": null,
+      "achievements": [],
+      "visibility": "everyone",
+      "kom_rank": null,
+      "hidden": false
+    },
+    {
+      "id": 3474736854909866000,
+      "resource_state": 2,
+      "name": "北京马甸桥至北土城西路骑行（G6辅路路段）",
+      "activity": {
+        "id": 17948026184,
+        "visibility": "everyone",
+        "resource_state": 1
+      },
+      "athlete": {
+        "id": 1596917895,
+        "resource_state": 1
+      },
+      "elapsed_time": 231,
+      "moving_time": 209,
+      "start_date": "2026-04-02T10:37:02Z",
+      "start_date_local": "2026-04-02T18:37:02Z",
+      "distance": 929.4,
+      "start_index": 443,
+      "end_index": 669,
+      "device_watts": false,
+      "average_heartrate": 147.1,
+      "max_heartrate": 157,
+      "segment": {
+        "id": 35542395,
+        "resource_state": 2,
+        "name": "北京马甸桥至北土城西路骑行（G6辅路路段）",
+        "activity_type": "Ride",
+        "distance": 929.4,
+        "average_grade": 0,
+        "maximum_grade": 1.5,
+        "elevation_high": 54.4,
+        "elevation_low": 53.5,
+        "start_latlng": [
+          39.967264,
+          116.374786
+        ],
+        "end_latlng": [
+          39.975568,
+          116.375448
+        ],
+        "elevation_profile": null,
+        "elevation_profiles": null,
+        "climb_category": 0,
+        "city": "德胜街道",
+        "state": "Beijing",
+        "country": "PRC",
+        "private": false,
+        "hazardous": false,
+        "starred": false
+      },
+      "pr_rank": null,
+      "achievements": [],
+      "visibility": "everyone",
+      "kom_rank": null,
+      "hidden": false
+    }
+  ],
+  "splits_metric": [
+    {
+      "distance": 1001.3,
+      "elapsed_time": 261,
+      "elevation_difference": 0.3,
+      "moving_time": 261,
+      "split": 1,
+      "average_speed": 3.84,
+      "average_grade_adjusted_speed": 3.84,
+      "average_heartrate": 132.02325581395348,
+      "pace_zone": 0
+    },
+    {
+      "distance": 999.8,
+      "elapsed_time": 311,
+      "elevation_difference": -0.2,
+      "moving_time": 309,
+      "split": 2,
+      "average_speed": 3.24,
+      "average_grade_adjusted_speed": 3.26,
+      "average_heartrate": 138.6722408026756,
+      "pace_zone": 0
+    },
+    {
+      "distance": 574.5,
+      "elapsed_time": 281,
+      "elevation_difference": -1.6,
+      "moving_time": 220,
+      "split": 3,
+      "average_speed": 2.61,
+      "average_grade_adjusted_speed": 2.61,
+      "average_heartrate": 136.8950276243094,
+      "pace_zone": 0
+    }
+  ],
+  "splits_standard": [
+    {
+      "distance": 1611.1,
+      "elapsed_time": 496,
+      "elevation_difference": 0.8,
+      "moving_time": 494,
+      "split": 1,
+      "average_speed": 3.26,
+      "average_grade_adjusted_speed": 3.28,
+      "average_heartrate": 133.16839916839916,
+      "pace_zone": 0
+    },
+    {
+      "distance": 964.5,
+      "elapsed_time": 357,
+      "elevation_difference": -2.3,
+      "moving_time": 296,
+      "split": 2,
+      "average_speed": 3.26,
+      "average_grade_adjusted_speed": 3.25,
+      "average_heartrate": 141.0466926070039,
+      "pace_zone": 0
+    }
+  ],
+  "laps": [
+    {
+      "id": 64190756813,
+      "resource_state": 2,
+      "name": "Lap 1",
+      "activity": {
+        "id": 17948026184,
+        "visibility": "everyone",
+        "resource_state": 1
+      },
+      "athlete": {
+        "id": 1596917895,
+        "resource_state": 1
+      },
+      "elapsed_time": 854,
+      "moving_time": 788,
+      "start_date": "2026-04-02T10:29:31Z",
+      "start_date_local": "2026-04-02T18:29:31Z",
+      "distance": 2575.6,
+      "average_speed": 3.27,
+      "max_speed": 6.8,
+      "lap_index": 1,
+      "split": 1,
+      "start_index": 0,
+      "end_index": 781,
+      "total_elevation_gain": 3.6,
+      "device_watts": false,
+      "average_heartrate": 135.9,
+      "max_heartrate": 157
+    }
+  ],
+  "photos": {
+    "primary": null,
+    "count": 0
+  },
+  "stats_visibility": [
+    {
+      "type": "heart_rate",
+      "visibility": "everyone"
+    },
+    {
+      "type": "pace",
+      "visibility": "everyone"
+    },
+    {
+      "type": "power",
+      "visibility": "everyone"
+    },
+    {
+      "type": "speed",
+      "visibility": "everyone"
+    },
+    {
+      "type": "calories",
+      "visibility": "everyone"
+    }
+  ],
+  "hide_from_home": false,
+  "embed_token": "fdc0033fcff59c0854d07d848a6528860eb65239",
+  "available_zones": [
+    "heartrate"
+  ]
+}
