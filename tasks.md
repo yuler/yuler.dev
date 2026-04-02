@@ -35,13 +35,13 @@ Scan date: 2026-04-02. Personal Astro site (`yuler.dev`). Items are ordered roug
 
 ## UX / accessibility
 
-- [ ] **Keyboard / focus for custom UI** — Share dialog and map controls: verify focus trap, Escape to close, and visible focus rings match `global.css` `:focus-visible` patterns.
-- [ ] **External links** — Spot-check `target="_blank"` links include `rel="noopener noreferrer"` where appropriate (many already do).
+- [x] **Keyboard / focus for custom UI** — Share dialog and map controls: verify focus trap, Escape to close, and visible focus rings match `global.css` `:focus-visible` patterns.
+- [x] **External links** — Spot-check `target="_blank"` links include `rel="noopener noreferrer"` where appropriate (many already do).
 
 ---
 
 ## Quick wins (same session)
 
-1. Fix the `matched` string in `workouts/index.astro`.
-2. Extract Strava JSON loader + types to `src/utils/` and switch three call sites.
-3. Replace duplicated corner divs with `CornerMarkers` on one page as a pattern, then roll out.
+1. [x] Fix the `matched` string in `workouts/index.astro`.
+2. [x] Extract Strava JSON loader + types to `src/utils/` and switch three call sites.
+3. [x] Replace duplicated corner divs with `CornerMarkers` on one page as a pattern, then roll out.

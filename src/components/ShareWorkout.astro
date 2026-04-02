@@ -38,7 +38,7 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
 <button
   id={triggerId}
   data-dialog-id={dialogId}
-  class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none cursor-pointer"
+  class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 rounded-sm cursor-pointer"
   aria-label="Share workout"
   title="Share workout"
 >
@@ -64,7 +64,7 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
       <button
         id={closeBtnId}
         data-dialog-close={dialogId}
-        class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none cursor-pointer"
+        class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 rounded-sm cursor-pointer"
         aria-label="Close share dialog"
       >
         <Close />
@@ -139,7 +139,7 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
         id={downloadBtnId}
         data-wrapper-id={posterWrapperId}
         data-activity-name={activityName}
-        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white text-sm font-mono hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white text-sm font-mono hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
         aria-label="Download poster"
       >
         <Download class="download-icon" />
@@ -148,7 +148,7 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
 
       <button
         data-copy-id={posterWrapperId}
-        class="copy-poster-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-mono text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        class="copy-poster-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-mono text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
         aria-label="Copy poster to clipboard"
       >
         <Copy />
@@ -165,11 +165,16 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
   /** Poster capture only runs after the share dialog opens; html-to-image stays dynamic. */
   const htmlToImagePromise = import('html-to-image')
 
+  const dialogFocusStack: HTMLElement[] = []
+
   // ── Dialog open/close ──────────────────────────────────────────────────────
 
   function openDialog(dialogId: string) {
     const dialog = document.getElementById(dialogId)
     if (!dialog) return
+    const ae = document.activeElement
+    if (ae instanceof HTMLElement) dialogFocusStack.push(ae)
+
     dialog.classList.remove('hidden')
     dialog.classList.add('flex')
     document.body.classList.add('overflow-hidden')
@@ -180,6 +185,13 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
       wrapper.dataset.initialized = 'true'
       initPoster(wrapper)
     }
+
+    requestAnimationFrame(() => {
+      const closeBtn = dialog.querySelector<HTMLButtonElement>(
+        'button[aria-label="Close share dialog"]',
+      )
+      closeBtn?.focus()
+    })
   }
 
   function closeDialog(dialogId: string) {
@@ -188,6 +200,9 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
     dialog.classList.add('hidden')
     dialog.classList.remove('flex')
     document.body.classList.remove('overflow-hidden')
+
+    const prev = dialogFocusStack.pop()
+    prev?.focus()
   }
 
   // Wire triggers
