@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     // Load .env files using Vite's built-in helper (same behavior Vitest expects).
     // The empty prefix means "load all keys", not just VITE_*.
     env: loadEnv(mode, __dirname, ''),
-    include: ['scripts/**/*.test.mjs'],
+    include: ['scripts/**/*.test.mjs', 'src/**/*.test.ts'],
     environment: 'node',
     // Integration tests rename dist / run screenshot; keep a single worker.
     maxWorkers: 1,
