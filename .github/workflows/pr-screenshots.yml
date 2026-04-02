@@ -84,14 +84,14 @@ jobs:
 
       - name: Upload screenshots artifact
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: pr-${{ github.event.pull_request.number }}-screenshots
           path: screenshots/*.png
           if-no-files-found: error
 
       - name: Comment on PR with screenshots link
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
           USE_RAW_URL: ${{ steps.publish.outputs.use_raw }}
