@@ -51,14 +51,26 @@ const resetBtnId = `reset-map-btn-${randomId}`
     </div>
     <button
       id={resetBtnId}
-      class="absolute bottom-12 right-3 z-1000 bg-white/95 text-gray-600 hover:text-gray-900 hover:bg-white border border-gray-200 rounded-md p-2.5 shadow-sm transition-colors focus:outline-none cursor-pointer"
+      class="absolute bottom-3 left-3 z-1000 flex size-[26px] items-center justify-center bg-white/95 p-0 text-gray-600 hover:bg-white hover:text-gray-900 border border-gray-200 rounded-md shadow-sm transition-colors focus:outline-none cursor-pointer"
       aria-label="Reset map center"
       title="Reset map center"
     >
-      <LocateFixed class="w-5 h-5" />
+      <LocateFixed class="size-[18px]" />
     </button>
   </div>
 </div>
+
+<style is:global>
+  /* Match .leaflet-touch .leaflet-bar a (30×30) next to the map container */
+  .activity-map-container.leaflet-touch + [id^='reset-map-btn-'] {
+    width: 30px;
+    height: 30px;
+  }
+  .activity-map-container.leaflet-touch + [id^='reset-map-btn-'] svg {
+    width: 22px;
+    height: 22px;
+  }
+</style>
 
 <script>
   import { addSeconds, format } from 'date-fns'
