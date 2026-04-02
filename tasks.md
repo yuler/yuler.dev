@@ -24,9 +24,9 @@ Scan date: 2026-04-02. Personal Astro site (`yuler.dev`). Items are ordered roug
 
 ## Types & tooling
 
-- [ ] **Tighten `any` usage** — `getStaticPaths` in `workouts/[id].astro` uses `as any` / loose casts; `MapRoute.astro` client script uses `any` for Leaflet helpers. Prefer proper types or narrow interfaces.
-- [ ] **Dependency placement** — `@astrojs/check` lives in `dependencies`; it is usually a dev-only tool. Moving to `devDependencies` keeps production install lean (verify nothing relies on it at runtime).
-- [ ] **Expand tests beyond scripts** — Vitest covers `scripts/*.test.mjs` only. Add unit tests for `src/utils/polyline.ts`, date helpers, and any extracted Strava/format helpers after refactors.
+- [x] **Tighten `any` usage** — `getStaticPaths` in `workouts/[id].astro` uses `as any` / loose casts; `MapRoute.astro` client script uses `any` for Leaflet helpers. Prefer proper types or narrow interfaces.
+- [x] **Dependency placement** — `@astrojs/check` lives in `dependencies`; it is usually a dev-only tool. Moving to `devDependencies` keeps production install lean (verify nothing relies on it at runtime).
+- [x] **Expand tests beyond scripts** — Vitest covers `scripts/*.test.mjs` only. Add unit tests for `src/utils/polyline.ts`, date helpers, and any extracted Strava/format helpers after refactors.
 
 ## Security / SEO / meta
 

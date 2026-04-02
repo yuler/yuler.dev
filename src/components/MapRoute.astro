@@ -102,7 +102,7 @@ const resetBtnId = `reset-map-btn-${randomId}`
       const btnId = el.getAttribute('data-btn-id')
       const resetBtnId = el.getAttribute('data-reset-btn-id')
 
-      const latlngs = points.map((p: any) => L.latLng(p[0], p[1]))
+      const latlngs = points.map((p: number[]) => L.latLng(p[0], p[1]))
       const map = L.map(mapId, { zoomControl: true, attributionControl: true })
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -134,7 +134,7 @@ const resetBtnId = `reset-map-btn-${randomId}`
 
       // --- Helpers ---
 
-      function addMarker(map: any, position: any, color: any) {
+      function addMarker(map: L.Map, position: L.LatLngExpression, color: string) {
         const html = `<div style="width:0.75rem;height:0.75rem;background:${color};border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>`
         L.marker(position, {
           icon: L.divIcon({ html, className: '', iconSize: [12, 12], iconAnchor: [6, 6] }),
@@ -142,13 +142,13 @@ const resetBtnId = `reset-map-btn-${randomId}`
       }
 
       function setupMotionPlayer(
-        map: any,
-        pathPoints: any,
-        actionBtnId: any,
-        motionDuration: any,
-        initialTimeStr: any,
+        map: L.Map,
+        pathPoints: L.LatLng[],
+        actionBtnId: string | null,
+        motionDuration: number,
+        initialTimeStr: string,
       ) {
-        const motionBtn = document.getElementById(actionBtnId)
+        const motionBtn = actionBtnId ? document.getElementById(actionBtnId) : null
         if (!motionBtn) return
 
         const playIcon = motionBtn.querySelector('.play-icon')
@@ -156,10 +156,10 @@ const resetBtnId = `reset-map-btn-${randomId}`
 
         let isPlaying = false
         let currentProgress = 0
-        let lastTime: any = null
-        let animationFrameId: any = null
-        let motionMarker: any = null
-        let motionPolyline: any = null
+        let lastTime: number | null = null
+        let animationFrameId: number | null = null
+        let motionMarker: L.Marker | null = null
+        let motionPolyline: L.Polyline | null = null
 
         const DURATION_MS = 8000
         let totalDist = 0
@@ -185,7 +185,7 @@ const resetBtnId = `reset-map-btn-${randomId}`
 
         function togglePlayPause() {
           if (isPlaying) {
-            cancelAnimationFrame(animationFrameId)
+            if (animationFrameId != null) cancelAnimationFrame(animationFrameId)
             isPlaying = false
             playIcon?.classList.remove('hidden')
             pauseIcon?.classList.add('hidden')
@@ -234,11 +234,12 @@ const resetBtnId = `reset-map-btn-${randomId}`
           }).addTo(map)
         }
 
-        function getInterpolatedPoint(targetDist: number) {
+        function getInterpolatedPoint(targetDist: number): { point: L.LatLng; index: number } {
           let i = 1
           while (i < dists.length && dists[i] < targetDist) i++
 
-          if (i >= dists.length) return { point: pathPoints[pathPoints.length - 1], index: pathPoints.length }
+          if (i >= dists.length)
+            return { point: pathPoints[pathPoints.length - 1], index: pathPoints.length }
 
           const startDist = dists[i - 1]
           const endDist = dists[i]
@@ -248,10 +249,11 @@ const resetBtnId = `reset-map-btn-${randomId}`
           const lat = p1.lat + (p2.lat - p1.lat) * segmentProgress
           const lng = p1.lng + (p2.lng - p1.lng) * segmentProgress
 
-          return { point: [lat, lng], index: i }
+          return { point: L.latLng(lat, lng), index: i }
         }
 
         function animate(time: number) {
+          if (lastTime == null || motionMarker == null || motionPolyline == null) return
           const delta = time - lastTime
           lastTime = time
           currentProgress += delta / DURATION_MS

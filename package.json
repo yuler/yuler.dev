@@ -23,7 +23,6 @@
     "clean:screenshots": "rm -rf screenshots"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.8",
     "@astrojs/mdx": "^5.0.3",
     "@fontsource/inter": "^5.2.8",
     "@tailwindcss/typography": "^0.5.19",
@@ -40,6 +39,7 @@
     "typescript": "^6.0.2"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.8",
     "@types/leaflet": "^1.9.21",
     "playwright": "^1.59.1",
     "sharp": "^0.34.5",
