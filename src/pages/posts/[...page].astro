@@ -56,7 +56,7 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
             page.data.map(post => (
               <li>
                 <a
-                  href={`/posts/${post.slug}`}
+                  href={`/posts/${post.id}`}
                   class="group flex items-center justify-between p-3 min-h-[3.25rem] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
                 >
                   <div>
