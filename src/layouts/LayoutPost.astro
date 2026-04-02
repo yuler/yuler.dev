@@ -17,10 +17,22 @@ interface Props {
 }
 
 const { frontmatter } = Astro.props
+
+const site = Astro.site ?? new URL('https://yuler.dev')
+const ogImage = frontmatter.image?.url
+  ? new URL(frontmatter.image.url, site).href
+  : undefined
 ---
 
-<Layout title={frontmatter.title}>
+<Layout
+  title={frontmatter.title}
+  description={frontmatter.description}
+  image={ogImage}
+  ogType="article"
+  articlePublishedTime={frontmatter.date.toISOString()}
+>
   <slot />
+  <!-- Mermaid: post diagrams are author-written MDX only; strict security is appropriate. -->
   <script>
     function initMermaid() {
       const blocks = document.querySelectorAll('pre[data-language="mermaid"]')
@@ -41,7 +53,7 @@ const { frontmatter } = Astro.props
         mermaid.initialize({
           startOnLoad: true,
           theme: 'default',
-          securityLevel: 'loose',
+          securityLevel: 'strict',
         })
       })
     }
