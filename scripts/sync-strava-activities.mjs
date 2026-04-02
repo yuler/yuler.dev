@@ -56,10 +56,9 @@ async function syncActivities() {
   const knownIds = readIds()
   const knownSet = new Set(knownIds)
 
-  const activities =
-    knownIds.length === 0
-      ? await fetchAllActivities()
-      : await getStravaActivities()
+  // Always paginate: incremental runs used to call getStravaActivities() once and
+  // missed IDs beyond the first page when total activities > per_page.
+  const activities = await fetchAllActivities()
 
   const freshIds = activities.map((a) => a.id)
   const missingIds = freshIds.filter((id) => !hasDetail(id))

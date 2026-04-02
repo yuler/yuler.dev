@@ -176,7 +176,7 @@ const weeks = allWeeks.filter(({ start, end }) =>
             li.style.display = 'none'
           }
         })
-        countEl.textContent = from ? visible + 'matched' : ''
+        countEl.textContent = from ? visible + ' matched' : ''
         activityCount.textContent = (from ? visible : total) + (visible === 1 ? ' activity' : ' activities')
         emptyState.classList.toggle('hidden', visible > 0)
 

@@ -13,8 +13,8 @@ Scan date: 2026-04-02. Personal Astro site (`yuler.dev`). Items are ordered roug
 
 ## Correctness / behavior
 
-- [ ] **Fix workouts filter count string** — In `workouts/index.astro` inline script, `countEl.textContent = from ? visible + 'matched' : ''` is missing a space (shows e.g. `5matched`). Should be readable text like `5 matched` or `5 activities`.
-- [ ] **Review incremental Strava sync** — `scripts/sync-strava-activities.mjs` uses full pagination only when `_index.json` is empty; otherwise it calls `getStravaActivities()` once (default first page). Document this assumption or paginate on incremental runs so edge cases (many new activities, or API ordering quirks) do not drop IDs.
+- [x] **Fix workouts filter count string** — In `workouts/index.astro` inline script, `countEl.textContent = from ? visible + 'matched' : ''` is missing a space (shows e.g. `5matched`). Should be readable text like `5 matched` or `5 activities`.
+- [x] **Review incremental Strava sync** — `scripts/sync-strava-activities.mjs` uses full pagination only when `_index.json` is empty; otherwise it calls `getStravaActivities()` once (default first page). Document this assumption or paginate on incremental runs so edge cases (many new activities, or API ordering quirks) do not drop IDs.
 
 ## Performance / bundles
 
