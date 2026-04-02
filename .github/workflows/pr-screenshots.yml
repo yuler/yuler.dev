@@ -9,8 +9,10 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: pr-screenshots-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  # All PRs write to the same branch (`pr-screenshots`), so serialize updates to avoid
+  # non-fast-forward pushes overwriting each other.
+  group: pr-screenshots
+  cancel-in-progress: false
 
 jobs:
   screenshots:
@@ -48,20 +50,27 @@ jobs:
           cp -r screenshots "$tmp_dir/screenshots"
 
           PR_NUMBER="${{ github.event.pull_request.number }}"
-          BRANCH="pr-screenshots-${PR_NUMBER}-${{ github.run_id }}"
+          BRANCH="pr-screenshots"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Start from a clean base so we only commit the screenshots.
-          git fetch origin main --depth=1
-          git checkout -B "$BRANCH" origin/main
+          # Start from the existing `pr-screenshots` branch (if it exists) so we
+          # accumulate screenshots from multiple PRs under `pr-<number>/...`.
+          if git fetch origin "$BRANCH" --depth=1; then
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            git fetch origin main --depth=1
+            git checkout -B "$BRANCH" origin/main
+          fi
 
-          rm -rf screenshots
-          mv "$tmp_dir/screenshots" ./screenshots
+          # Replace only this PR's folder.
+          rm -rf "pr-${PR_NUMBER}"
+          mkdir -p "pr-${PR_NUMBER}"
+          mv "$tmp_dir/screenshots" "pr-${PR_NUMBER}/screenshots"
           rm -rf "$tmp_dir"
 
-          git add screenshots/*.png
+          git add "pr-${PR_NUMBER}/screenshots/*.png"
           if git diff --cached --quiet; then
             echo "No changes to commit."
             echo "use_raw=false" >> "$GITHUB_OUTPUT"
@@ -98,9 +107,9 @@ jobs:
             const artifactUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}/artifacts/${artifactId}`;
             const useRaw = process.env.USE_RAW_URL === 'true';
 
-            const screenshotBranch = `pr-screenshots-${issue_number}-${context.runId}`;
+            const screenshotBranch = `pr-screenshots`;
             // Use same-origin "github.com/.../raw/..." URLs for better compatibility with GitHub's CSP.
-            const rawImgBase = `https://github.com/${owner}/${repo}/raw/${screenshotBranch}/screenshots`;
+            const rawImgBase = `https://github.com/${owner}/${repo}/raw/${screenshotBranch}/pr-${issue_number}/screenshots`;
 
             const files = fs
               .readdirSync('screenshots')
