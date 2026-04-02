@@ -33,7 +33,7 @@ jobs:
         run: pnpm build
 
       - name: Generate screenshots
-        run: pnpm run gen:screenshot
+        run: pnpm run gen:screenshots
 
       - name: Check
         run: npm run check

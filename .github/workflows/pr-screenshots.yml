@@ -1,0 +1,194 @@
+name: PR Screenshots
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  # All PRs write to the same branch (`pr-screenshots`), so serialize updates to avoid
+  # non-fast-forward pushes overwriting each other.
+  group: pr-screenshots
+  cancel-in-progress: false
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          cache: true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Generate screenshots
+        run: pnpm run gen:screenshots
+
+      - name: Publish screenshots to branch
+        id: publish
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          set -euo pipefail
+          tmp_dir="$(mktemp -d)"
+          cp -r screenshots "$tmp_dir/screenshots"
+
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          BRANCH="pr-screenshots"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Start from the existing `pr-screenshots` branch (if it exists) so we
+          # accumulate screenshots from multiple PRs under `pr-<number>/...`.
+          if git fetch origin "$BRANCH" --depth=1; then
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            git fetch origin main --depth=1
+            git checkout -B "$BRANCH" origin/main
+          fi
+
+          # Replace only this PR's folder.
+          rm -rf "pr-${PR_NUMBER}"
+          mkdir -p "pr-${PR_NUMBER}"
+          mv "$tmp_dir/screenshots" "pr-${PR_NUMBER}/screenshots"
+          rm -rf "$tmp_dir"
+
+          git add "pr-${PR_NUMBER}/screenshots/*.png"
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            echo "use_raw=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "chore: add PR #${PR_NUMBER} screenshots"
+          git push origin "$BRANCH":"$BRANCH"
+
+          echo "use_raw=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload screenshots artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-${{ github.event.pull_request.number }}-screenshots
+          path: screenshots/*.png
+          if-no-files-found: error
+
+      - name: Comment on PR with screenshots link
+        uses: actions/github-script@v7
+        env:
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+          USE_RAW_URL: ${{ steps.publish.outputs.use_raw }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            const marker = '<!-- yuler.dev/pr-screenshots -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            const artifactId = process.env.ARTIFACT_ID;
+            const artifactUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}/artifacts/${artifactId}`;
+            const useRaw = process.env.USE_RAW_URL === 'true';
+
+            const screenshotBranch = `pr-screenshots`;
+            // Use same-origin "github.com/.../raw/..." URLs for better compatibility with GitHub's CSP.
+            const rawImgBase = `https://github.com/${owner}/${repo}/raw/${screenshotBranch}/pr-${issue_number}/screenshots`;
+
+            const files = fs
+              .readdirSync('screenshots')
+              .filter((f) => f.endsWith('.png'))
+              .sort((a, b) => a.localeCompare(b));
+
+            // screenshots/<slug>.<vp>.png
+            // Example: screenshots/home.iphone.png
+            const shotsByPage = new Map();
+            for (const file of files) {
+              const match = file.match(/^(.+)\.(iphone|ipad|pc)\.png$/);
+              if (!match) continue;
+              const [, slug, vp] = match;
+              if (!shotsByPage.has(slug)) shotsByPage.set(slug, {});
+              shotsByPage.get(slug)[vp] = file;
+            }
+
+            const pageSlugs = Array.from(shotsByPage.keys()).sort((a, b) =>
+              a.localeCompare(b),
+            );
+
+            const imgSrc = (file) => {
+              if (useRaw) return `${rawImgBase}/${file}`;
+              // Fallback to artifact URLs for cases where we couldn't publish.
+              return `${artifactUrl}/download?path=${encodeURIComponent(file)}`;
+            };
+
+            const pageCell = (slug) => {
+              return `<b>${slug}</b>`;
+            };
+
+            const cell = (slug, vp) => {
+              const file = shotsByPage.get(slug)?.[vp];
+              if (!file) return '-';
+              const src = imgSrc(file);
+              return `<img src="${src}" alt="${slug} ${vp}" width="260" />`;
+            };
+
+            const table = [
+              '| page | iphone | ipad | pc |',
+              '| --- | --- | --- | --- |',
+              ...pageSlugs.map(
+                (slug) =>
+                  `| ${pageCell(slug)} | ${cell(slug, 'iphone')} | ${cell(slug, 'ipad')} | ${cell(slug, 'pc')} |`,
+              ),
+            ].join('\n');
+
+            const body = [
+              marker,
+              `<details>`,
+              `<summary>📸 Screenshots for PR #${issue_number}</summary>`,
+              ``,
+              table,
+              ``,
+              `Download artifact: ${artifactUrl}`,
+              `</details>`,
+            ].join('\n');
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }

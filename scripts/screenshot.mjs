@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import { execSync } from 'child_process';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, statSync } from 'fs';
 import { createServer } from 'http';
 import { readFile } from 'fs/promises';
 import { extname, resolve } from 'path';
@@ -9,12 +9,12 @@ import { fileURLToPath } from 'url';
 const PORT = 4173;
 const DIST = process.env.SCREENSHOT_DIST_DIR ?? 'dist';
 
-export const OUT_DIR = 'shots';
+export const OUT_DIR = 'screenshots';
 
 export const PAGES = [
   { url: '/', slug: 'home' },
   { url: '/posts', slug: 'posts' },
-  { url: '/posts/2025/explore-rails-with-vue', slug: 'posts-2025-explore-rails-with-vue' },
+  { url: '/posts/hi', slug: 'posts-hi' },
   { url: '/workouts', slug: 'workouts' },
   { url: '/workouts/17751421152', slug: 'workouts-17751421152' },
 ];
@@ -83,10 +83,24 @@ function startServer(port) {
 
     // Resolve the candidate path and ensure it stays within distRoot.
     // We explicitly prefix with '.' to avoid issues with absolute paths.
-    const candidate = resolve(distRoot, `.${pathname}`);
-    const relative = candidate.slice(distRoot.length);
+    const directCandidate = resolve(distRoot, `.${pathname}`);
+    const relative = directCandidate.slice(distRoot.length);
     const isWithinDist = relative === '' || relative.startsWith('/') || relative.startsWith('\\');
     if (!isWithinDist) return null;
+
+    // Astro static output uses directories with `index.html` (e.g. `/posts/index.html`).
+    // When we request `/posts` (no trailing slash), `pathname` doesn't end with `/`,
+    // so we need to fall back to `/posts/index.html`.
+    let candidate = directCandidate;
+    if (!pathname.endsWith('/') && extname(directCandidate) === '') {
+      try {
+        if (statSync(directCandidate).isDirectory()) {
+          candidate = resolve(distRoot, `.${pathname}/index.html`);
+        }
+      } catch {
+        // If it doesn't exist yet, later readFile will return 404.
+      }
+    }
 
     const ext = extname(candidate).toLowerCase();
     const contentType = mimeTypes[ext] || 'application/octet-stream';
@@ -155,7 +169,7 @@ function startServer(port) {
 }
 
 // Main: capture all screenshots
-async function captureShots(baseUrl) {
+async function captureScreenshots(baseUrl) {
   console.log('Launching browser...');
   const browser = await chromium.launch();
 
@@ -171,6 +185,17 @@ async function captureShots(baseUrl) {
         // Use bounded waits to avoid indefinite hangs on long-lived connections.
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45_000 });
         await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
+
+        // Some pages render the route map via `MapRoute.astro` which initializes Leaflet after DOMContentLoaded.
+        // Wait for our explicit readiness flag so screenshots capture the route polyline/bounds.
+        if (await page.$('.activity-map-container')) {
+          await page
+            .waitForFunction(
+              () => document.querySelector('.activity-map-container')?.dataset?.routeReady === 'true',
+              { timeout: 30_000 },
+            )
+            .catch(() => {});
+        }
 
         const outputFile = outputPath(pageInfo.slug, viewport.name);
         await page.screenshot({ path: outputFile, fullPage: true });
@@ -197,7 +222,7 @@ if (isMainModule()) {
 
       serverHandle = await startServer(PORT);
 
-      await captureShots(`http://localhost:${PORT}`);
+      await captureScreenshots(`http://localhost:${PORT}`);
 
       await serverHandle.close();
       process.exit(0);

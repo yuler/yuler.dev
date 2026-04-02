@@ -128,6 +128,12 @@ const resetBtnId = `reset-map-btn-${randomId}`
       setupMotionPlayer(map, latlngs, btnId, duration, startTimeStr)
       setupResetCenter(map, routeLine, resetBtnId)
 
+      // Signal to the screenshot runner that the route map is initialized.
+      // (leaflet tiles may still load after this, but the route polyline + bounds are set.)
+      if (el instanceof HTMLElement) {
+        el.dataset.routeReady = 'true'
+      }
+
       // --- Helpers ---
 
       function addMarker(map: any, position: any, color: any) {
