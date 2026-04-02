@@ -1,13 +1,10 @@
 ---
 import Avatar from '../Avatar.astro'
+import CornerMarkers from '../CornerMarkers.astro'
 ---
 
 <div class="relative bg-white border border-gray-200 p-6 transition-all duration-300 hover:border-gray-400">
-  <!-- Corner Markers -->
-  <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-gray-400"></div>
-  <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-gray-400"></div>
-  <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-gray-400"></div>
-  <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-gray-400"></div>
+  <CornerMarkers />
 
   <div class="flex items-center gap-4">
     <div class="h-16 w-16 flex-shrink-0 transition-transform duration-300">

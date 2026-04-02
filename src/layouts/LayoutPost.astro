@@ -1,8 +1,45 @@
 ---
 import Layout from './Layout.astro'
+
+interface Props {
+  frontmatter: {
+    title: string
+    description?: string
+    date: Date
+    tags?: string[]
+    draft?: boolean
+    wip?: boolean
+    image?: {
+      url: string
+      alt: string
+    }
+  }
+}
+
 const { frontmatter } = Astro.props
 ---
 
 <Layout title={frontmatter.title}>
   <slot />
+  <script>
+    import mermaid from 'mermaid'
+
+    // Find all mermaid code blocks and extract raw text
+    document.querySelectorAll('pre[data-language="mermaid"]').forEach(pre => {
+      const code = pre.querySelector('code')
+      if (code) {
+        const rawCode = code.textContent
+        const newPre = document.createElement('pre')
+        newPre.className = 'mermaid not-prose'
+        newPre.textContent = rawCode
+        pre.parentNode?.replaceChild(newPre, pre)
+      }
+    })
+
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+    })
+  </script>
 </Layout>

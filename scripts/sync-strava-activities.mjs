@@ -8,7 +8,7 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ACTIVITIES_DIR = path.join(__dirname, '..', 'data', 'strava', 'activities')
-const IDS_FILE = path.join(ACTIVITIES_DIR, 'ids.json')
+const IDS_FILE = path.join(ACTIVITIES_DIR, '_index.json')
 
 fs.mkdirSync(ACTIVITIES_DIR, { recursive: true })
 

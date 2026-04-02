@@ -1,16 +1,27 @@
 ---
 import '../styles/global.css'
 import Footer from '../components/Footer.astro'
-const { title } = Astro.props
+
+interface Props {
+  title: string
+  description?: string
+  image?: string
+}
+
+const { title, description, image } = Astro.props
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    {image && <meta property="og:image" content={image} />}
     <slot name="head" />
   </head>
   <body class="grid grid-cols-1 h-full">
@@ -18,30 +29,5 @@ const { title } = Astro.props
       <slot />
     </main>
     <Footer />
-    <script>
-      import mermaid from 'mermaid'
-
-      // Find all mermaid code blocks and extract raw text
-      document.querySelectorAll('pre[data-language="mermaid"]').forEach(pre => {
-        const code = pre.querySelector('code')
-        if (code) {
-          // Extract raw text content
-          const rawCode = code.textContent
-          // Create new pre element with mermaid class
-          const newPre = document.createElement('pre')
-          newPre.className = 'mermaid not-prose'
-          newPre.textContent = rawCode
-          // Replace the old pre element
-          pre.parentNode?.replaceChild(newPre, pre)
-        }
-      })
-
-      // Initialize mermaid
-      mermaid.initialize({
-        startOnLoad: true,
-        theme: 'default',
-        securityLevel: 'loose',
-      })
-    </script>
   </body>
 </html>

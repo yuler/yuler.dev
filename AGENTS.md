@@ -17,4 +17,8 @@ Every icons should a simple astro component locate in [`src/components/icons`](.
 
 ## Git Commit
 
-Every commit needs to invoke the `/git-commit` skill.
+Use the `/git-commit` skill for every commit. Check in this order:
+- Local: `skills/git-commit` (this repo)
+- Global: `~/.agents/skills/git-commit`
+
+If neither exists, install it from [skills/git-commit](https://github.com/yuler/skills/tree/main/skills/git-commit).
