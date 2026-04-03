@@ -42,7 +42,6 @@ jobs:
         run: pnpm run gen:screenshots
 
       - name: Publish screenshots to branch
-        id: publish
         if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           set -euo pipefail
@@ -73,28 +72,14 @@ jobs:
           git add "pr-${PR_NUMBER}/screenshots/*.png"
           if git diff --cached --quiet; then
             echo "No changes to commit."
-            echo "use_raw=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           git commit -m "chore: add PR #${PR_NUMBER} screenshots"
           git push origin "$BRANCH":"$BRANCH"
 
-          echo "use_raw=true" >> "$GITHUB_OUTPUT"
-
-      - name: Upload screenshots artifact
-        id: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr-${{ github.event.pull_request.number }}-screenshots
-          path: screenshots/*.png
-          if-no-files-found: error
-
       - name: Comment on PR with screenshots link
-        uses: actions/github-script@v7
-        env:
-          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
-          USE_RAW_URL: ${{ steps.publish.outputs.use_raw }}
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
@@ -103,12 +88,10 @@ jobs:
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;
 
-            const artifactId = process.env.ARTIFACT_ID;
-            const artifactUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}/artifacts/${artifactId}`;
-            const useRaw = process.env.USE_RAW_URL === 'true';
-
             const screenshotBranch = `pr-screenshots`;
-            // Use same-origin "github.com/.../raw/..." URLs for better compatibility with GitHub's CSP.
+            // All comment URLs point at `pr-screenshots` branch content (tree + raw), never workflow artifacts.
+            const prFolderUrl = `https://github.com/${owner}/${repo}/tree/${screenshotBranch}/pr-${issue_number}`;
+            // Same-origin raw URLs for inline images (GitHub CSP).
             const rawImgBase = `https://github.com/${owner}/${repo}/raw/${screenshotBranch}/pr-${issue_number}/screenshots`;
 
             const files = fs
@@ -131,11 +114,7 @@ jobs:
               a.localeCompare(b),
             );
 
-            const imgSrc = (file) => {
-              if (useRaw) return `${rawImgBase}/${file}`;
-              // Fallback to artifact URLs for cases where we couldn't publish.
-              return `${artifactUrl}/download?path=${encodeURIComponent(file)}`;
-            };
+            const imgSrc = (file) => `${rawImgBase}/${file}`;
 
             const pageCell = (slug) => {
               return `<b>${slug}</b>`;
@@ -164,7 +143,7 @@ jobs:
               ``,
               table,
               ``,
-              `Download artifact: ${artifactUrl}`,
+              `[PR screenshots folder](${prFolderUrl}) (branch \`${screenshotBranch}\`)`,
               `</details>`,
             ].join('\n');
 
