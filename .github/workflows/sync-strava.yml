@@ -13,17 +13,18 @@ jobs:
       actions: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          cache: true
 
       - name: Install dependencies
         run: pnpm install
