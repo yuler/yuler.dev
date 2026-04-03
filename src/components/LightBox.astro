@@ -132,6 +132,8 @@ function onKeydown(e: KeyboardEvent) {
 
     const first = focusables[0]
     const last = focusables.at(-1)
+    if (last == null)
+      return
 
     if (e.shiftKey) {
       if (document.activeElement === first) {

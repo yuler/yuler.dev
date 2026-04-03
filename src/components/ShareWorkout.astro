@@ -303,9 +303,12 @@ function initPoster(wrapper: HTMLElement) {
 
   // End marker
   const endHtml = '<div class="poster-map-marker end-marker"></div>'
-  L.marker(latlngs.at(-1), {
-    icon: L.divIcon({ html: endHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
-  }).addTo(map)
+  const endLatLng = latlngs.at(-1)
+  if (endLatLng) {
+    L.marker(endLatLng, {
+      icon: L.divIcon({ html: endHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
+    }).addTo(map)
+  }
 
   map.fitBounds(routeLine.getBounds(), { padding: [20, 20] })
 }
