@@ -53,5 +53,5 @@ jobs:
             echo "No ESLint changes to commit."
             exit 0
           fi
-          git commit -m "chore: apply eslint --fix"
+          git commit -m "💄 Apply ESLint --fix"
           git push origin "HEAD:${{ github.head_ref }}"
