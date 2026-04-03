@@ -60,10 +60,10 @@ const resetBtnId = `reset-map-btn-${randomId}`
 </div>
 
 <style is:global>
-  /* Align zoom with top-left inset; same 8px (Tailwind gap-2) as reset bottom-left */
+  /* Align zoom with top-left inset; same as Tailwind gap-2 (0.5rem) as reset bottom-left */
   .activity-map-container .leaflet-top.leaflet-left .leaflet-control {
-    margin-top: 8px;
-    margin-left: 8px;
+    margin-top: 0.5rem;
+    margin-left: 0.5rem;
   }
 
   /* Leaflet default is 2px on touch; use 1px like Tailwind `border` */
@@ -80,7 +80,7 @@ const resetBtnId = `reset-map-btn-${randomId}`
 
   .activity-map-container.leaflet-touch .leaflet-control-zoom-in,
   .activity-map-container.leaflet-touch .leaflet-control-zoom-out {
-    font-size: 18px;
+    font-size: 1.125rem;
   }
 
   .activity-map-container + .reset-map-btn {

@@ -312,9 +312,10 @@ function initPoster(wrapper: HTMLElement) {
 
   // Asymmetric padding: reserve space at the bottom for the stats/QR overlay so the
   // route stays in the open map area above the cards (fitBounds centers in padded viewport).
+  const posterMapStatsOverlayPaddingPx = 180
   map.fitBounds(routeLine.getBounds(), {
     paddingTopLeft: [20, 20],
-    paddingBottomRight: [20, 180],
+    paddingBottomRight: [20, posterMapStatsOverlayPaddingPx],
   })
 }
 
