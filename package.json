@@ -13,6 +13,7 @@
     "export:pdf": "pnpm build && node scripts/export-post-pdf.mjs",
     "gen:screenshots": "node scripts/screenshot.mjs",
     "sync:strava:activities": "tsx --env-file=.env scripts/sync-strava-activities.mjs",
+    "format": "autocorrect src/content && eslint .",
     "format:fix": "autocorrect --fix src/content && eslint . --fix",
     "test": "vitest",
     "test:strava": "vitest run scripts/sync-strava.test.mjs",
