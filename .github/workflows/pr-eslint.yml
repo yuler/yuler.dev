@@ -38,7 +38,7 @@ jobs:
 
       - name: ESLint (fix + verify)
         env:
-          CI: "1"
+          CI: '1'
         run: |
           pnpm exec eslint . --fix
           pnpm exec eslint .
