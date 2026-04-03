@@ -58,15 +58,15 @@ function ensureBuilt() {
 }
 
 /**
- * Start `npm run preview` (Astro preview) and wait until HTTP responds.
+ * Start `pnpm run preview` (Astro preview) and wait until HTTP responds.
  * Uses the same static hosting behavior as local preview, not a custom file server.
  */
 function startPreviewServer(port) {
   return new Promise((resolve, reject) => {
-    const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+    const pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
     const child = spawn(
-      npm,
-      ['run', 'preview', '--', '--host', '127.0.0.1', '--port', String(port)],
+      pnpm,
+      ['run', 'preview', '--host', '127.0.0.1', '--port', String(port)],
       {
         cwd: process.cwd(),
         env: process.env,
@@ -94,7 +94,7 @@ function startPreviewServer(port) {
       settled = true
       reject(
         new Error(
-          `npm run preview exited before ready (code=${code} signal=${signal})\n${stderr}`,
+          `pnpm run preview exited before ready (code=${code} signal=${signal})\n${stderr}`,
         ),
       )
     })
@@ -119,13 +119,18 @@ function startPreviewServer(port) {
             resolve({
               close: () => {
                 return new Promise((resolveClose) => {
+                  if (child.exitCode !== null || child.signalCode !== null) {
+                    console.log('✓ Preview server already stopped')
+                    resolveClose()
+                    return
+                  }
                   child.once('exit', () => {
                     console.log('✓ Preview server stopped')
                     resolveClose()
                   })
                   child.kill('SIGTERM')
                   setTimeout(() => {
-                    if (!child.killed)
+                    if (child.exitCode === null && child.signalCode === null)
                       child.kill('SIGKILL')
                   }, 5000)
                 })
@@ -182,7 +187,7 @@ async function captureScreenshots(baseUrl) {
             .locator('.activity-map-container[data-route-ready="true"]')
             .first()
             .waitFor({ state: 'attached', timeout: 30_000 })
-            .catch(() => {})
+            .catch(() => console.warn(`[screenshot] Map readiness timeout for ${url}`))
         }
 
         const outputFile = outputPath(pageInfo.slug, viewport.name)
