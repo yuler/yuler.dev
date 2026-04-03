@@ -50,7 +50,7 @@ const resetBtnId = `reset-map-btn-${randomId}`
     </div>
     <button
       id={resetBtnId}
-      class="absolute bottom-3 left-3 z-1000 flex size-[26px] items-center justify-center bg-white/95 p-0 text-gray-600 hover:bg-white hover:text-gray-900 border border-gray-200 rounded-md shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 cursor-pointer"
+      class="reset-map-btn absolute bottom-2 left-2 z-1000 flex items-center justify-center bg-white/95 p-0 text-gray-600 hover:bg-white hover:text-gray-900 border border-gray-200 rounded-sm shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 cursor-pointer"
       aria-label="Reset map center"
       title="Reset map center"
     >
@@ -60,14 +60,33 @@ const resetBtnId = `reset-map-btn-${randomId}`
 </div>
 
 <style is:global>
-  /* Match .leaflet-touch .leaflet-bar a (30×30) next to the map container */
-  .activity-map-container.leaflet-touch + [id^='reset-map-btn-'] {
-    width: 30px;
-    height: 30px;
+  /* Align zoom with top-left inset; same 8px (Tailwind gap-2) as reset bottom-left */
+  .activity-map-container .leaflet-top.leaflet-left .leaflet-control {
+    margin-top: 8px;
+    margin-left: 8px;
   }
-  .activity-map-container.leaflet-touch + [id^='reset-map-btn-'] svg {
-    width: 22px;
-    height: 22px;
+
+  /* Leaflet default is 2px on touch; use 1px like Tailwind `border` */
+  .activity-map-container.leaflet-touch .leaflet-bar {
+    border-width: 1px;
+  }
+
+  /* Same cell size as Leaflet default (26×26); override touch 30×30 so reset + zoom match */
+  .activity-map-container .leaflet-bar a {
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+  }
+
+  .activity-map-container.leaflet-touch .leaflet-control-zoom-in,
+  .activity-map-container.leaflet-touch .leaflet-control-zoom-out {
+    font-size: 18px;
+  }
+
+  .activity-map-container + .reset-map-btn {
+    width: 26px;
+    height: 26px;
+    box-sizing: border-box;
   }
 </style>
 
