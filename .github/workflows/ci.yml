@@ -26,17 +26,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Check
+        run: npm run check
 
       - name: Build
         run: pnpm build
-
-      - name: Generate screenshots
-        run: pnpm run gen:screenshots
-
-      - name: Check
-        run: npm run check
 
       - name: Test
         run: npm test
