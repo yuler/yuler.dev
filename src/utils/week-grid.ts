@@ -1,6 +1,6 @@
 import { formatDate } from './date'
 
-export type WeekRangeWithIndex = { start: string; end: string; index: number }
+export interface WeekRangeWithIndex { start: string, end: string, index: number }
 
 /**
  * Calendar weeks from Jan 1 for a given year: first segment ends on the nearest Saturday,

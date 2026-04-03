@@ -1,10 +1,10 @@
-import { defineConfig } from 'astro/config';
-import mdx from "@astrojs/mdx";
-import tailwindcss from '@tailwindcss/vite';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import mdx from '@astrojs/mdx'
+import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from 'astro/config'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://astro.build/config
 export default defineConfig({
@@ -30,4 +30,4 @@ export default defineConfig({
       },
     },
   },
-});
+})

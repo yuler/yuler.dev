@@ -18,6 +18,7 @@ Every icons should a simple astro component locate in [`src/components/icons`](.
 ## Git Commit
 
 Use the `/git-commit` skill for every commit. Check in this order:
+
 - Local: `skills/git-commit` (this repo)
 - Global: `~/.agents/skills/git-commit`
 

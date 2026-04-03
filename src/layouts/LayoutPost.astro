@@ -34,43 +34,46 @@ const ogImage = frontmatter.image?.url
   <slot />
   <!-- Mermaid: post diagrams are author-written MDX only; strict security is appropriate. -->
   <script>
-    function initMermaid() {
-      const blocks = document.querySelectorAll('pre[data-language="mermaid"]')
-      if (!blocks.length) return
+function initMermaid() {
+  const blocks = document.querySelectorAll('pre[data-language="mermaid"]')
+  if (!blocks.length)
+    return
 
-      import('mermaid').then(({ default: mermaid }) => {
-        blocks.forEach(pre => {
-          const code = pre.querySelector('code')
-          if (code) {
-            const rawCode = code.textContent
-            const newPre = document.createElement('pre')
-            newPre.className = 'mermaid not-prose'
-            newPre.textContent = rawCode
-            pre.parentNode?.replaceChild(newPre, pre)
-          }
-        })
-
-        mermaid.initialize({
-          startOnLoad: true,
-          theme: 'default',
-          securityLevel: 'strict',
-        })
-      })
-    }
-
-    function scheduleMermaid() {
-      const run = () => initMermaid()
-      if (typeof requestIdleCallback !== 'undefined') {
-        requestIdleCallback(run, { timeout: 4000 })
-      } else {
-        setTimeout(run, 0)
+  import('mermaid').then(({ default: mermaid }) => {
+    blocks.forEach((pre) => {
+      const code = pre.querySelector('code')
+      if (code) {
+        const rawCode = code.textContent
+        const newPre = document.createElement('pre')
+        newPre.className = 'mermaid not-prose'
+        newPre.textContent = rawCode
+        pre.parentNode?.replaceChild(newPre, pre)
       }
-    }
+    })
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', scheduleMermaid)
-    } else {
-      scheduleMermaid()
-    }
-  </script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'strict',
+    })
+  })
+}
+
+function scheduleMermaid() {
+  const run = () => initMermaid()
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(run, { timeout: 4000 })
+  }
+  else {
+    setTimeout(run, 0)
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', scheduleMermaid)
+}
+else {
+  scheduleMermaid()
+}
+</script>
 </Layout>

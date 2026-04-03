@@ -1,10 +1,14 @@
 ---
-import Layout from '../../layouts/Layout.astro'
+import type { GetStaticPaths } from 'astro'
+import type { StoredActivity } from '../../utils/strava-activities'
 import CornerMarkers from '../../components/CornerMarkers.astro'
+import MapRoute from '../../components/MapRoute.astro'
+import ShareWorkout from '../../components/ShareWorkout.astro'
+import Layout from '../../layouts/Layout.astro'
 import { formatDate } from '../../utils/date'
 import { decodePolyline } from '../../utils/polyline'
 import { getStoredActivityIds, loadStoredActivityById } from '../../utils/strava-activities'
-import type { StoredActivity } from '../../utils/strava-activities'
+
 import {
   deviceEmoji,
   formatDistanceMeters,
@@ -13,20 +17,17 @@ import {
   formatPaceOrSpeed,
   sportIcons,
 } from '../../utils/workout-display'
-import MapRoute from '../../components/MapRoute.astro'
-import ShareWorkout from '../../components/ShareWorkout.astro'
-
-import type { GetStaticPaths } from 'astro'
 
 export const getStaticPaths: GetStaticPaths = () => {
   return getStoredActivityIds()
-    .map(id => {
+    .map((id) => {
       const activity = loadStoredActivityById<StoredActivity>(id)
-      if (!activity) return null
+      if (!activity)
+return null
       return { params: { id: String(id) }, props: { activity } }
     })
     .filter(
-      (x): x is { params: { id: string }; props: { activity: StoredActivity } } => x !== null,
+      (x): x is { params: { id: string }, props: { activity: StoredActivity } } => x !== null,
     )
 }
 

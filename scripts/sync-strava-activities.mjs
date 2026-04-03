@@ -1,6 +1,7 @@
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import fs from 'node:fs'
+import path from 'node:path'
+import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 import {
   getStravaActivities,
   getStravaActivityById,
@@ -16,13 +17,14 @@ function readIds() {
   try {
     const data = JSON.parse(fs.readFileSync(IDS_FILE, 'utf-8'))
     return Array.isArray(data) ? data : []
-  } catch {
+  }
+  catch {
     return []
   }
 }
 
 function writeIds(ids) {
-  fs.writeFileSync(IDS_FILE, JSON.stringify(ids, null, 2) + '\n')
+  fs.writeFileSync(IDS_FILE, `${JSON.stringify(ids, null, 2)}\n`)
 }
 
 function hasDetail(id) {
@@ -32,7 +34,7 @@ function hasDetail(id) {
 function saveDetail(id, data) {
   fs.writeFileSync(
     path.join(ACTIVITIES_DIR, `${id}.json`),
-    JSON.stringify(data, null, 2) + '\n',
+    `${JSON.stringify(data, null, 2)}\n`,
   )
 }
 
@@ -41,10 +43,12 @@ async function fetchAllActivities() {
   let page = 1
   while (true) {
     const batch = await getStravaActivities({ page, perPage: 100 })
-    if (!batch.length) break
+    if (!batch.length)
+      break
     all.push(...batch)
     console.log(`  Page ${page}: ${batch.length} activities`)
-    if (batch.length < 100) break
+    if (batch.length < 100)
+      break
     page++
   }
   return all
@@ -60,8 +64,8 @@ async function syncActivities() {
   // missed IDs beyond the first page when total activities > per_page.
   const activities = await fetchAllActivities()
 
-  const freshIds = activities.map((a) => a.id)
-  const missingIds = freshIds.filter((id) => !hasDetail(id))
+  const freshIds = activities.map(a => a.id)
+  const missingIds = freshIds.filter(id => !hasDetail(id))
 
   if (missingIds.length === 0) {
     console.log('✅ All activities up to date')

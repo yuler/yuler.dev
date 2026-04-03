@@ -1,18 +1,18 @@
 ---
-import Layout from '../../layouts/Layout.astro'
+import type { StoredActivitySummary } from '../../utils/strava-activities'
 import CornerMarkers from '../../components/CornerMarkers.astro'
-import ChevronRight from '../../components/icons/ChevronRight.astro'
 import ChevronDown from '../../components/icons/ChevronDown.astro'
+import ChevronRight from '../../components/icons/ChevronRight.astro'
+import Layout from '../../layouts/Layout.astro'
 import { formatDate } from '../../utils/date'
 import { loadAllStoredActivities } from '../../utils/strava-activities'
-import type { StoredActivitySummary } from '../../utils/strava-activities'
+import { getWeekRangesWithIndex } from '../../utils/week-grid'
 import {
   formatDistanceMetersCompact,
   formatMovingDuration,
   formatPaceOrSpeed,
   sportIcons,
 } from '../../utils/workout-display'
-import { getWeekRangesWithIndex } from '../../utils/week-grid'
 
 const activities = loadAllStoredActivities<StoredActivitySummary>()
 
@@ -155,72 +155,77 @@ const weeks = allWeeks.filter(({ start, end }) =>
   </div>
 
   <script is:inline>
-    ;(function () {
-      var select = document.getElementById('week-select')
-      var prevBtn = document.getElementById('week-prev')
-      var nextBtn = document.getElementById('week-next')
-      var countEl = document.getElementById('filter-count')
-      var activityCount = document.getElementById('activity-count')
-      var emptyState = document.getElementById('empty-state')
-      var items = document.querySelectorAll('#activity-list > li')
-      var total = items.length
+;(function () {
+  const select = document.getElementById('week-select')
+  const prevBtn = document.getElementById('week-prev')
+  const nextBtn = document.getElementById('week-next')
+  const countEl = document.getElementById('filter-count')
+  const activityCount = document.getElementById('activity-count')
+  const emptyState = document.getElementById('empty-state')
+  const items = document.querySelectorAll('#activity-list > li')
+  const total = items.length
 
-      function applyFilter(from, to) {
-        var visible = 0
-        items.forEach(function (li) {
-          var date = li.getAttribute('data-date')
-          if (!from || (date >= from && date <= to)) {
-            li.style.display = ''
-            visible++
-          } else {
-            li.style.display = 'none'
-          }
-        })
-        countEl.textContent = from ? visible + ' matched' : ''
-        activityCount.textContent = (from ? visible : total) + (visible === 1 ? ' activity' : ' activities')
-        emptyState.classList.toggle('hidden', visible > 0)
-
-        var idx = select.selectedIndex
-        prevBtn.disabled = idx <= 1
-        nextBtn.disabled = idx <= 0 || idx >= select.options.length - 1
+  function applyFilter(from, to) {
+    let visible = 0
+    items.forEach((li) => {
+      const date = li.getAttribute('data-date')
+      if (!from || (date >= from && date <= to)) {
+        li.style.display = ''
+        visible++
       }
-
-      function setWeek(value) {
-        select.value = value
-        if (value) {
-          var parts = value.split('~')
-          applyFilter(parts[0], parts[1])
-          history.replaceState(null, '', '?from=' + parts[0] + '&to=' + parts[1])
-        } else {
-          applyFilter(null, null)
-          history.replaceState(null, '', window.location.pathname)
-        }
+      else {
+        li.style.display = 'none'
       }
+    })
+    countEl.textContent = from ? `${visible} matched` : ''
+    activityCount.textContent = (from ? visible : total) + (visible === 1 ? ' activity' : ' activities')
+    emptyState.classList.toggle('hidden', visible > 0)
 
-      select.addEventListener('change', function () {
-        setWeek(select.value)
-      })
+    const idx = select.selectedIndex
+    prevBtn.disabled = idx <= 1
+    nextBtn.disabled = idx <= 0 || idx >= select.options.length - 1
+  }
 
-      prevBtn.addEventListener('click', function () {
-        var idx = select.selectedIndex
-        if (idx > 1) setWeek(select.options[idx - 1].value)
-      })
+  function setWeek(value) {
+    select.value = value
+    if (value) {
+      const parts = value.split('~')
+      applyFilter(parts[0], parts[1])
+      history.replaceState(null, '', `?from=${parts[0]}&to=${parts[1]}`)
+    }
+    else {
+      applyFilter(null, null)
+      history.replaceState(null, '', window.location.pathname)
+    }
+  }
 
-      nextBtn.addEventListener('click', function () {
-        var idx = select.selectedIndex
-        if (idx > 0 && idx < select.options.length - 1) setWeek(select.options[idx + 1].value)
-      })
+  select.addEventListener('change', () => {
+    setWeek(select.value)
+  })
 
-      // Init from URL params
-      var params = new URLSearchParams(window.location.search)
-      var from = params.get('from')
-      var to = params.get('to')
-      if (from && to) {
-        setWeek(from + '~' + to)
-      } else {
-        prevBtn.disabled = true
-        nextBtn.disabled = true
-      }
-    })()
-  </script>
+  prevBtn.addEventListener('click', () => {
+    const idx = select.selectedIndex
+    if (idx > 1)
+      setWeek(select.options[idx - 1].value)
+  })
+
+  nextBtn.addEventListener('click', () => {
+    const idx = select.selectedIndex
+    if (idx > 0 && idx < select.options.length - 1)
+      setWeek(select.options[idx + 1].value)
+  })
+
+  // Init from URL params
+  const params = new URLSearchParams(window.location.search)
+  const from = params.get('from')
+  const to = params.get('to')
+  if (from && to) {
+    setWeek(`${from}~${to}`)
+  }
+  else {
+    prevBtn.disabled = true
+    nextBtn.disabled = true
+  }
+})()
+</script>
 </Layout>

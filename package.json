@@ -15,6 +15,8 @@
     "export:pdf": "pnpm build && node scripts/export-post-pdf.mjs",
     "gen:screenshots": "node scripts/screenshot.mjs",
     "sync:strava:activities": "tsx --env-file=.env scripts/sync-strava-activities.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "vitest",
     "test:strava": "vitest run scripts/sync-strava.test.mjs",
     "clean": "pnpm clean:dist && pnpm clean:pdfs && pnpm clean:screenshots",
@@ -39,8 +41,13 @@
     "typescript": "^6.0.2"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^8.0.0",
     "@astrojs/check": "^0.9.8",
     "@types/leaflet": "^1.9.21",
+    "autocorrect-node": "^2.14.0",
+    "eslint": "^10.1.0",
+    "eslint-plugin-astro": "^1.6.0",
+    "eslint-plugin-format": "^2.0.1",
     "playwright": "^1.59.1",
     "sharp": "^0.34.5",
     "tsx": "^4.21.0",

@@ -5,19 +5,22 @@
 
 import ids from '../../data/strava/activities/_index.json'
 
+const ACTIVITY_JSON_PATH_RE = /\/(\d+)\.json$/
+
 const activityModules = import.meta.glob('../../data/strava/activities/*.json', {
   eager: true,
 }) as Record<string, unknown>
 
 function activityIdFromModuleKey(key: string): number | undefined {
-  const m = key.match(/\/(\d+)\.json$/)
-  return m ? parseInt(m[1], 10) : undefined
+  const m = key.match(ACTIVITY_JSON_PATH_RE)
+  return m ? Number.parseInt(m[1], 10) : undefined
 }
 
 const activityModuleById = new Map<number, unknown>()
 for (const [key, mod] of Object.entries(activityModules)) {
   const id = activityIdFromModuleKey(key)
-  if (id != null) activityModuleById.set(id, mod)
+  if (id != null)
+    activityModuleById.set(id, mod)
 }
 
 export function getStoredActivityIds(): readonly number[] {
@@ -33,7 +36,8 @@ export function unwrapJsonModule<T>(mod: unknown): T {
 
 export function loadStoredActivityById<T>(id: number): T | undefined {
   const mod = activityModuleById.get(id)
-  if (mod === undefined) return undefined
+  if (mod === undefined)
+    return undefined
   return unwrapJsonModule<T>(mod)
 }
 
@@ -66,7 +70,7 @@ export interface StoredActivity {
   device_name: string
   start_latlng: number[]
   end_latlng: number[]
-  map: { polyline: string; summary_polyline: string }
+  map: { polyline: string, summary_polyline: string }
 }
 
 /** Subset for list / home card */
