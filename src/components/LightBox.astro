@@ -47,149 +47,160 @@ import Close from './icons/Close.astro'
 </div>
 
 <script>
-  const DIALOG_ID = 'image-preview-dialog'
-  const IMG_ID = 'image-preview-img'
-  const CAPTION_ID = 'image-preview-caption'
-  const CLOSE_BTN_ID = 'image-preview-close-btn'
+const DIALOG_ID = 'image-preview-dialog'
+const IMG_ID = 'image-preview-img'
+const CAPTION_ID = 'image-preview-caption'
+const CLOSE_BTN_ID = 'image-preview-close-btn'
 
-  const SELECTOR = 'article.prose img'
-  const CLOSE_SELECTOR = '[data-image-preview-close]'
+const SELECTOR = 'article.prose img'
+const CLOSE_SELECTOR = '[data-image-preview-close]'
 
-  let lastFocusedElement: HTMLElement | null = null
+let lastFocusedElement: HTMLElement | null = null
 
-  function getDialog(): HTMLElement | null {
-    return document.getElementById(DIALOG_ID)
+function getDialog(): HTMLElement | null {
+  return document.getElementById(DIALOG_ID)
+}
+
+function openPreview(source: HTMLImageElement) {
+  const dialog = getDialog()
+  const full = document.getElementById(IMG_ID) as HTMLImageElement | null
+  const caption = document.getElementById(CAPTION_ID)
+  const closeBtn = document.getElementById(CLOSE_BTN_ID) as HTMLButtonElement | null
+  if (!dialog || !full || !caption)
+    return
+
+  lastFocusedElement = document.activeElement as HTMLElement | null
+
+  const src = source.currentSrc || source.src
+  full.src = src
+  full.alt = source.alt || ''
+  const text = (source.alt || '').trim()
+  if (text) {
+    caption.textContent = text
+    caption.classList.remove('text-gray-400', 'italic')
+  }
+  else {
+    caption.textContent = 'No description'
+    caption.classList.add('text-gray-400', 'italic')
   }
 
-  function openPreview(source: HTMLImageElement) {
-    const dialog = getDialog()
-    const full = document.getElementById(IMG_ID) as HTMLImageElement | null
-    const caption = document.getElementById(CAPTION_ID)
-    const closeBtn = document.getElementById(CLOSE_BTN_ID) as HTMLButtonElement | null
-    if (!dialog || !full || !caption) return
+  dialog.classList.remove('hidden')
+  dialog.classList.add('flex')
+  document.body.classList.add('overflow-hidden')
+  closeBtn?.focus()
+}
 
-    lastFocusedElement = document.activeElement as HTMLElement | null
+function closePreview() {
+  const dialog = getDialog()
+  const full = document.getElementById(IMG_ID) as HTMLImageElement | null
+  if (!dialog || !full)
+    return
 
-    const src = source.currentSrc || source.src
-    full.src = src
-    full.alt = source.alt || ''
-    const text = (source.alt || '').trim()
-    if (text) {
-      caption.textContent = text
-      caption.classList.remove('text-gray-400', 'italic')
-    } else {
-      caption.textContent = 'No description'
-      caption.classList.add('text-gray-400', 'italic')
-    }
+  dialog.classList.add('hidden')
+  dialog.classList.remove('flex')
+  document.body.classList.remove('overflow-hidden')
+  full.removeAttribute('src')
+  full.alt = ''
 
-    dialog.classList.remove('hidden')
-    dialog.classList.add('flex')
-    document.body.classList.add('overflow-hidden')
-    closeBtn?.focus()
+  // Restore keyboard focus to where the user came from.
+  lastFocusedElement?.focus()
+  lastFocusedElement = null
+}
+
+function onKeydown(e: KeyboardEvent) {
+  const dialog = getDialog()
+  if (!dialog || dialog.classList.contains('hidden'))
+    return
+
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    closePreview()
+    return
   }
 
-  function closePreview() {
-    const dialog = getDialog()
-    const full = document.getElementById(IMG_ID) as HTMLImageElement | null
-    if (!dialog || !full) return
+  // Focus trap: keep Tab navigation inside the dialog.
+  if (e.key === 'Tab') {
+    const focusables = Array.from(
+      dialog.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1 && el.offsetParent !== null)
 
-    dialog.classList.add('hidden')
-    dialog.classList.remove('flex')
-    document.body.classList.remove('overflow-hidden')
-    full.removeAttribute('src')
-    full.alt = ''
-
-    // Restore keyboard focus to where the user came from.
-    lastFocusedElement?.focus()
-    lastFocusedElement = null
-  }
-
-  function onKeydown(e: KeyboardEvent) {
-    const dialog = getDialog()
-    if (!dialog || dialog.classList.contains('hidden')) return
-
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      closePreview()
+    // If we can't find focusable elements, avoid breaking tabbing behavior.
+    if (focusables.length === 0)
       return
+
+    const first = focusables[0]
+    const last = focusables.at(-1)
+
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        last.focus()
+        e.preventDefault()
+      }
     }
-
-    // Focus trap: keep Tab navigation inside the dialog.
-    if (e.key === 'Tab') {
-      const focusables = Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1 && el.offsetParent !== null)
-
-      // If we can't find focusable elements, avoid breaking tabbing behavior.
-      if (focusables.length === 0) return
-
-      const first = focusables[0]
-      const last = focusables[focusables.length - 1]
-
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          last.focus()
-          e.preventDefault()
-        }
-      } else {
-        if (document.activeElement === last) {
-          first.focus()
-          e.preventDefault()
-        }
+    else {
+      if (document.activeElement === last) {
+        first.focus()
+        e.preventDefault()
       }
     }
   }
+}
 
-  function enhanceImages(root: ParentNode = document) {
-    root.querySelectorAll<HTMLImageElement>(SELECTOR).forEach(img => {
-      if (img.closest(`#${DIALOG_ID}`)) return
-      if (img.dataset.previewBound === 'true') return
-      img.dataset.previewBound = 'true'
+function enhanceImages(root: ParentNode = document) {
+  root.querySelectorAll<HTMLImageElement>(SELECTOR).forEach((img) => {
+    if (img.closest(`#${DIALOG_ID}`))
+      return
+    if (img.dataset.previewBound === 'true')
+      return
+    img.dataset.previewBound = 'true'
 
-      img.classList.add(
-        'cursor-zoom-in',
-        'transition-transform',
-        'duration-200',
-        'hover:brightness-[0.98]',
-      )
+    img.classList.add(
+      'cursor-zoom-in',
+      'transition-transform',
+      'duration-200',
+      'hover:brightness-[0.98]',
+    )
 
-      const open = (e: Event) => {
-        e.preventDefault()
-        e.stopPropagation()
+    const open = (e: Event) => {
+      e.preventDefault()
+      e.stopPropagation()
+      openPreview(img)
+    }
+
+    img.addEventListener('click', open)
+    img.tabIndex = 0
+    img.setAttribute('role', 'button')
+    const label = img.alt?.trim() ? `Enlarge image: ${img.alt}` : 'Enlarge image'
+    img.setAttribute('aria-label', label)
+
+    img.addEventListener('keydown', (ke) => {
+      if (ke.key === 'Enter' || ke.key === ' ') {
+        ke.preventDefault()
         openPreview(img)
       }
-
-      img.addEventListener('click', open)
-      img.tabIndex = 0
-      img.setAttribute('role', 'button')
-      const label = img.alt?.trim() ? `Enlarge image: ${img.alt}` : 'Enlarge image'
-      img.setAttribute('aria-label', label)
-
-      img.addEventListener('keydown', ke => {
-        if (ke.key === 'Enter' || ke.key === ' ') {
-          ke.preventDefault()
-          openPreview(img)
-        }
-      })
     })
-  }
-
-  document.addEventListener('click', e => {
-    const target = e.target as HTMLElement | null
-    if (!target) return
-
-    const dialog = getDialog()
-    if (!dialog || dialog.classList.contains('hidden')) return
-    if (target.closest(CLOSE_SELECTOR)) closePreview()
   })
+}
 
-  window.addEventListener('keydown', onKeydown)
+document.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement | null
+  if (!target)
+    return
 
+  const dialog = getDialog()
+  if (!dialog || dialog.classList.contains('hidden'))
+    return
+  if (target.closest(CLOSE_SELECTOR))
+    closePreview()
+})
+
+window.addEventListener('keydown', onKeydown)
+
+enhanceImages()
+
+document.addEventListener('astro:page-load', () => {
   enhanceImages()
-
-  document.addEventListener('astro:page-load', () => {
-    enhanceImages()
-  })
+})
 </script>

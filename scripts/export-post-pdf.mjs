@@ -6,9 +6,10 @@
  */
 
 import { spawn } from 'node:child_process'
+import { createReadStream, existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { createServer } from 'node:http'
-import { createReadStream, existsSync, statSync, readdirSync, mkdirSync, readFileSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { dirname, join } from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -18,6 +19,11 @@ const postsRoot = join(root, 'src', 'content', 'posts')
 const port = 4173
 const baseUrl = `http://127.0.0.1:${port}`
 
+const MD_EXT_RE = /\.(md|mdx)$/
+const DATE_FRONTMATTER_RE = /^date:\s*(\d{4}-\d{2}-\d{2})/m
+const URL_PATH_TRIM_RE = /^\//
+const SLUG_SAFE_RE = /[^\w-]+/g
+
 function listPostSlugs(dir = postsRoot, prefix = '') {
   const entries = readdirSync(dir, { withFileTypes: true })
   const slugs = []
@@ -26,17 +32,19 @@ function listPostSlugs(dir = postsRoot, prefix = '') {
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name
     if (entry.isDirectory()) {
       slugs.push(...listPostSlugs(fullPath, rel))
-    } else if (entry.isFile() && (entry.name.endsWith('.md') || entry.name.endsWith('.mdx'))) {
-      const withoutExt = rel.replace(/\.(md|mdx)$/, '')
+    }
+    else if (entry.isFile() && (entry.name.endsWith('.md') || entry.name.endsWith('.mdx'))) {
+      const withoutExt = rel.replace(MD_EXT_RE, '')
       let dateRaw = null
       try {
         const content = readFileSync(fullPath, 'utf8')
-        const match = content.match(/^date:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/m)
+        const match = content.match(DATE_FRONTMATTER_RE)
         if (match) {
           dateRaw = match[1]
         }
-      } catch (e) {
-        console.warn(`[Warning] Failed to read date from ${fullPath}: ${e.message}`);
+      }
+      catch (e) {
+        console.warn(`[Warning] Failed to read date from ${fullPath}: ${e.message}`)
       }
       const date = dateRaw ? new Date(dateRaw) : null
       slugs.push({ slug: withoutExt, date, dateRaw })
@@ -46,8 +54,10 @@ function listPostSlugs(dir = postsRoot, prefix = '') {
     if (a.date && b.date) {
       return b.date.getTime() - a.date.getTime()
     }
-    if (a.date && !b.date) return -1
-    if (!a.date && b.date) return 1
+    if (a.date && !b.date)
+      return -1
+    if (!a.date && b.date)
+      return 1
     return a.slug.localeCompare(b.slug)
   })
 }
@@ -71,11 +81,11 @@ async function chooseSlugTui() {
   const iface = rl.createInterface({ input: process.stdin, output: process.stdout })
 
   const answer = await new Promise((resolve) => {
-    iface.question('> ', (ans) => resolve(ans.trim()))
+    iface.question('> ', ans => resolve(ans.trim()))
   })
   iface.close()
 
-  let index = parseInt(answer || '1', 10)
+  let index = Number.parseInt(answer || '1', 10)
   if (Number.isNaN(index) || index < 1 || index > posts.length) {
     console.log(`Invalid selection, defaulting to 1.`)
     index = 1
@@ -90,18 +100,19 @@ async function build() {
       stdio: 'inherit',
       shell: true,
     })
-    child.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`Build exited ${code}`))))
+    child.on('exit', code => (code === 0 ? resolve() : reject(new Error(`Build exited ${code}`))))
   })
 }
 
 function serveDist() {
   return createServer((req, res) => {
-    const urlPath = (req.url?.split('?')[0] || '/').replace(/^\//, '') || 'index.html'
+    const urlPath = (req.url?.split('?')[0] || '/').replace(URL_PATH_TRIM_RE, '') || 'index.html'
     let path = join(distDir, urlPath)
     if (!path.endsWith('.html')) {
       if (existsSync(path) && statSync(path).isDirectory()) {
         path = join(path, 'index.html')
-      } else if (!existsSync(path)) {
+      }
+      else if (!existsSync(path)) {
         path = join(path, 'index.html')
       }
     }
@@ -126,22 +137,24 @@ async function exportPdf(postUrl, outPath) {
   // Force all lazy-loaded images to load: scroll to bottom then wait for images
   await page.evaluate(async () => {
     window.scrollTo(0, document.body.scrollHeight)
-    await new Promise((r) => setTimeout(r, 300))
+    await new Promise(r => setTimeout(r, 300))
     const imgs = Array.from(document.images)
     await Promise.all(
       imgs.map((img) => {
-        if (img.complete) return Promise.resolve()
+        if (img.complete)
+          return Promise.resolve()
         return new Promise((resolve) => {
           img.onload = img.onerror = resolve
         })
-      })
+      }),
     )
   })
 
   // Keep only article content, width 100%
   await page.evaluate(() => {
     const article = document.querySelector('article')
-    if (!article) return
+    if (!article)
+      return
     const clone = article.cloneNode(true)
     const wrap = document.createElement('div')
     wrap.style.cssText = 'width:100%;max-width:100%;margin:0;padding:20px;box-sizing:border-box;'
@@ -168,12 +181,13 @@ async function main() {
   let slug = process.argv[2]
   if (!slug) {
     slug = await chooseSlugTui()
-  } else {
+  }
+  else {
     console.log(`Using slug from CLI: ${slug}`)
   }
 
   const postUrl = `${baseUrl}/posts/${slug}`
-  const safeName = slug.replace(/[^\w\-]+/g, '-')
+  const safeName = slug.replace(SLUG_SAFE_RE, '-')
   const pdfDir = join(root, 'pdfs')
   if (!existsSync(pdfDir)) {
     mkdirSync(pdfDir, { recursive: true })
@@ -183,7 +197,8 @@ async function main() {
   if (!existsSync(distDir)) {
     console.log('Building site...')
     await build()
-  } else {
+  }
+  else {
     console.log('Using existing dist. Run "pnpm run build" first if you changed the post.')
   }
 
@@ -193,7 +208,8 @@ async function main() {
       console.log(`Serving at ${baseUrl}, exporting ${postUrl} to PDF...`)
       await exportPdf(postUrl, outPath)
       console.log(`PDF saved: ${outPath}`)
-    } finally {
+    }
+    finally {
       server.close()
     }
   })

@@ -1,8 +1,9 @@
 ---
-import Share from './icons/Share.astro'
 import Close from './icons/Close.astro'
-import Download from './icons/Download.astro'
 import Copy from './icons/Copy.astro'
+import Download from './icons/Download.astro'
+import Share from './icons/Share.astro'
+
 interface Stat {
   label: string
   value: string
@@ -159,220 +160,241 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
 </div>
 
 <script>
-  import QRCode from 'qrcode'
-  import L from 'leaflet'
+import L from 'leaflet'
+import QRCode from 'qrcode'
 
-  /** Poster capture only runs after the share dialog opens; html-to-image stays dynamic. */
-  const htmlToImagePromise = import('html-to-image')
+/** Poster capture only runs after the share dialog opens; html-to-image stays dynamic. */
+const htmlToImagePromise = import('html-to-image')
 
-  const dialogFocusStack: HTMLElement[] = []
+const dialogFocusStack: HTMLElement[] = []
 
-  // ── Dialog open/close ──────────────────────────────────────────────────────
+// ── Dialog open/close ──────────────────────────────────────────────────────
 
-  function openDialog(dialogId: string) {
-    const dialog = document.getElementById(dialogId)
-    if (!dialog) return
-    const ae = document.activeElement
-    if (ae instanceof HTMLElement) dialogFocusStack.push(ae)
+function openDialog(dialogId: string) {
+  const dialog = document.getElementById(dialogId)
+  if (!dialog)
+    return
+  const ae = document.activeElement
+  if (ae instanceof HTMLElement)
+    dialogFocusStack.push(ae)
 
-    dialog.classList.remove('hidden')
-    dialog.classList.add('flex')
-    document.body.classList.add('overflow-hidden')
+  dialog.classList.remove('hidden')
+  dialog.classList.add('flex')
+  document.body.classList.add('overflow-hidden')
 
-    // Init poster contents when dialog first opens
-    const wrapper = dialog.querySelector('.poster-wrapper') as HTMLElement | null
-    if (wrapper && !wrapper.dataset.initialized) {
-      wrapper.dataset.initialized = 'true'
-      initPoster(wrapper)
-    }
+  // Init poster contents when dialog first opens
+  const wrapper = dialog.querySelector('.poster-wrapper') as HTMLElement | null
+  if (wrapper && !wrapper.dataset.initialized) {
+    wrapper.dataset.initialized = 'true'
+    initPoster(wrapper)
+  }
 
-    requestAnimationFrame(() => {
-      const closeBtn = dialog.querySelector<HTMLButtonElement>(
-        'button[aria-label="Close share dialog"]',
-      )
-      closeBtn?.focus()
+  requestAnimationFrame(() => {
+    const closeBtn = dialog.querySelector<HTMLButtonElement>(
+      'button[aria-label="Close share dialog"]',
+    )
+    closeBtn?.focus()
+  })
+}
+
+function closeDialog(dialogId: string) {
+  const dialog = document.getElementById(dialogId)
+  if (!dialog)
+    return
+  dialog.classList.add('hidden')
+  dialog.classList.remove('flex')
+  document.body.classList.remove('overflow-hidden')
+
+  const prev = dialogFocusStack.pop()
+  prev?.focus()
+}
+
+// Wire triggers
+document.querySelectorAll<HTMLButtonElement>('[data-dialog-id]').forEach((btn) => {
+  btn.addEventListener('click', () => openDialog(btn.dataset.dialogId!))
+})
+
+// Wire close buttons & backdrops
+document.querySelectorAll<HTMLElement>('[data-dialog-close]').forEach((el) => {
+  el.addEventListener('click', () => closeDialog(el.dataset.dialogClose!))
+})
+
+// Close on Escape
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll<HTMLElement>('[role="dialog"]:not(.hidden)').forEach((dialog) => {
+      closeDialog(dialog.id)
+    })
+  }
+})
+
+// ── Poster initializer ─────────────────────────────────────────────────────
+
+function initPoster(wrapper: HTMLElement) {
+  const mapId = wrapper.dataset.mapId!
+  const qrId = wrapper.dataset.qrId!
+  const pageUrl = wrapper.dataset.pageUrl!
+  const pointsRaw = wrapper.dataset.points!
+
+  // 1. QR Code
+  const qrCanvas = document.getElementById(qrId) as HTMLCanvasElement | null
+  if (qrCanvas) {
+    QRCode.toCanvas(qrCanvas, pageUrl, {
+      width: 60,
+      margin: 1,
+      color: { light: '#00000000', dark: '#111827ff' },
+      errorCorrectionLevel: 'M',
+    }).catch((err) => {
+      console.error('Failed to generate QR code:', err)
+      const ctx = qrCanvas.getContext('2d')
+      if (ctx) {
+        ctx.fillStyle = '#ef4444'
+        ctx.font = '8px monospace'
+        ctx.fillText('QR error', 2, 32)
+      }
     })
   }
 
-  function closeDialog(dialogId: string) {
-    const dialog = document.getElementById(dialogId)
-    if (!dialog) return
-    dialog.classList.add('hidden')
-    dialog.classList.remove('flex')
-    document.body.classList.remove('overflow-hidden')
+  // 2. Route map (dark style, no controls)
+  const mapEl = document.getElementById(mapId)
+  if (!mapEl)
+    return
 
-    const prev = dialogFocusStack.pop()
-    prev?.focus()
+  let points: number[][] = []
+  try {
+    points = JSON.parse(pointsRaw)
   }
+  catch (e) {
+    console.error('Failed to parse points data for poster map:', e)
+    return
+  }
+  if (points.length === 0)
+    return
 
-  // Wire triggers
-  document.querySelectorAll<HTMLButtonElement>('[data-dialog-id]').forEach(btn => {
-    btn.addEventListener('click', () => openDialog(btn.dataset.dialogId!))
+  const map = L.map(mapId, {
+    zoomControl: false,
+    attributionControl: false,
+    dragging: false,
+    touchZoom: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    keyboard: false,
   })
 
-  // Wire close buttons & backdrops
-  document.querySelectorAll<HTMLElement>('[data-dialog-close]').forEach(el => {
-    el.addEventListener('click', () => closeDialog(el.dataset.dialogClose!))
-  })
+  // Light monochrome tile layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    maxZoom: 20,
+  }).addTo(map)
 
-  // Close on Escape
-  window.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll<HTMLElement>('[role="dialog"]:not(.hidden)').forEach(dialog => {
-        closeDialog(dialog.id)
-      })
-    }
-  })
+  const latlngs = points.map((p: number[]) => L.latLng(p[0], p[1]))
 
-  // ── Poster initializer ─────────────────────────────────────────────────────
+  const routeLine = L.polyline(latlngs, {
+    color: '#10b981',
+    weight: 2.5,
+    opacity: 0.9,
+  }).addTo(map)
 
-  function initPoster(wrapper: HTMLElement) {
-    const mapId = wrapper.dataset.mapId!
-    const qrId = wrapper.dataset.qrId!
-    const pageUrl = wrapper.dataset.pageUrl!
-    const pointsRaw = wrapper.dataset.points!
+  // Start marker
+  const startHtml = '<div class="poster-map-marker start-marker"></div>'
+  L.marker(latlngs[0], {
+    icon: L.divIcon({ html: startHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
+  }).addTo(map)
 
-    // 1. QR Code
-    const qrCanvas = document.getElementById(qrId) as HTMLCanvasElement | null
-    if (qrCanvas) {
-      QRCode.toCanvas(qrCanvas, pageUrl, {
-        width: 60,
-        margin: 1,
-        color: { light: '#00000000', dark: '#111827ff' },
-        errorCorrectionLevel: 'M',
-      }).catch(err => {
-        console.error('Failed to generate QR code:', err)
-        const ctx = qrCanvas.getContext('2d')
-        if (ctx) {
-          ctx.fillStyle = '#ef4444'
-          ctx.font = '8px monospace'
-          ctx.fillText('QR error', 2, 32)
-        }
-      })
-    }
+  // End marker
+  const endHtml = '<div class="poster-map-marker end-marker"></div>'
+  L.marker(latlngs.at(-1), {
+    icon: L.divIcon({ html: endHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
+  }).addTo(map)
 
-    // 2. Route map (dark style, no controls)
-    const mapEl = document.getElementById(mapId)
-    if (!mapEl) return
+  map.fitBounds(routeLine.getBounds(), { padding: [20, 20] })
+}
 
-    let points: number[][] = []
+// ── Shared: capture poster as Blob ────────────────────────────────────────
+
+async function capturePosterBlob(wrapperId: string): Promise<Blob> {
+  const wrapper = document.getElementById(wrapperId)
+  if (!wrapper)
+    throw new Error('Poster wrapper not found')
+  const { toBlob } = await htmlToImagePromise
+  const blob = await toBlob(wrapper, { cacheBust: true, pixelRatio: 2, skipFonts: false })
+  if (!blob)
+    throw new Error('Failed to generate image blob')
+  return blob
+}
+
+// ── Download ───────────────────────────────────────────────────────────────
+
+document.querySelectorAll<HTMLButtonElement>('[data-wrapper-id]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const wrapperId = btn.dataset.wrapperId!
+    const activityName = btn.dataset.activityName || 'workout'
+    const label = btn.querySelector('.btn-label')
+    const originalText = label?.textContent ?? 'Download'
+    btn.disabled = true
+    if (label)
+      label.textContent = 'Generating…'
+
     try {
-      points = JSON.parse(pointsRaw)
-    } catch (e) {
-      console.error('Failed to parse points data for poster map:', e)
-      return
+      const blob = await capturePosterBlob(wrapperId)
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.download = `workout-${activityName.replace(/\s+/g, '-').toLowerCase()}.png`
+      link.href = url
+      link.click()
+      URL.revokeObjectURL(url)
     }
-    if (points.length === 0) return
-
-    const map = L.map(mapId, {
-      zoomControl: false,
-      attributionControl: false,
-      dragging: false,
-      touchZoom: false,
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
-      keyboard: false,
-    })
-
-    // Light monochrome tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
-      maxZoom: 20,
-    }).addTo(map)
-
-    const latlngs = points.map((p: number[]) => L.latLng(p[0], p[1]))
-
-    const routeLine = L.polyline(latlngs, {
-      color: '#10b981',
-      weight: 2.5,
-      opacity: 0.9,
-    }).addTo(map)
-
-    // Start marker
-    const startHtml = '<div class="poster-map-marker start-marker"></div>'
-    L.marker(latlngs[0], {
-      icon: L.divIcon({ html: startHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
-    }).addTo(map)
-
-    // End marker
-    const endHtml = '<div class="poster-map-marker end-marker"></div>'
-    L.marker(latlngs[latlngs.length - 1], {
-      icon: L.divIcon({ html: endHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
-    }).addTo(map)
-
-    map.fitBounds(routeLine.getBounds(), { padding: [20, 20] })
-  }
-
-  // ── Shared: capture poster as Blob ────────────────────────────────────────
-
-  async function capturePosterBlob(wrapperId: string): Promise<Blob> {
-    const wrapper = document.getElementById(wrapperId)
-    if (!wrapper) throw new Error('Poster wrapper not found')
-    const { toBlob } = await htmlToImagePromise
-    const blob = await toBlob(wrapper, { cacheBust: true, pixelRatio: 2, skipFonts: false })
-    if (!blob) throw new Error('Failed to generate image blob')
-    return blob
-  }
-
-  // ── Download ───────────────────────────────────────────────────────────────
-
-  document.querySelectorAll<HTMLButtonElement>('[data-wrapper-id]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const wrapperId = btn.dataset.wrapperId!
-      const activityName = btn.dataset.activityName || 'workout'
-      const label = btn.querySelector('.btn-label')
-      const originalText = label?.textContent ?? 'Download'
-      btn.disabled = true
-      if (label) label.textContent = 'Generating…'
-
-      try {
-        const blob = await capturePosterBlob(wrapperId)
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.download = `workout-${activityName.replace(/\s+/g, '-').toLowerCase()}.png`
-        link.href = url
-        link.click()
-        URL.revokeObjectURL(url)
-      } catch (err) {
-        console.error('Failed to download poster:', err)
-        if (label) {
-          label.textContent = 'Failed'
-          setTimeout(() => { if (label) label.textContent = originalText }, 2000)
-        }
-      } finally {
-        btn.disabled = false
-      }
-    })
-  })
-
-  // ── Copy Image ─────────────────────────────────────────────────────────────
-
-  document.querySelectorAll<HTMLButtonElement>('.copy-poster-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const wrapperId = btn.dataset.copyId!
-      const label = btn.querySelector('.copy-label')
-      const originalText = label?.textContent ?? 'Copy'
-      btn.disabled = true
-      if (label) label.textContent = 'Copying…'
-
-      try {
-        const blob = await capturePosterBlob(wrapperId)
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-        if (label) label.textContent = 'Copied!'
+    catch (err) {
+      console.error('Failed to download poster:', err)
+      if (label) {
+        label.textContent = 'Failed'
         setTimeout(() => {
-          if (label) label.textContent = originalText
+          if (label)
+            label.textContent = originalText
         }, 2000)
-      } catch (err) {
-        console.error('Failed to copy poster:', err)
-        if (label) label.textContent = 'Failed'
-        setTimeout(() => {
-          if (label) label.textContent = originalText
-        }, 2000)
-      } finally {
-        btn.disabled = false
       }
-    })
+    }
+    finally {
+      btn.disabled = false
+    }
   })
+})
+
+// ── Copy Image ─────────────────────────────────────────────────────────────
+
+document.querySelectorAll<HTMLButtonElement>('.copy-poster-btn').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const wrapperId = btn.dataset.copyId!
+    const label = btn.querySelector('.copy-label')
+    const originalText = label?.textContent ?? 'Copy'
+    btn.disabled = true
+    if (label)
+      label.textContent = 'Copying…'
+
+    try {
+      const blob = await capturePosterBlob(wrapperId)
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      if (label)
+        label.textContent = 'Copied!'
+      setTimeout(() => {
+        if (label)
+          label.textContent = originalText
+      }, 2000)
+    }
+    catch (err) {
+      console.error('Failed to copy poster:', err)
+      if (label)
+        label.textContent = 'Failed'
+      setTimeout(() => {
+        if (label)
+          label.textContent = originalText
+      }, 2000)
+    }
+    finally {
+      btn.disabled = false
+    }
+  })
+})
 </script>
 
 <style>

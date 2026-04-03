@@ -1,7 +1,8 @@
-import { existsSync, mkdirSync, writeFileSync } from 'fs'
-import { join } from 'path'
-import { createInterface } from 'readline/promises'
-import { fileURLToPath } from 'url'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import process from 'node:process'
+import { createInterface } from 'node:readline/promises'
+import { fileURLToPath } from 'node:url'
 
 function normalizeSlug(input) {
   return String(input || '')
@@ -16,7 +17,8 @@ async function readSlugFromStdin() {
   try {
     const answer = await rl.question('Post slug (e.g. "my-new-post"): ')
     return answer
-  } finally {
+  }
+  finally {
     rl.close()
   }
 }

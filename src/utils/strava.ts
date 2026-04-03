@@ -3,10 +3,12 @@
  * Documentation: https://developers.strava.com/docs/reference/
  */
 
+import process from 'node:process'
+
 const API_BASE = 'https://www.strava.com/api/v3'
 
 function getEnv(key: string): string {
-  if (typeof process === 'undefined' || !process.env) {
+  if (!process.env) {
     throw new Error('Server-side only: process.env is not available.')
   }
   const value = process.env[key]
@@ -19,7 +21,8 @@ function getEnv(key: string): string {
 let cachedToken: string | null = null
 
 async function getAccessToken(): Promise<string> {
-  if (cachedToken) return cachedToken
+  if (cachedToken)
+    return cachedToken
 
   const res = await fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
@@ -48,7 +51,8 @@ async function stravaFetch<T>(
   const url = new URL(`${API_BASE}${path}`)
   if (params) {
     for (const [k, v] of Object.entries(params)) {
-      if (v != null) url.searchParams.set(k, String(v))
+      if (v != null)
+        url.searchParams.set(k, String(v))
     }
   }
 
@@ -70,7 +74,7 @@ async function stravaFetch<T>(
  * https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities
  */
 export function getStravaActivities(
-  options: { after?: number; page?: number; perPage?: number } = {},
+  options: { after?: number, page?: number, perPage?: number } = {},
 ) {
   const { after, page, perPage = 100 } = options
   return stravaFetch<StravaActivity[]>('/athlete/activities', {
@@ -96,12 +100,12 @@ export interface StravaActivity {
   moving_time: number
   start_date: string
   start_date_local: string
-  map: { id: string; summary_polyline: string }
+  map: { id: string, summary_polyline: string }
   [key: string]: unknown
 }
 
 export interface StravaActivityDetail extends StravaActivity {
-  map: { id: string; summary_polyline: string; polyline: string }
+  map: { id: string, summary_polyline: string, polyline: string }
   calories: number
   description: string | null
   [key: string]: unknown

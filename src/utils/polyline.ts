@@ -15,7 +15,7 @@ export function decodePolyline(encoded: string): [number, number][] {
 
     do {
       byte = encoded.charCodeAt(index++) - 63
-      result |= (byte & 0x1f) << shift
+      result |= (byte & 0x1F) << shift
       shift += 5
     } while (byte >= 0x20)
 
@@ -26,7 +26,7 @@ export function decodePolyline(encoded: string): [number, number][] {
 
     do {
       byte = encoded.charCodeAt(index++) - 63
-      result |= (byte & 0x1f) << shift
+      result |= (byte & 0x1F) << shift
       shift += 5
     } while (byte >= 0x20)
 

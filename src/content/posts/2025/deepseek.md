@@ -208,7 +208,7 @@ https://github.com/PlexPt/awesome-chatgpt-prompts-zh
 https://api-docs.deepseek.com/zh-cn/
 
 ```javascript
-import OpenAI from "openai"
+import OpenAI from 'openai'
 import 'dotenv/config'
 
 const openai = new OpenAI({
@@ -219,10 +219,10 @@ const openai = new OpenAI({
 async function main(message) {
   const completion = await openai.chat.completions.create({
     messages: [
-      { role: "system", content: "You are a helpful assistant." },
+      { role: 'system', content: 'You are a helpful assistant.' },
       { role: 'user', content: message },
     ],
-    model: "deepseek-chat",
+    model: 'deepseek-chat',
   })
 
   console.log(completion.choices[0].message.content)

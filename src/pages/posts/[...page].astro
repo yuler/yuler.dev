@@ -1,13 +1,12 @@
 ---
-import { getCollection } from 'astro:content'
-import Layout from '../../layouts/Layout.astro'
-import ChevronRight from '../../components/icons/ChevronRight.astro'
-import { formatDate } from '../../utils/date'
-
-import type { GetStaticPaths } from 'astro'
-
-import type { Page } from 'astro'
+import type { GetStaticPaths, Page } from 'astro'
 import type { CollectionEntry } from 'astro:content'
+import { getCollection } from 'astro:content'
+
+import ChevronRight from '../../components/icons/ChevronRight.astro'
+
+import Layout from '../../layouts/Layout.astro'
+import { formatDate } from '../../utils/date'
 
 interface Props {
   page: Page<CollectionEntry<'posts'>>
@@ -81,7 +80,8 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
         {
           (page.url.prev || page.url.next) && (
             <div class="mt-8 flex items-center justify-between border-t border-gray-100 pt-6">
-              {page.url.prev ? (
+              {page.url.prev
+? (
                 <a
                   href={page.url.prev}
                   class="inline-flex items-center gap-2 px-4 py-3 min-h-[2.75rem] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
@@ -89,7 +89,8 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
                   <span>←</span>
                   <span>Prev</span>
                 </a>
-              ) : (
+              )
+: (
                 <span />
               )}
 
@@ -97,7 +98,8 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
                 {page.currentPage}/{page.lastPage}
               </span>
 
-              {page.url.next ? (
+              {page.url.next
+? (
                 <a
                   href={page.url.next}
                   class="inline-flex items-center gap-2 px-4 py-3 min-h-[2.75rem] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
@@ -105,7 +107,8 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
                   <span>Next</span>
                   <span>→</span>
                 </a>
-              ) : (
+              )
+: (
                 <span />
               )}
             </div>

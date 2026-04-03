@@ -4,6 +4,13 @@ import CornerMarkers from '../../components/CornerMarkers.astro'
 import LightBox from '../../components/LightBox.astro'
 import LayoutPost from '../../layouts/LayoutPost.astro'
 
+const RT_CODE_FENCE = /```[\s\S]*?```/g
+const RT_INLINE_CODE = /`[^`]+`/g
+const RT_MD_LINK = /\[([^\]]+)\]\([^)]+\)/g
+const RT_MD_SYNTAX = /[#*_~`]/g
+const RT_NEWLINES = /\n+/g
+const RT_WS = /\s+/
+
 export async function getStaticPaths() {
   const blogEntries = await getCollection('posts')
   return blogEntries.map(entry => ({
@@ -16,16 +23,17 @@ const { entry } = Astro.props
 const { Content } = await render(entry)
 
 // Calculate reading time
-const readingTime = (content: string) => {
-  if (!content) return 1
+function readingTime(content: string) {
+  if (!content)
+    return 1
   const plainText = content
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/`[^`]+`/g, '')
-    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-    .replace(/[#*_~`]/g, '')
-    .replace(/\n+/g, ' ')
+    .replace(RT_CODE_FENCE, '')
+    .replace(RT_INLINE_CODE, '')
+    .replace(RT_MD_LINK, '$1')
+    .replace(RT_MD_SYNTAX, '')
+    .replace(RT_NEWLINES, ' ')
     .trim()
-  const words = plainText.split(/\s+/).filter(word => word.length > 0).length
+  const words = plainText.split(RT_WS).filter(word => word.length > 0).length
   return Math.max(1, Math.ceil(words / 200))
 }
 
@@ -33,7 +41,8 @@ let readTime = 1
 try {
   const contentText = (entry as any).body || ''
   readTime = readingTime(contentText)
-} catch {
+}
+catch {
   readTime = 1
 }
 
@@ -64,7 +73,7 @@ try {
         {/* Description */}
         {entry.data.description && (
           <p class="text-gray-600 mb-6 text-lg border-l-2 border-gray-300 pl-4">
-            <span class="text-gray-400">></span> {entry.data.description}
+            <span class="text-gray-400">{'>'}</span> {entry.data.description}
           </p>
         )}
 
@@ -99,7 +108,7 @@ try {
         {entry.data.tags && entry.data.tags.length > 0 && (
           <div class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-200">
             <span class="text-gray-400 font-mono text-sm">tags:</span>
-            {entry.data.tags.map((tag) => (
+            {entry.data.tags.map(tag => (
               <a
                 href={`/tags/${tag}`}
                 class="px-2 py-0.5 text-sm border border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900 transition-colors"
@@ -142,7 +151,8 @@ try {
           prose-table:w-full prose-table:border-collapse prose-table:my-4
           prose-th:border prose-th:border-gray-200 prose-th:bg-gray-50 prose-th:p-2 prose-th:text-left prose-th:text-gray-900 prose-th:font-semibold prose-th:text-sm prose-th:font-mono
           prose-td:border prose-td:border-gray-200 prose-td:p-2 prose-td:text-gray-700 prose-td:text-sm
-        ">
+        "
+        >
           <Content />
         </article>
       </div>

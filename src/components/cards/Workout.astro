@@ -1,9 +1,9 @@
 ---
+import type { StoredActivitySummary } from '../../utils/strava-activities'
 import { formatDate } from '../../utils/date'
 import { loadAllStoredActivities } from '../../utils/strava-activities'
-import type { StoredActivitySummary } from '../../utils/strava-activities'
-import { formatDurationHeatmap } from '../../utils/workout-display'
 import { getWeekRangesForYear } from '../../utils/week-grid'
+import { formatDurationHeatmap } from '../../utils/workout-display'
 import CornerMarkers from '../CornerMarkers.astro'
 
 interface Props {
@@ -19,16 +19,18 @@ const activities = loadAllStoredActivities<Activity>()
 const currentYear = new Date().getFullYear()
 const weeks = getWeekRangesForYear(currentYear)
 
-const weeklySeconds = new Array(weeks.length).fill(0) as number[]
-const weeklyNames = new Array(weeks.length).fill(0).map(() => []) as string[][]
+const weeklySeconds = Array.from({ length: weeks.length }).fill(0) as number[]
+const weeklyNames = Array.from({ length: weeks.length }).fill(0).map(() => []) as string[][]
 
 for (const activity of activities) {
   const date = new Date(activity.start_date_local)
-  if (date.getFullYear() !== currentYear) continue
+  if (date.getFullYear() !== currentYear)
+continue
 
   const dateStr = formatDate(date)
   const weekIndex = weeks.findIndex(([start, end]) => dateStr >= start && dateStr <= end)
-  if (weekIndex === -1) continue
+  if (weekIndex === -1)
+continue
 
   weeklySeconds[weekIndex] += activity.moving_time
   weeklyNames[weekIndex].push(activity.name)
@@ -80,7 +82,8 @@ const weeklyStats = weeks.map(([start, end], index) => {
         {
           weeklyStats.map((week, index) => (
             <div class="group relative">
-              {week.level > 0 ? (
+              {week.level > 0
+? (
                 <a
                   href={`/workouts?from=${week.start}&to=${week.end}`}
                   class:list={[
@@ -97,7 +100,8 @@ const weeklyStats = weeks.map(([start, end], index) => {
                     },
                   ]}
                 />
-              ) : (
+              )
+: (
                 <div
                   class:list={['size-4 bg-gray-100', { 'ring-1 ring-black/50 dark:ring-white/50': week.isCurrentWeek }]}
                 />

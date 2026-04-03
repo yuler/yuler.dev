@@ -1,14 +1,14 @@
 ---
-import MapPin from '../icons/MapPin.astro'
-import ArrowUpRight from '../icons/ArrowUpRight.astro'
-import 'leaflet/dist/leaflet.css'
 import CornerMarkers from '../CornerMarkers.astro'
+import ArrowUpRight from '../icons/ArrowUpRight.astro'
+import MapPin from '../icons/MapPin.astro'
+import 'leaflet/dist/leaflet.css'
 
 interface Props {
   class?: string
   title?: string
   subtitle?: string
-  mapCoords?: { lng: number; lat: number }
+  mapCoords?: { lng: number, lat: number }
 }
 
 const {
@@ -68,9 +68,9 @@ const {
     '.location-map',
   ) as NodeListOf<HTMLElement>
 
-  maps.forEach(mapElement => {
-    const lat = parseFloat(mapElement.dataset.lat || '0')
-    const lng = parseFloat(mapElement.dataset.lng || '0')
+  maps.forEach((mapElement) => {
+    const lat = Number.parseFloat(mapElement.dataset.lat || '0')
+    const lng = Number.parseFloat(mapElement.dataset.lng || '0')
 
     const map = L.map(mapElement, {
       center: [lat, lng],
