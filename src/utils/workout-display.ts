@@ -27,9 +27,10 @@ export function deviceEmoji(name: string): string {
 
 /** List row: short duration. Detail: include seconds when under 1h. */
 export function formatMovingDuration(seconds: number, mode: 'list' | 'detail'): string {
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = seconds % 60
+  const roundedSeconds = Math.round(seconds)
+  const h = Math.floor(roundedSeconds / 3600)
+  const m = Math.floor((roundedSeconds % 3600) / 60)
+  const s = roundedSeconds % 60
   if (mode === 'detail') {
     if (h > 0) return `${h}h ${m}m ${s}s`
     return `${m}m ${s}s`
@@ -52,9 +53,9 @@ export function formatDistanceMetersCompact(meters: number): string {
 export function formatPaceOrSpeed(sportType: string, avgSpeed: number): string {
   if (avgSpeed === 0) return '-'
   if (sportType === 'Ride') return `${(avgSpeed * 3.6).toFixed(1)} km/h`
-  const paceSeconds = 1000 / avgSpeed
-  const paceMin = Math.floor(paceSeconds / 60)
-  const paceSec = Math.round(paceSeconds % 60)
+  const totalPaceSeconds = Math.round(1000 / avgSpeed)
+  const paceMin = Math.floor(totalPaceSeconds / 60)
+  const paceSec = totalPaceSeconds % 60
   return `${paceMin}'${String(paceSec).padStart(2, '0')}"/km`
 }
 

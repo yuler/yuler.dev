@@ -9,6 +9,17 @@ const activityModules = import.meta.glob('../../data/strava/activities/*.json', 
   eager: true,
 }) as Record<string, unknown>
 
+function activityIdFromModuleKey(key: string): number | undefined {
+  const m = key.match(/\/(\d+)\.json$/)
+  return m ? parseInt(m[1], 10) : undefined
+}
+
+const activityModuleById = new Map<number, unknown>()
+for (const [key, mod] of Object.entries(activityModules)) {
+  const id = activityIdFromModuleKey(key)
+  if (id != null) activityModuleById.set(id, mod)
+}
+
 export function getStoredActivityIds(): readonly number[] {
   return ids as number[]
 }
@@ -20,14 +31,10 @@ export function unwrapJsonModule<T>(mod: unknown): T {
   return mod as T
 }
 
-function moduleKeyForId(id: number): string | undefined {
-  return Object.keys(activityModules).find(k => k.endsWith(`/${id}.json`))
-}
-
 export function loadStoredActivityById<T>(id: number): T | undefined {
-  const key = moduleKeyForId(id)
-  if (!key) return undefined
-  return unwrapJsonModule<T>(activityModules[key])
+  const mod = activityModuleById.get(id)
+  if (mod === undefined) return undefined
+  return unwrapJsonModule<T>(mod)
 }
 
 export function loadAllStoredActivities<T>(): T[] {
