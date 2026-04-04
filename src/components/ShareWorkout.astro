@@ -209,14 +209,20 @@ function closeDialog(dialogId: string) {
   prev?.focus()
 }
 
-// Wire triggers
-document.querySelectorAll<HTMLButtonElement>('[data-dialog-id]').forEach((btn) => {
-  btn.addEventListener('click', () => openDialog(btn.dataset.dialogId!))
+// Wire triggers - use event delegation to work with Astro hydration
+document.addEventListener('click', (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-dialog-id]')
+  if (btn) {
+    openDialog(btn.dataset.dialogId!)
+  }
 })
 
-// Wire close buttons & backdrops
-document.querySelectorAll<HTMLElement>('[data-dialog-close]').forEach((el) => {
-  el.addEventListener('click', () => closeDialog(el.dataset.dialogClose!))
+// Wire close buttons & backdrops - use event delegation
+document.addEventListener('click', (e) => {
+  const el = (e.target as HTMLElement).closest<HTMLElement>('[data-dialog-close]')
+  if (el) {
+    closeDialog(el.dataset.dialogClose!)
+  }
 })
 
 // Close on Escape
@@ -334,75 +340,77 @@ async function capturePosterBlob(wrapperId: string): Promise<Blob> {
 
 // ── Download ───────────────────────────────────────────────────────────────
 
-document.querySelectorAll<HTMLButtonElement>('[data-wrapper-id]').forEach((btn) => {
-  btn.addEventListener('click', async () => {
-    const wrapperId = btn.dataset.wrapperId!
-    const activityName = btn.dataset.activityName || 'workout'
-    const label = btn.querySelector('.btn-label')
-    const originalText = label?.textContent ?? 'Download'
-    btn.disabled = true
-    if (label)
-      label.textContent = 'Generating…'
+document.addEventListener('click', async (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-wrapper-id]')
+  if (!btn) return
 
-    try {
-      const blob = await capturePosterBlob(wrapperId)
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.download = `workout-${activityName.replace(/\s+/g, '-').toLowerCase()}.png`
-      link.href = url
-      link.click()
-      URL.revokeObjectURL(url)
+  const wrapperId = btn.dataset.wrapperId!
+  const activityName = btn.dataset.activityName || 'workout'
+  const label = btn.querySelector('.btn-label')
+  const originalText = label?.textContent ?? 'Download'
+  btn.disabled = true
+  if (label)
+    label.textContent = 'Generating…'
+
+  try {
+    const blob = await capturePosterBlob(wrapperId)
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.download = `workout-${activityName.replace(/\s+/g, '-').toLowerCase()}.png`
+    link.href = url
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+  catch (err) {
+    console.error('Failed to download poster:', err)
+    if (label) {
+      label.textContent = 'Failed'
+      setTimeout(() => {
+        if (label)
+          label.textContent = originalText
+      }, 2000)
     }
-    catch (err) {
-      console.error('Failed to download poster:', err)
-      if (label) {
-        label.textContent = 'Failed'
-        setTimeout(() => {
-          if (label)
-            label.textContent = originalText
-        }, 2000)
-      }
-    }
-    finally {
-      btn.disabled = false
-    }
-  })
+  }
+  finally {
+    btn.disabled = false
+  }
 })
 
 // ── Copy Image ─────────────────────────────────────────────────────────────
 
-document.querySelectorAll<HTMLButtonElement>('.copy-poster-btn').forEach((btn) => {
-  btn.addEventListener('click', async () => {
-    const wrapperId = btn.dataset.copyId!
-    const label = btn.querySelector('.copy-label')
-    const originalText = label?.textContent ?? 'Copy'
-    btn.disabled = true
-    if (label)
-      label.textContent = 'Copying…'
+document.addEventListener('click', async (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.copy-poster-btn')
+  if (!btn) return
 
-    try {
-      const blob = await capturePosterBlob(wrapperId)
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+  const wrapperId = btn.dataset.copyId!
+  const label = btn.querySelector('.copy-label')
+  const originalText = label?.textContent ?? 'Copy'
+  btn.disabled = true
+  if (label)
+    label.textContent = 'Copying…'
+
+  try {
+    const blob = await capturePosterBlob(wrapperId)
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+    if (label)
+      label.textContent = 'Copied!'
+    setTimeout(() => {
       if (label)
-        label.textContent = 'Copied!'
-      setTimeout(() => {
-        if (label)
-          label.textContent = originalText
-      }, 2000)
-    }
-    catch (err) {
-      console.error('Failed to copy poster:', err)
+        label.textContent = originalText
+    }, 2000)
+  }
+  catch (err) {
+    console.error('Failed to copy poster:', err)
+    if (label)
+      label.textContent = 'Failed'
+    setTimeout(() => {
       if (label)
-        label.textContent = 'Failed'
-      setTimeout(() => {
-        if (label)
-          label.textContent = originalText
-      }, 2000)
-    }
-    finally {
-      btn.disabled = false
-    }
-  })
+        label.textContent = originalText
+    }, 2000)
+  }
+  finally {
+    btn.disabled = false
+  }
 })
 </script>
 
