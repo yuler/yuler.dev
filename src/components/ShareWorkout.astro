@@ -342,7 +342,8 @@ async function capturePosterBlob(wrapperId: string): Promise<Blob> {
 
 document.addEventListener('click', async (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-wrapper-id]')
-  if (!btn) return
+  if (!btn)
+    return
 
   const wrapperId = btn.dataset.wrapperId!
   const activityName = btn.dataset.activityName || 'workout'
@@ -380,7 +381,8 @@ document.addEventListener('click', async (e) => {
 
 document.addEventListener('click', async (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.copy-poster-btn')
-  if (!btn) return
+  if (!btn)
+    return
 
   const wrapperId = btn.dataset.copyId!
   const label = btn.querySelector('.copy-label')
