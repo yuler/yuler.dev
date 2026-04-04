@@ -54,7 +54,7 @@ const stats = [
 ]
 
 const sportIcon = sportIcons[activity.sport_type] || '💪'
-const pageUrl = new URL(`workouts/${activity.id}`, Astro.site ?? 'https://yuler.dev').href
+const pageUrl = new URL(`workouts/${activity.id}`, Astro.site ?? 'https://yuler.dev/').href
 ---
 
 <Layout title={`${activity.name} — Workouts`}>
