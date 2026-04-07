@@ -24,6 +24,7 @@ const { activityId, activityName, sportType, sportIcon, date, stats, points, pag
 
 const dialogId = `share-dialog-${activityId}`
 const triggerId = `share-trigger-${activityId}`
+const templateId = `share-template-${activityId}`
 const posterWrapperId = `poster-wrapper-${activityId}`
 const posterMapId = `poster-map-${activityId}`
 const qrCodeId = `qr-code-${activityId}`
@@ -38,6 +39,7 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
 <!-- Trigger Button -->
 <button
   id={triggerId}
+  data-template-id={templateId}
   data-dialog-id={dialogId}
   class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 rounded-sm cursor-pointer"
   aria-label="Share workout"
@@ -46,163 +48,190 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
   <Share />
 </button>
 
-<!-- Dialog Overlay -->
-<div
-  id={dialogId}
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby={`share-title-${activityId}`}
-  class="fixed inset-0 z-[9999] flex items-center justify-center p-4 hidden"
->
-  <!-- Backdrop -->
-  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm share-backdrop" data-dialog-close={dialogId}></div>
+<!-- Dialog Template (lazy: cloned into DOM on first open) -->
+<template id={templateId}>
+  <div
+    id={dialogId}
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby={`share-title-${activityId}`}
+    class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+  >
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm share-backdrop" data-dialog-close={dialogId}></div>
 
-  <!-- Dialog Panel -->
-  <div class="relative z-10 bg-white w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col">
-    <!-- Dialog Header -->
-    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-      <h2 id={`share-title-${activityId}`} class="text-sm font-semibold font-mono text-gray-900">Share Workout</h2>
-      <button
-        id={closeBtnId}
-        data-dialog-close={dialogId}
-        class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 rounded-sm cursor-pointer"
-        aria-label="Close share dialog"
-      >
-        <Close />
-      </button>
-    </div>
-
-    <!-- Poster Preview Area -->
-    <div class="p-5">
-      <!-- The actual poster element that gets captured -->
-      <div
-        id={posterWrapperId}
-        class="poster-wrapper relative bg-white overflow-hidden"
-        style="width: 100%; aspect-ratio: 3/4; border: 1px solid #e5e7eb;"
-        data-points={JSON.stringify(points)}
-        data-page-url={pageUrl}
-        data-map-id={posterMapId}
-        data-qr-id={qrCodeId}
-      >
-        <!-- Top gradient accent -->
-        <div
-          class="absolute top-0 left-0 right-0 h-1 z-10"
-          style="background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6)"
+    <!-- Dialog Panel -->
+    <div class="relative z-10 bg-white w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col">
+      <!-- Dialog Header -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <h2 id={`share-title-${activityId}`} class="text-sm font-semibold font-mono text-gray-900">Share Workout</h2>
+        <button
+          id={closeBtnId}
+          data-dialog-close={dialogId}
+          class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 rounded-sm cursor-pointer"
+          aria-label="Close share dialog"
         >
-        </div>
+          <Close />
+        </button>
+      </div>
 
-        <!-- Map background (renders into this div) -->
-        <div id={posterMapId} class="absolute inset-0 opacity-20" style="z-index: 0;"></div>
-
-        <!-- Content overlay -->
-        <div class="absolute inset-0 flex flex-col justify-between p-5 z-10">
-          <!-- Top: sport icon + title -->
-          <div>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-2xl">{sportIcon}</span>
-              <span class="text-[10px] font-mono text-emerald-600 uppercase tracking-widest">
-                {sportType}
-              </span>
-            </div>
-            <h3 class="text-gray-900 font-bold font-mono text-lg leading-tight line-clamp-2">
-              {activityName}
-            </h3>
-            <p class="text-gray-400 font-mono text-[10px] mt-1">{date}</p>
+      <!-- Poster Preview Area -->
+      <div class="p-5">
+        <!-- The actual poster element that gets captured -->
+        <div
+          id={posterWrapperId}
+          class="poster-wrapper relative bg-white overflow-hidden"
+          style="width: 100%; aspect-ratio: 3/4; border: 1px solid #e5e7eb;"
+          data-points={JSON.stringify(points)}
+          data-page-url={pageUrl}
+          data-map-id={posterMapId}
+          data-qr-id={qrCodeId}
+        >
+          <!-- Top gradient accent -->
+          <div
+            class="absolute top-0 left-0 right-0 h-1 z-10"
+            style="background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6)"
+          >
           </div>
 
-          <!-- Core Stats Grid -->
-          <div class="grid grid-cols-3 gap-2 mt-auto mb-3">
-            {
-              coreStats.map(stat => (
-                <div class="bg-gray-50 border border-gray-200 p-2">
-                  <div class="text-[9px] text-gray-400 font-mono mb-0.5 truncate">{stat.label}</div>
-                  <div class="text-gray-900 font-mono font-semibold text-sm leading-tight">{stat.value}</div>
-                </div>
-              ))
-            }
-          </div>
+          <!-- Map background (renders into this div) -->
+          <div id={posterMapId} class="absolute inset-0 opacity-20" style="z-index: 0;"></div>
 
-          <!-- Bottom: QR code + branding -->
-          <div class="flex items-end justify-between">
+          <!-- Content overlay -->
+          <div class="absolute inset-0 flex flex-col justify-between px-3 py-5 md:px-5 z-10">
+            <!-- Top: sport icon + title -->
             <div>
-              <p class="text-sm font-mono text-gray-700 mb-0.5">yuler.dev</p>
-              <p class="text-xs font-mono text-gray-400">Scan to view activity</p>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-2xl">{sportIcon}</span>
+                <span class="text-[10px] font-mono text-emerald-600 uppercase tracking-widest">
+                  {sportType}
+                </span>
+              </div>
+              <h3 class="text-gray-900 font-bold font-mono text-lg leading-tight line-clamp-2">
+                {activityName}
+              </h3>
+              <p class="text-gray-400 font-mono text-[10px] mt-1">{date}</p>
             </div>
-            <canvas id={qrCodeId} width="60" height="60" class="block" style="image-rendering: pixelated;"> </canvas>
+
+            <!-- Core Stats Grid -->
+            <div class="grid grid-cols-3 gap-2 mt-auto mb-3">
+              {
+                coreStats.map(stat => (
+                  <div class="bg-gray-50 border border-gray-200 p-2 min-w-0">
+                    <div class="text-[9px] text-gray-400 font-mono mb-0.5 truncate">{stat.label}</div>
+                    <div class="text-gray-900 font-mono font-semibold text-xs leading-tight whitespace-nowrap">
+                      {stat.value}
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+
+            <!-- Bottom: QR code + branding -->
+            <div class="flex items-end justify-between">
+              <div>
+                <p class="text-sm font-mono text-gray-700 mb-0.5">yuler.dev</p>
+                <p class="text-xs font-mono text-gray-400">Scan to view activity</p>
+              </div>
+              <canvas id={qrCodeId} width="60" height="60" class="block" style="image-rendering: pixelated;"> </canvas>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Action buttons -->
-    <div class="px-5 pb-5 flex gap-3">
-      <button
-        id={downloadBtnId}
-        data-wrapper-id={posterWrapperId}
-        data-activity-name={activityName}
-        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white text-sm font-mono hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
-        aria-label="Download poster"
-      >
-        <Download class="download-icon" />
-        <span class="btn-label">Download</span>
-      </button>
+      <!-- Action buttons -->
+      <div class="px-5 pb-5 flex gap-3">
+        <button
+          id={downloadBtnId}
+          data-wrapper-id={posterWrapperId}
+          data-activity-name={activityName}
+          class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white text-sm font-mono hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+          aria-label="Download poster"
+        >
+          <Download class="download-icon" />
+          <span class="btn-label">Download</span>
+        </button>
 
-      <button
-        data-copy-id={posterWrapperId}
-        class="copy-poster-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-mono text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
-        aria-label="Copy poster to clipboard"
-      >
-        <Copy />
-        <span class="copy-label">Copy</span>
-      </button>
+        <button
+          data-copy-id={posterWrapperId}
+          class="copy-poster-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-mono text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+          aria-label="Copy poster to clipboard"
+        >
+          <Copy />
+          <span class="copy-label">Copy</span>
+        </button>
+      </div>
     </div>
   </div>
-</div>
+</template>
 
 <script>
 import L from 'leaflet'
 import QRCode from 'qrcode'
+import {
+  addLightBasemapTiles,
+  LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+  nudgeZoomOutAfterFit,
+  resolveBasemapProvider,
+  toMapCoords,
+} from '../lib/leafletTiles'
 
 /** Poster capture only runs after the share dialog opens; html-to-image stays dynamic. */
 const htmlToImagePromise = import('html-to-image')
 
 const dialogFocusStack: HTMLElement[] = []
+const leafletMaps = new Map<string, L.Map>()
 
-// ── Dialog open/close ──────────────────────────────────────────────────────
+// ── Dialog open / close / destroy ─────────────────────────────────────────
 
-function openDialog(dialogId: string) {
+function openDialog(dialogId: string, templateId?: string) {
+  // Already open — ignore
+  if (document.getElementById(dialogId))
+    return
+
+  // Clone from <template>
+  const template = templateId
+    ? document.getElementById(templateId) as HTMLTemplateElement | null
+    : null
+  if (!template)
+    return
+  document.body.appendChild(template.content.cloneNode(true))
+
   const dialog = document.getElementById(dialogId)
   if (!dialog)
     return
+
   const ae = document.activeElement
   if (ae instanceof HTMLElement)
     dialogFocusStack.push(ae)
 
-  dialog.classList.remove('hidden')
-  dialog.classList.add('flex')
   document.body.classList.add('overflow-hidden')
 
-  // Init poster contents when dialog first opens
   const wrapper = dialog.querySelector('.poster-wrapper') as HTMLElement | null
-  if (wrapper && !wrapper.dataset.initialized) {
-    wrapper.dataset.initialized = 'true'
+  if (wrapper)
     initPoster(wrapper)
-  }
 
   requestAnimationFrame(() => {
-    const closeBtn = dialog.querySelector<HTMLButtonElement>(
+    dialog.querySelector<HTMLButtonElement>(
       'button[aria-label="Close share dialog"]',
-    )
-    closeBtn?.focus()
+    )?.focus()
   })
 }
 
-function closeDialog(dialogId: string) {
+function destroyDialog(dialogId: string) {
   const dialog = document.getElementById(dialogId)
   if (!dialog)
     return
-  dialog.classList.add('hidden')
-  dialog.classList.remove('flex')
+
+  // Tear down Leaflet map to free tiles / event listeners
+  const wrapper = dialog.querySelector('.poster-wrapper') as HTMLElement | null
+  const mapId = wrapper?.dataset.mapId
+  if (mapId) {
+    leafletMaps.get(mapId)?.remove()
+    leafletMaps.delete(mapId)
+  }
+
+  dialog.remove()
   document.body.classList.remove('overflow-hidden')
 
   const prev = dialogFocusStack.pop()
@@ -215,28 +244,41 @@ document.addEventListener('click', (e) => {
 
   const openBtn = target.closest<HTMLButtonElement>('[data-dialog-id]')
   if (openBtn) {
-    openDialog(openBtn.dataset.dialogId!)
+    openDialog(openBtn.dataset.dialogId!, openBtn.dataset.templateId)
     return
   }
 
   const closeEl = target.closest<HTMLElement>('[data-dialog-close]')
   if (closeEl) {
-    closeDialog(closeEl.dataset.dialogClose!)
+    destroyDialog(closeEl.dataset.dialogClose!)
   }
 })
 
 // Close on Escape
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    document.querySelectorAll<HTMLElement>('[role="dialog"]:not(.hidden)').forEach((dialog) => {
-      closeDialog(dialog.id)
+    document.querySelectorAll<HTMLElement>('[role="dialog"]').forEach((dialog) => {
+      destroyDialog(dialog.id)
     })
   }
 })
 
+// ── Debounced window resize — destroy open dialogs so next open re-renders at new size
+let resizeTimer: ReturnType<typeof setTimeout>
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(() => {
+    document.querySelectorAll<HTMLElement>('[role="dialog"]').forEach((dialog) => {
+      destroyDialog(dialog.id)
+    })
+  }, 300)
+})
+
 // ── Poster initializer ─────────────────────────────────────────────────────
 
-function initPoster(wrapper: HTMLElement) {
+async function initPoster(wrapper: HTMLElement) {
+  await resolveBasemapProvider()
+
   const mapId = wrapper.dataset.mapId!
   const qrId = wrapper.dataset.qrId!
   const pageUrl = wrapper.dataset.pageUrl!
@@ -261,7 +303,7 @@ function initPoster(wrapper: HTMLElement) {
     })
   }
 
-  // 2. Route map (dark style, no controls)
+  // 2. Route map (no controls, static display)
   const mapEl = document.getElementById(mapId)
   if (!mapEl)
     return
@@ -285,15 +327,15 @@ function initPoster(wrapper: HTMLElement) {
     scrollWheelZoom: false,
     doubleClickZoom: false,
     keyboard: false,
+    ...LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
   })
 
-  // Light monochrome tile layer
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd',
-    maxZoom: 20,
-  }).addTo(map)
+  addLightBasemapTiles(map, { labels: false })
 
-  const latlngs = points.map((p: number[]) => L.latLng(p[0], p[1]))
+  const latlngs = points.map((p: number[]) => {
+    const [lat, lng] = toMapCoords(p[0], p[1])
+    return L.latLng(lat, lng)
+  })
 
   const routeLine = L.polyline(latlngs, {
     color: '#10b981',
@@ -301,13 +343,11 @@ function initPoster(wrapper: HTMLElement) {
     opacity: 0.9,
   }).addTo(map)
 
-  // Start marker
   const startHtml = '<div class="poster-map-marker start-marker"></div>'
   L.marker(latlngs[0], {
     icon: L.divIcon({ html: startHtml, className: '', iconSize: [8, 8], iconAnchor: [4, 4] }),
   }).addTo(map)
 
-  // End marker
   const endHtml = '<div class="poster-map-marker end-marker"></div>'
   const endLatLng = latlngs.at(-1)
   if (endLatLng) {
@@ -316,13 +356,14 @@ function initPoster(wrapper: HTMLElement) {
     }).addTo(map)
   }
 
-  // Asymmetric padding: reserve space at the bottom for the stats/QR overlay so the
-  // route stays in the open map area above the cards (fitBounds centers in padded viewport).
-  const posterMapStatsOverlayPaddingPx = 180
+  const posterMapStatsOverlayPaddingPx = 220
   map.fitBounds(routeLine.getBounds(), {
-    paddingTopLeft: [20, 20],
-    paddingBottomRight: [20, posterMapStatsOverlayPaddingPx],
+    paddingTopLeft: [28, 28],
+    paddingBottomRight: [28, posterMapStatsOverlayPaddingPx],
   })
+  nudgeZoomOutAfterFit(map, 0.4)
+
+  leafletMaps.set(mapId, map)
 }
 
 // ── Shared: capture poster as Blob ────────────────────────────────────────

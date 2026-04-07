@@ -1,6 +1,8 @@
 ---
 import CornerMarkers from './CornerMarkers.astro'
+import Globe from './icons/Globe.astro'
 import LocateFixed from './icons/LocateFixed.astro'
+import MapFold from './icons/MapFold.astro'
 import Pause from './icons/Pause.astro'
 import Play from './icons/Play.astro'
 import 'leaflet/dist/leaflet.css'
@@ -17,13 +19,25 @@ const randomId = Math.random().toString(36).slice(2, 9)
 const mapId = `activity-map-${randomId}`
 const btnId = `play-route-btn-${randomId}`
 const resetBtnId = `reset-map-btn-${randomId}`
+const switchBtnId = `switch-provider-btn-${randomId}`
 ---
 
 <div class="bg-white border border-gray-200 mb-4 relative">
   <CornerMarkers class="z-1000" />
 
   <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-    <h2 class="text-sm font-semibold text-gray-900 font-mono">Route</h2>
+    <div class="flex items-center gap-3">
+      <h2 class="text-sm font-semibold text-gray-900 font-mono">Route</h2>
+      <button
+        id={switchBtnId}
+        class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 rounded-sm cursor-pointer"
+        aria-label="Switch map provider"
+        title="Switch map provider"
+      >
+        <Globe class="size-3.5 provider-icon-carto" />
+        <MapFold class="size-3.5 provider-icon-amap hidden" />
+      </button>
+    </div>
     <div class="flex items-center gap-4">
       <slot name="header-actions" />
       <button
@@ -46,6 +60,7 @@ const resetBtnId = `reset-map-btn-${randomId}`
       data-start-time={startTime}
       data-btn-id={btnId}
       data-reset-btn-id={resetBtnId}
+      data-switch-btn-id={switchBtnId}
     >
     </div>
     <button
@@ -91,251 +106,346 @@ const resetBtnId = `reset-map-btn-${randomId}`
 </style>
 
 <script>
+import type { BasemapProvider } from '../lib/leafletTiles'
 import { addSeconds, format } from 'date-fns'
 import L from 'leaflet'
+import {
+  addLightBasemapTiles,
+  getProvider,
+  LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+  nudgeZoomOutAfterFit,
+  resolveBasemapProvider,
+  setProvider,
+  toMapCoords,
+} from '../lib/leafletTiles'
 
-function initActivityMaps() {
-  document.querySelectorAll('.activity-map-container').forEach((el) => {
-    const MAP_BOUNDS_PADDING: L.PointExpression = [30, 30]
-    const pointsData = el.getAttribute('data-points')
-    if (!pointsData)
-      return
+const MAP_BOUNDS_PADDING: L.PointExpression = [46, 46]
 
-    let points: number[][]
-    try {
-      points = JSON.parse(pointsData)
-    }
-    catch (e) {
-      console.error('Failed to parse route points:', e)
-      return
-    }
-    if (!Array.isArray(points) || points.length === 0)
-      return
+const liveAbort = new Map<string, AbortController>()
+const liveMaps = new Map<string, L.Map>()
 
-    const duration = Number.parseInt(el.getAttribute('data-duration') || '0', 10)
-    let startTimeStr = el.getAttribute('data-start-time') || ''
-
-    // start_date_local is exactly the local time string format but often comes with a "Z".
-    // We strip the "Z" to prevent the browser from interpreting it as UTC, creating an accurate date relative to 0 duration.
-    if (startTimeStr.endsWith('Z')) {
-      startTimeStr = startTimeStr.slice(0, -1)
-    }
-
-    const mapId = el.id
-    const btnId = el.getAttribute('data-btn-id')
-    const resetBtnId = el.getAttribute('data-reset-btn-id')
-
-    const latlngs = points.map((p: number[]) => L.latLng(p[0], p[1]))
-    const map = L.map(mapId, { zoomControl: true, attributionControl: true })
-
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      subdomains: 'abcd',
-      maxZoom: 20,
-    }).addTo(map)
-
-    const routeLine = L.polyline(latlngs, {
-      color: '#10b981',
-      weight: 3,
-      opacity: 0.9,
-      smoothFactor: 1,
-    }).addTo(map)
-
-    addMarker(map, latlngs[0], '#10b981')
-    const endLatLng = latlngs.at(-1)
-    if (endLatLng)
-      addMarker(map, endLatLng, '#ef4444')
-
-    map.fitBounds(routeLine.getBounds(), { padding: MAP_BOUNDS_PADDING })
-
-    setupMotionPlayer(map, latlngs, btnId, duration, startTimeStr)
-    setupResetCenter(map, routeLine, resetBtnId)
-
-    // Signal to the screenshot runner that the route map is initialized.
-    // (leaflet tiles may still load after this, but the route polyline + bounds are set.)
-    if (el instanceof HTMLElement) {
-      el.dataset.routeReady = 'true'
-    }
-
-    // --- Helpers ---
-
-    function addMarker(map: L.Map, position: L.LatLngExpression, color: string) {
-      const html = `<div style="width:0.75rem;height:0.75rem;background:${color};border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>`
-      L.marker(position, {
-        icon: L.divIcon({ html, className: '', iconSize: [12, 12], iconAnchor: [6, 6] }),
-      }).addTo(map)
-    }
-
-    function setupMotionPlayer(
-      map: L.Map,
-      pathPoints: L.LatLng[],
-      actionBtnId: string | null,
-      motionDuration: number,
-      initialTimeStr: string,
-    ) {
-      const motionBtn = actionBtnId ? document.getElementById(actionBtnId) : null
-      if (!motionBtn)
-        return
-
-      const playIcon = motionBtn.querySelector('.play-icon')
-      const pauseIcon = motionBtn.querySelector('.pause-icon')
-
-      let isPlaying = false
-      let currentProgress = 0
-      let lastTime: number | null = null
-      let animationFrameId: number | null = null
-      let motionMarker: L.Marker | null = null
-      let motionPolyline: L.Polyline | null = null
-
-      const DURATION_MS = 8000
-      let totalDist = 0
-      const dists = [0]
-      for (let i = 1; i < pathPoints.length; i++) {
-        totalDist += pathPoints[i - 1].distanceTo(pathPoints[i])
-        dists.push(totalDist)
-      }
-
-      function formatTime(progressSeconds: number) {
-        if (initialTimeStr) {
-          const dateObj = new Date(initialTimeStr)
-          const currentObj = addSeconds(dateObj, progressSeconds)
-          return format(currentObj, 'HH:mm:ss')
-        }
-        const h = Math.floor(progressSeconds / 3600)
-        const m = Math.floor((progressSeconds % 3600) / 60)
-        const s = Math.round(progressSeconds % 60)
-        return h > 0
-          ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-          : `${m}:${String(s).padStart(2, '0')}`
-      }
-
-      function togglePlayPause() {
-        if (isPlaying) {
-          if (animationFrameId != null)
-            cancelAnimationFrame(animationFrameId)
-          isPlaying = false
-          playIcon?.classList.remove('hidden')
-          pauseIcon?.classList.add('hidden')
-        }
-        else {
-          if (currentProgress >= 1)
-            currentProgress = 0
-          isPlaying = true
-          playIcon?.classList.add('hidden')
-          pauseIcon?.classList.remove('hidden')
-          lastTime = performance.now()
-
-          if (!motionMarker)
-            initMotionElements()
-
-          animationFrameId = requestAnimationFrame(animate)
-        }
-      }
-
-      function initMotionElements() {
-        motionMarker = L.marker(pathPoints[0], {
-          icon: L.divIcon({
-            html: '<div style="width:0.875rem;height:0.875rem;background:#3b82f6;border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>',
-            className: '',
-            iconSize: [14, 14],
-            iconAnchor: [7, 7],
-          }),
-          interactive: false,
-          zIndexOffset: 1000,
-        }).addTo(map)
-
-        if (motionDuration > 0 || initialTimeStr) {
-          motionMarker
-            .bindTooltip(formatTime(0), {
-              permanent: true,
-              direction: 'top',
-              offset: [0, -10],
-              className: 'font-mono text-xs font-semibold',
-            })
-            .openTooltip()
-        }
-
-        motionPolyline = L.polyline([pathPoints[0]], {
-          color: '#3b82f6',
-          weight: 3,
-          opacity: 1,
-          smoothFactor: 1,
-          interactive: false,
-        }).addTo(map)
-      }
-
-      function getInterpolatedPoint(targetDist: number): { point: L.LatLng, index: number } {
-        let i = 1
-        while (i < dists.length && dists[i] < targetDist) i++
-
-        if (i >= dists.length) {
-          const lastPt = pathPoints.at(-1)
-          return { point: lastPt ?? pathPoints[0], index: pathPoints.length }
-        }
-
-        const startDist = dists[i - 1]
-        const endDist = dists[i]
-        const segmentProgress = (targetDist - startDist) / (endDist - startDist || 1)
-        const p1 = pathPoints[i - 1]
-        const p2 = pathPoints[i]
-        const lat = p1.lat + (p2.lat - p1.lat) * segmentProgress
-        const lng = p1.lng + (p2.lng - p1.lng) * segmentProgress
-
-        return { point: L.latLng(lat, lng), index: i }
-      }
-
-      function animate(time: number) {
-        if (lastTime == null || motionMarker == null || motionPolyline == null)
-          return
-        const delta = time - lastTime
-        lastTime = time
-        currentProgress += delta / DURATION_MS
-
-        if (currentProgress >= 1) {
-          currentProgress = 1
-          isPlaying = false
-          playIcon?.classList.remove('hidden')
-          pauseIcon?.classList.add('hidden')
-        }
-        else {
-          animationFrameId = requestAnimationFrame(animate)
-        }
-
-        const { point, index } = getInterpolatedPoint(currentProgress * totalDist)
-
-        motionMarker.setLatLng(point)
-        motionPolyline.setLatLngs([...pathPoints.slice(0, index), point])
-
-        if ((motionDuration > 0 || initialTimeStr) && motionMarker.getTooltip()) {
-          const currentSeconds = Math.round(currentProgress * motionDuration)
-          motionMarker.setTooltipContent(formatTime(currentSeconds))
-        }
-      }
-
-      motionBtn.addEventListener('click', togglePlayPause)
-    }
-
-    function setupResetCenter(
-      map: L.Map,
-      route: L.Polyline,
-      resetActionBtnId: string | null,
-    ) {
-      if (!resetActionBtnId)
-        return
-
-      const resetBtn = document.getElementById(resetActionBtnId)
-      if (!resetBtn)
-        return
-
-      resetBtn.addEventListener('click', () => {
-        map.fitBounds(route.getBounds(), { padding: MAP_BOUNDS_PADDING })
-      })
-    }
-  })
+async function initActivityMaps() {
+  await resolveBasemapProvider()
+  document.querySelectorAll<HTMLElement>('.activity-map-container').forEach(initSingleMap)
 }
 
-// Deferred `type="module"` scripts can run after `DOMContentLoaded` has already fired;
-// only listening for that event then never initializes the map or `data-route-ready`.
+function initSingleMap(el: HTMLElement) {
+  const pointsData = el.getAttribute('data-points')
+  if (!pointsData)
+    return
+
+  let rawPoints: number[][]
+  try {
+    rawPoints = JSON.parse(pointsData)
+  }
+  catch (e) {
+    console.error('Failed to parse route points:', e)
+    return
+  }
+  if (!Array.isArray(rawPoints) || rawPoints.length === 0)
+    return
+
+  const duration = Number.parseInt(el.getAttribute('data-duration') || '0', 10)
+  let startTimeStr = el.getAttribute('data-start-time') || ''
+  if (startTimeStr.endsWith('Z'))
+    startTimeStr = startTimeStr.slice(0, -1)
+
+  const mapId = el.id
+  const btnId = el.getAttribute('data-btn-id')
+  const resetBtnId = el.getAttribute('data-reset-btn-id')
+  const switchBtnId = el.getAttribute('data-switch-btn-id')
+
+  // Tear down previous instance (for provider-switch re-init)
+  liveAbort.get(mapId)?.abort()
+  liveMaps.get(mapId)?.remove()
+
+  const ac = new AbortController()
+  const { signal } = ac
+  liveAbort.set(mapId, ac)
+
+  const latlngs = rawPoints.map((p: number[]) => {
+    const [lat, lng] = toMapCoords(p[0], p[1])
+    return L.latLng(lat, lng)
+  })
+
+  const map = L.map(mapId, {
+    zoomControl: true,
+    attributionControl: true,
+    ...LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+  })
+  liveMaps.set(mapId, map)
+
+  addLightBasemapTiles(map, { labels: true })
+
+  const routeLine = L.polyline(latlngs, {
+    color: '#10b981',
+    weight: 3,
+    opacity: 0.9,
+    smoothFactor: 1,
+  }).addTo(map)
+
+  addMarker(map, latlngs[0], '#10b981')
+  const endLatLng = latlngs.at(-1)
+  if (endLatLng)
+    addMarker(map, endLatLng, '#ef4444')
+
+  map.fitBounds(routeLine.getBounds(), { padding: MAP_BOUNDS_PADDING, animate: false })
+  nudgeZoomOutAfterFit(map, 0.05)
+
+  const homeCenter = map.getCenter()
+  const homeZoom = map.getZoom()
+
+  setupMotionPlayer(map, latlngs, btnId, duration, startTimeStr, signal)
+  setupResetCenter(map, homeCenter, homeZoom, resetBtnId, signal)
+  setupProviderSwitch(el, switchBtnId, signal)
+
+  el.dataset.routeReady = 'true'
+}
+
+// ── Provider switch ──────────────────────────────────────────────────────
+
+function syncSwitchIcon(btn: HTMLElement, provider: BasemapProvider) {
+  const cartoIcon = btn.querySelector('.provider-icon-carto')
+  const amapIcon = btn.querySelector('.provider-icon-amap')
+  if (provider === 'carto') {
+    cartoIcon?.classList.remove('hidden')
+    amapIcon?.classList.add('hidden')
+    btn.title = 'Switch to Amap'
+  }
+  else {
+    cartoIcon?.classList.add('hidden')
+    amapIcon?.classList.remove('hidden')
+    btn.title = 'Switch to Carto'
+  }
+}
+
+function setupProviderSwitch(mapEl: HTMLElement, switchBtnId: string | null, signal: AbortSignal) {
+  if (!switchBtnId)
+    return
+  const btn = document.getElementById(switchBtnId)
+  if (!btn)
+    return
+
+  syncSwitchIcon(btn, getProvider())
+
+  btn.addEventListener(
+    'click',
+    () => {
+      const next: BasemapProvider = getProvider() === 'carto' ? 'amap' : 'carto'
+      setProvider(next)
+
+      // Update ALL switch buttons on the page (multiple route maps share the same provider)
+      document.querySelectorAll<HTMLElement>('[id^="switch-provider-btn-"]').forEach((b) => {
+        syncSwitchIcon(b, next)
+      })
+
+      // Re-init every map on the page so tiles + coordinates stay in sync
+      document.querySelectorAll<HTMLElement>('.activity-map-container').forEach(initSingleMap)
+    },
+    { signal },
+  )
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+function addMarker(map: L.Map, position: L.LatLngExpression, color: string) {
+  const html = `<div style="width:0.75rem;height:0.75rem;background:${color};border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>`
+  L.marker(position, {
+    icon: L.divIcon({ html, className: '', iconSize: [12, 12], iconAnchor: [6, 6] }),
+  }).addTo(map)
+}
+
+function setupMotionPlayer(
+  map: L.Map,
+  pathPoints: L.LatLng[],
+  actionBtnId: string | null,
+  motionDuration: number,
+  initialTimeStr: string,
+  signal: AbortSignal,
+) {
+  const motionBtn = actionBtnId ? document.getElementById(actionBtnId) : null
+  if (!motionBtn)
+    return
+
+  const playIcon = motionBtn.querySelector('.play-icon')
+  const pauseIcon = motionBtn.querySelector('.pause-icon')
+
+  let isPlaying = false
+  let currentProgress = 0
+  let lastTime: number | null = null
+  let animationFrameId: number | null = null
+  let motionMarker: L.Marker | null = null
+  let motionPolyline: L.Polyline | null = null
+
+  const DURATION_MS = 16000
+  let totalDist = 0
+  const dists = [0]
+  for (let i = 1; i < pathPoints.length; i++) {
+    totalDist += pathPoints[i - 1].distanceTo(pathPoints[i])
+    dists.push(totalDist)
+  }
+
+  // Reset play button visual on re-init
+  playIcon?.classList.remove('hidden')
+  pauseIcon?.classList.add('hidden')
+
+  function formatTime(progressSeconds: number) {
+    if (initialTimeStr) {
+      const dateObj = new Date(initialTimeStr)
+      const currentObj = addSeconds(dateObj, progressSeconds)
+      return format(currentObj, 'HH:mm:ss')
+    }
+    const h = Math.floor(progressSeconds / 3600)
+    const m = Math.floor((progressSeconds % 3600) / 60)
+    const s = Math.round(progressSeconds % 60)
+    return h > 0
+      ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      : `${m}:${String(s).padStart(2, '0')}`
+  }
+
+  function togglePlayPause() {
+    if (isPlaying) {
+      if (animationFrameId != null)
+        cancelAnimationFrame(animationFrameId)
+      isPlaying = false
+      playIcon?.classList.remove('hidden')
+      pauseIcon?.classList.add('hidden')
+    }
+    else {
+      if (currentProgress >= 1)
+        currentProgress = 0
+      isPlaying = true
+      playIcon?.classList.add('hidden')
+      pauseIcon?.classList.remove('hidden')
+      lastTime = performance.now()
+
+      if (!motionMarker)
+        initMotionElements()
+
+      animationFrameId = requestAnimationFrame(animate)
+    }
+  }
+
+  function initMotionElements() {
+    motionMarker = L.marker(pathPoints[0], {
+      icon: L.divIcon({
+        html: '<div style="width:0.875rem;height:0.875rem;background:#3b82f6;border:0.125rem solid white;border-radius:50%;box-shadow:0 0.0625rem 0.1875rem rgba(0,0,0,0.3)"></div>',
+        className: '',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      }),
+      interactive: false,
+      zIndexOffset: 1000,
+    }).addTo(map)
+
+    if (motionDuration > 0 || initialTimeStr) {
+      motionMarker
+        .bindTooltip(formatTime(0), {
+          permanent: true,
+          direction: 'top',
+          offset: [0, -10],
+          className: 'font-mono text-xs font-semibold',
+        })
+        .openTooltip()
+    }
+
+    motionPolyline = L.polyline([pathPoints[0]], {
+      color: '#3b82f6',
+      weight: 3,
+      opacity: 1,
+      smoothFactor: 1,
+      interactive: false,
+    }).addTo(map)
+  }
+
+  function getInterpolatedPoint(targetDist: number): { point: L.LatLng, index: number } {
+    let i = 1
+    while (i < dists.length && dists[i] < targetDist) i++
+
+    if (i >= dists.length) {
+      const lastPt = pathPoints.at(-1)
+      return { point: lastPt ?? pathPoints[0], index: pathPoints.length }
+    }
+
+    const startDist = dists[i - 1]
+    const endDist = dists[i]
+    const segmentProgress = (targetDist - startDist) / (endDist - startDist || 1)
+    const p1 = pathPoints[i - 1]
+    const p2 = pathPoints[i]
+    const lat = p1.lat + (p2.lat - p1.lat) * segmentProgress
+    const lng = p1.lng + (p2.lng - p1.lng) * segmentProgress
+
+    return { point: L.latLng(lat, lng), index: i }
+  }
+
+  function animate(time: number) {
+    if (lastTime == null || motionMarker == null || motionPolyline == null)
+      return
+    const delta = time - lastTime
+    lastTime = time
+    currentProgress += delta / DURATION_MS
+
+    if (currentProgress >= 1) {
+      currentProgress = 1
+      isPlaying = false
+      playIcon?.classList.remove('hidden')
+      pauseIcon?.classList.add('hidden')
+    }
+    else {
+      animationFrameId = requestAnimationFrame(animate)
+    }
+
+    const { point, index } = getInterpolatedPoint(currentProgress * totalDist)
+
+    motionMarker.setLatLng(point)
+    motionPolyline.setLatLngs([...pathPoints.slice(0, index), point])
+
+    if ((motionDuration > 0 || initialTimeStr) && motionMarker.getTooltip()) {
+      const currentSeconds = Math.round(currentProgress * motionDuration)
+      motionMarker.setTooltipContent(formatTime(currentSeconds))
+    }
+  }
+
+  // Stop animation when this map instance is torn down
+  signal.addEventListener('abort', () => {
+    if (animationFrameId != null)
+      cancelAnimationFrame(animationFrameId)
+  })
+
+  motionBtn.addEventListener('click', togglePlayPause, { signal })
+}
+
+function setupResetCenter(
+  map: L.Map,
+  homeCenter: L.LatLng,
+  homeZoom: number,
+  resetActionBtnId: string | null,
+  signal: AbortSignal,
+) {
+  if (!resetActionBtnId)
+    return
+
+  const resetBtn = document.getElementById(resetActionBtnId)
+  if (!resetBtn)
+    return
+
+  resetBtn.addEventListener(
+    'click',
+    () => {
+      map.setView(homeCenter, homeZoom)
+    },
+    { signal },
+  )
+}
+
+let resizeTimer: ReturnType<typeof setTimeout>
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(() => {
+    document.querySelectorAll<HTMLElement>('.activity-map-container').forEach(initSingleMap)
+  }, 300)
+})
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initActivityMaps)
 }
