@@ -193,7 +193,7 @@ function initSingleMap(el: HTMLElement) {
     addMarker(map, endLatLng, '#ef4444')
 
   map.fitBounds(routeLine.getBounds(), { padding: MAP_BOUNDS_PADDING, animate: false })
-  nudgeZoomOutAfterFit(map, 0.25)
+  nudgeZoomOutAfterFit(map, 0.05)
 
   const homeCenter = map.getCenter()
   const homeZoom = map.getZoom()

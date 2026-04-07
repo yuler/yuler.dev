@@ -74,6 +74,25 @@ function probeCarto(): Promise<boolean> {
   })
 }
 
+function probeAmap(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const timer = setTimeout(() => {
+      img.src = ''
+      resolve(false)
+    }, PROBE_TIMEOUT_MS)
+    img.onload = () => {
+      clearTimeout(timer)
+      resolve(true)
+    }
+    img.onerror = () => {
+      clearTimeout(timer)
+      resolve(false)
+    }
+    img.src = 'https://wprd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&scl=1&x=0&y=0&z=1'
+  })
+}
+
 let _probePromise: Promise<BasemapProvider> | null = null
 
 /**
@@ -132,8 +151,15 @@ export function resolveBasemapProvider(): Promise<BasemapProvider> {
     }
     catch {}
 
-    const ok = await probeCarto()
-    _provider = ok ? 'carto' : 'amap'
+    const preferred = _provider
+    const preferredOk = preferred === 'amap' ? await probeAmap() : await probeCarto()
+
+    if (preferredOk) {
+      _provider = preferred
+    }
+    else {
+      _provider = preferred === 'amap' ? 'carto' : 'amap'
+    }
 
     try {
       sessionStorage.setItem(PROVIDER_STORAGE_KEY, _provider)
@@ -147,7 +173,7 @@ export function resolveBasemapProvider(): Promise<BasemapProvider> {
 }
 
 /** 与 {@link nudgeZoomOutAfterFit} 合用，否则 `setZoom(12.55)` 会被默认 `zoomSnap: 1` 吃掉。 */
-export const LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM = { zoomSnap: 0.25 } as const
+export const LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM = { zoomSnap: 0.05 } as const
 
 /**
  * 在 `fitBounds` 后略为缩小缩放级，整图（含瓦片里烤死的道路字）在屏幕上会略小。不改变 `tileSize`。
