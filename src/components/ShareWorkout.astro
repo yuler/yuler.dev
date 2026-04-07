@@ -360,6 +360,7 @@ async function initPoster(wrapper: HTMLElement) {
   map.fitBounds(routeLine.getBounds(), {
     paddingTopLeft: [28, 28],
     paddingBottomRight: [28, posterMapStatsOverlayPaddingPx],
+    animate: false,
   })
   nudgeZoomOutAfterFit(map, 0.4)
 
@@ -437,7 +438,7 @@ document.addEventListener('click', async (e) => {
 })
 </script>
 
-<style>
+<style is:global>
   .poster-map-marker {
     width: 8px;
     height: 8px;
@@ -445,10 +446,10 @@ document.addEventListener('click', async (e) => {
     border-radius: 50%;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   }
-  .start-marker {
+  .poster-map-marker.start-marker {
     background: #10b981;
   }
-  .end-marker {
+  .poster-map-marker.end-marker {
     background: #ef4444;
   }
 </style>

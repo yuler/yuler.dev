@@ -94,6 +94,30 @@ export function setProvider(provider: BasemapProvider): void {
   _probePromise = Promise.resolve(provider)
 }
 
+export const BASEMAP_CHANGED_EVENT = 'basemap-provider-changed'
+
+export function toggleProvider(): BasemapProvider {
+  const next: BasemapProvider = _provider === 'carto' ? 'amap' : 'carto'
+  setProvider(next)
+  document.dispatchEvent(new CustomEvent(BASEMAP_CHANGED_EVENT))
+  return next
+}
+
+export function syncProviderIcon(btn: HTMLElement, provider: BasemapProvider): void {
+  const cartoIcon = btn.querySelector('.provider-icon-carto')
+  const amapIcon = btn.querySelector('.provider-icon-amap')
+  if (provider === 'carto') {
+    cartoIcon?.classList.remove('hidden')
+    amapIcon?.classList.add('hidden')
+    btn.title = 'Switch to Amap'
+  }
+  else {
+    cartoIcon?.classList.add('hidden')
+    amapIcon?.classList.remove('hidden')
+    btn.title = 'Switch to Carto'
+  }
+}
+
 export function resolveBasemapProvider(): Promise<BasemapProvider> {
   if (_probePromise)
     return _probePromise
