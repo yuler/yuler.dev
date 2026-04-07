@@ -75,7 +75,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m "chore: add PR #${PR_NUMBER} screenshots"
+          git commit -m "📝 Add PR #${PR_NUMBER} screenshots"
           git push origin "$BRANCH":"$BRANCH"
 
       - name: Comment on PR with screenshots link
