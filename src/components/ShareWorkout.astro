@@ -171,6 +171,7 @@ import QRCode from 'qrcode'
 import {
   addLightBasemapTiles,
   LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+  LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION,
   nudgeZoomOutAfterFit,
   resolveBasemapProvider,
   toMapCoords,
@@ -328,6 +329,7 @@ async function initPoster(wrapper: HTMLElement) {
     doubleClickZoom: false,
     keyboard: false,
     ...LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+    ...LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION,
   })
 
   addLightBasemapTiles(map, { labels: false })
@@ -337,10 +339,23 @@ async function initPoster(wrapper: HTMLElement) {
     return L.latLng(lat, lng)
   })
 
+  // Draw a soft halo under the route so it stands out on light basemaps.
+  L.polyline(latlngs, {
+    color: '#34d399',
+    weight: 8,
+    opacity: 0.35,
+    lineCap: 'round',
+    lineJoin: 'round',
+    smoothFactor: 1,
+  }).addTo(map)
+
   const routeLine = L.polyline(latlngs, {
-    color: '#10b981',
-    weight: 2.5,
-    opacity: 0.9,
+    color: '#059669',
+    weight: 4,
+    opacity: 0.95,
+    lineCap: 'round',
+    lineJoin: 'round',
+    smoothFactor: 1,
   }).addTo(map)
 
   const startHtml = '<div class="poster-map-marker start-marker"></div>'

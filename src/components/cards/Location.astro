@@ -78,6 +78,7 @@ const {
     BASEMAP_CHANGED_EVENT,
     getProvider,
     LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+    LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION,
     resolveBasemapProvider,
     syncProviderIcon,
     toggleProvider,
@@ -104,6 +105,7 @@ const {
       boxZoom: false,
       keyboard: false,
       ...LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+      ...LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION,
     })
 
     addLightBasemapTiles(map, { labels: true })

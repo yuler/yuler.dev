@@ -24,6 +24,7 @@ const TILE_OPTIONS_CARTO = {
   subdomains: 'abcd',
   tileSize: 256,
   zoomOffset: 0,
+  fadeAnimation: false,
 } as const
 
 // ── 高德 (mainland-friendly) ──────────────────────────────────────────────
@@ -48,6 +49,7 @@ const TILE_OPTIONS_AMAP = {
   subdomains: '1234',
   tileSize: 128,
   zoomOffset: 1,
+  fadeAnimation: false,
 } as const
 
 // ── Provider auto-detection (Carto → Amap fallback) ─────────────────────
@@ -174,6 +176,27 @@ export function resolveBasemapProvider(): Promise<BasemapProvider> {
 
 /** 与 {@link nudgeZoomOutAfterFit} 合用，否则 `setZoom(12.55)` 会被默认 `zoomSnap: 1` 吃掉。 */
 export const LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM = { zoomSnap: 0.05 } as const
+
+/** 关闭缩放过渡（滚轮/控件瞬时变级）。 */
+export const LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION = {
+  zoomAnimation: true,
+  markerZoomAnimation: true,
+} as const
+
+/**
+ * 活动路线大图：整数缩放 + 无缩放动画 + Canvas 折线 + 滚轮灵敏度，减轻滚轮时瓦片/矢量反复重绘导致的卡顿。
+ * （细粒度 `zoomSnap: 0.05` 会让每次滚轮触发多段小缩放，比动画本身更容易卡。）
+ */
+export const LEAFLET_MAP_OPTIONS_ACTIVITY_ROUTE = {
+  ...LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION,
+  zoomSnap: 1,
+  zoomDelta: 1,
+  preferCanvas: true,
+  fadeAnimation: false,
+  /** 越大 = 同样滚动距离下缩放变化越小（Leaflet 默认 60）。 */
+  wheelPxPerZoomLevel: 260,
+  wheelDebounceTime: 72,
+} as const
 
 /**
  * 在 `fitBounds` 后略为缩小缩放级，整图（含瓦片里烤死的道路字）在屏幕上会略小。不改变 `tileSize`。

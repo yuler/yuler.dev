@@ -112,15 +112,14 @@ import {
   addLightBasemapTiles,
   BASEMAP_CHANGED_EVENT,
   getProvider,
-  LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
-  nudgeZoomOutAfterFit,
+  LEAFLET_MAP_OPTIONS_ACTIVITY_ROUTE,
   resolveBasemapProvider,
   syncProviderIcon,
   toggleProvider,
   toMapCoords,
 } from '../lib/leafletTiles'
 
-const MAP_BOUNDS_PADDING: L.PointExpression = [46, 46]
+const MAP_BOUNDS_PADDING: L.PointExpression = [54, 54]
 
 const liveAbort = new Map<string, AbortController>()
 const liveMaps = new Map<string, L.Map>()
@@ -174,7 +173,7 @@ function initSingleMap(el: HTMLElement) {
   const map = L.map(mapId, {
     zoomControl: true,
     attributionControl: true,
-    ...LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+    ...LEAFLET_MAP_OPTIONS_ACTIVITY_ROUTE,
   })
   liveMaps.set(mapId, map)
 
@@ -184,7 +183,7 @@ function initSingleMap(el: HTMLElement) {
     color: '#10b981',
     weight: 3,
     opacity: 0.9,
-    smoothFactor: 1,
+    smoothFactor: 1.35,
   }).addTo(map)
 
   addMarker(map, latlngs[0], '#10b981')
@@ -193,7 +192,6 @@ function initSingleMap(el: HTMLElement) {
     addMarker(map, endLatLng, '#ef4444')
 
   map.fitBounds(routeLine.getBounds(), { padding: MAP_BOUNDS_PADDING, animate: false })
-  nudgeZoomOutAfterFit(map, 0.05)
 
   const homeCenter = map.getCenter()
   const homeZoom = map.getZoom()
@@ -257,7 +255,12 @@ function setupMotionPlayer(
   let motionMarker: L.Marker | null = null
   let motionPolyline: L.Polyline | null = null
 
-  const DURATION_MS = 16000
+  const FALLBACK_DURATION_MS = 10000
+  /** 1 real minute moving time → 0.5s playback */
+  const PLAYBACK_MS_PER_REAL_MINUTE = 500
+  const DURATION_MS = motionDuration > 0
+    ? Math.max(500, (motionDuration / 60) * PLAYBACK_MS_PER_REAL_MINUTE)
+    : FALLBACK_DURATION_MS
   let totalDist = 0
   const dists = [0]
   for (let i = 1; i < pathPoints.length; i++) {
