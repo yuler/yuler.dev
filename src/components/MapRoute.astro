@@ -148,6 +148,8 @@ function initSingleMap(el: HTMLElement) {
 
   const duration = Number.parseInt(el.getAttribute('data-duration') || '0', 10)
   let startTimeStr = el.getAttribute('data-start-time') || ''
+  // start_date_local is local time but may include a trailing "Z".
+  // Strip "Z" so browsers don't parse it as UTC and shift displayed elapsed time.
   if (startTimeStr.endsWith('Z'))
     startTimeStr = startTimeStr.slice(0, -1)
 
@@ -191,7 +193,7 @@ function initSingleMap(el: HTMLElement) {
     addMarker(map, endLatLng, '#ef4444')
 
   map.fitBounds(routeLine.getBounds(), { padding: MAP_BOUNDS_PADDING, animate: false })
-  nudgeZoomOutAfterFit(map, 0.05)
+  nudgeZoomOutAfterFit(map, 0.25)
 
   const homeCenter = map.getCenter()
   const homeZoom = map.getZoom()
