@@ -1,6 +1,8 @@
 ---
 import CornerMarkers from '../CornerMarkers.astro'
 import ArrowUpRight from '../icons/ArrowUpRight.astro'
+import Globe from '../icons/Globe.astro'
+import MapFold from '../icons/MapFold.astro'
 import MapPin from '../icons/MapPin.astro'
 import 'leaflet/dist/leaflet.css'
 
@@ -19,62 +21,81 @@ const {
 } = Astro.props
 ---
 
-<a
-  href={`https://www.google.com/maps/search/?api=1&query=${mapCoords.lat},${mapCoords.lng}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  class:list={[
-    'group relative flex flex-col bg-white border border-gray-200 transition-all duration-300 hover:border-gray-400',
-    className,
-  ]}
->
-  <CornerMarkers class="z-20" />
-
-  <div class="absolute inset-0 z-0">
-    <div
-      class="location-map h-full w-full object-cover"
-      data-lat={mapCoords.lat}
-      data-lng={mapCoords.lng}
-    >
-    </div>
-    <div
-      class="pointer-events-none absolute inset-0 bg-gradient-to-t from-white/95 via-white/80 to-white/60 z-[401]"
-    >
-    </div>
-  </div>
-
-  <div class="absolute right-0 top-0 opacity-5 z-10">
-    <MapPin class="size-20 sm:size-28 lg:size-32" />
-  </div>
-
-  <div class="relative z-10 flex h-full flex-col p-4">
-    <div class="text-left mt-auto border-t border-gray-100 pt-3">
-      <h3 class="text-base font-semibold text-gray-900 font-mono">{title}</h3>
-      <p class="text-xs text-gray-500 font-mono">{subtitle}</p>
-    </div>
-  </div>
-
-  <div
-    class="absolute right-4 bottom-4 z-20 opacity-0 transition-opacity group-hover:opacity-100"
+<div class:list={['relative', className]}>
+  <a
+    href={`https://www.google.com/maps/search/?api=1&query=${mapCoords.lat},${mapCoords.lng}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="group relative flex flex-col bg-white border border-gray-200 transition-all duration-300 hover:border-gray-400 h-full"
   >
-    <ArrowUpRight class="size-4 text-gray-400" />
-  </div>
-</a>
+    <CornerMarkers class="z-20" />
+
+    <div class="absolute inset-0 z-0">
+      <div
+        class="location-map h-full w-full object-cover"
+        data-lat={mapCoords.lat}
+        data-lng={mapCoords.lng}
+      >
+      </div>
+      <div
+        class="pointer-events-none absolute inset-0 bg-gradient-to-t from-white/95 via-white/80 to-white/60 z-[401]"
+      >
+      </div>
+    </div>
+
+    <div class="absolute right-0 top-0 opacity-5 z-10">
+      <MapPin class="size-20 sm:size-28 lg:size-32" />
+    </div>
+
+    <div class="relative z-10 flex h-full flex-col p-4">
+      <div class="text-left mt-auto border-t border-gray-100 pt-3">
+        <h3 class="text-base font-semibold text-gray-900 font-mono">{title}</h3>
+        <p class="text-xs text-gray-500 font-mono">{subtitle}</p>
+      </div>
+    </div>
+
+    <div
+      class="absolute right-4 bottom-4 z-20 opacity-0 transition-opacity group-hover:opacity-100"
+    >
+      <ArrowUpRight class="size-4 text-gray-400" />
+    </div>
+  </a>
+
+  <button
+    class="location-provider-btn absolute top-2 left-2 z-[402] flex items-center justify-center bg-white/80 backdrop-blur-sm p-1 rounded-sm border border-gray-200 text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 cursor-pointer"
+    aria-label="Switch map provider"
+    title="Switch map provider"
+  >
+    <Globe class="size-3.5 provider-icon-carto" />
+    <MapFold class="size-3.5 provider-icon-amap hidden" />
+  </button>
+</div>
 
 <script>
   import L from 'leaflet'
+  import {
+    addLightBasemapTiles,
+    BASEMAP_CHANGED_EVENT,
+    getProvider,
+    LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+    resolveBasemapProvider,
+    syncProviderIcon,
+    toggleProvider,
+    toMapCoords,
+  } from '../../lib/leafletTiles'
 
-  const maps = document.querySelectorAll(
-    '.location-map',
-  ) as NodeListOf<HTMLElement>
+  const locationMapInstances = new Map<HTMLElement, L.Map>()
 
-  maps.forEach((mapElement) => {
-    const lat = Number.parseFloat(mapElement.dataset.lat || '0')
-    const lng = Number.parseFloat(mapElement.dataset.lng || '0')
+  function initLocationMap(el: HTMLElement) {
+    locationMapInstances.get(el)?.remove()
 
-    const map = L.map(mapElement, {
+    const rawLat = Number.parseFloat(el.dataset.lat || '0')
+    const rawLng = Number.parseFloat(el.dataset.lng || '0')
+    const [lat, lng] = toMapCoords(rawLat, rawLng)
+
+    const map = L.map(el, {
       center: [lat, lng],
-      zoom: 11,
+      zoom: 9.25,
       zoomControl: false,
       attributionControl: false,
       dragging: false,
@@ -82,14 +103,47 @@ const {
       doubleClickZoom: false,
       boxZoom: false,
       keyboard: false,
+      ...LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
     })
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      subdomains: 'abcd',
-      maxZoom: 20,
-    }).addTo(map)
+    addLightBasemapTiles(map, { labels: true })
+    locationMapInstances.set(el, map)
+  }
+
+  function syncAllLocationButtons() {
+    const provider = getProvider()
+    document.querySelectorAll<HTMLElement>('.location-provider-btn').forEach((btn) => {
+      syncProviderIcon(btn, provider)
+    })
+  }
+
+  async function initAllLocationMaps() {
+    await resolveBasemapProvider()
+    document.querySelectorAll<HTMLElement>('.location-map').forEach(initLocationMap)
+    syncAllLocationButtons()
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.location-provider-btn')
+    if (!btn)
+      return
+    toggleProvider()
   })
+
+  document.addEventListener(BASEMAP_CHANGED_EVENT, () => {
+    syncAllLocationButtons()
+    document.querySelectorAll<HTMLElement>('.location-map').forEach(initLocationMap)
+  })
+
+  let resizeTimer: ReturnType<typeof setTimeout>
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(() => {
+      document.querySelectorAll<HTMLElement>('.location-map').forEach(initLocationMap)
+    }, 300)
+  })
+
+  initAllLocationMaps()
 </script>
 
 <style>
