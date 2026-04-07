@@ -8,7 +8,7 @@ export type BasemapProvider = 'amap' | 'carto'
  * Fallback: Amap (大陆网络更稳, GCJ-02).
  * Resolved at runtime via {@link resolveBasemapProvider}.
  */
-let _provider: BasemapProvider = 'carto'
+let _provider: BasemapProvider = 'amap'
 
 // ── Carto (legacy / global) ───────────────────────────────────────────────
 
