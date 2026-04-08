@@ -39,7 +39,7 @@ const AMAP_LIGHT_LABELED
   = 'https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&scl=1&x={x}&y={y}&z={z}'
 
 const AMAP_LIGHT_NO_LABELS
-  = 'https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&scl=2&x={x}&y={y}&z={z}'
+  = 'https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&scl=2&x={x}&y={y}&z={z}'
 
 const AMAP_ATTRIBUTION = 'Map &copy; <a href="https://www.amap.com/" rel="noopener noreferrer">高德地图</a>'
 
@@ -177,7 +177,7 @@ export function resolveBasemapProvider(): Promise<BasemapProvider> {
 /** 与 {@link nudgeZoomOutAfterFit} 合用，否则 `setZoom(12.55)` 会被默认 `zoomSnap: 1` 吃掉。 */
 export const LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM = { zoomSnap: 0.05 } as const
 
-/** 关闭缩放过渡（滚轮/控件瞬时变级）。 */
+/** 缩放过渡（滚轮/控件瞬时变级）。 */
 export const LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION = {
   zoomAnimation: true,
   markerZoomAnimation: true,
