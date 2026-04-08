@@ -117,9 +117,54 @@ import {
   syncProviderIcon,
   toggleProvider,
   toMapCoords,
+  type BasemapProvider,
 } from '../lib/leafletTiles'
 
 const MAP_BOUNDS_PADDING: L.PointExpression = [54, 54]
+
+/** 高德绿地/黄路多，细绿线易糊；白晕 + 深色粗线更易读。Carto 浅色底单层即可。 */
+const ROUTE_POLYLINE_BASE: Pick<L.PolylineOptions, 'lineCap' | 'lineJoin' | 'smoothFactor'> = {
+  lineCap: 'round',
+  lineJoin: 'round',
+  smoothFactor: 1.35,
+}
+
+const ROUTE_BY_PROVIDER: Record<
+  BasemapProvider,
+  { halo: L.PolylineOptions | null, main: L.PolylineOptions }
+> = {
+  amap: {
+    halo: {
+      ...ROUTE_POLYLINE_BASE,
+      color: '#ffffff',
+      weight: 12,
+      opacity: 0.5,
+      interactive: false,
+    },
+    main: {
+      ...ROUTE_POLYLINE_BASE,
+      color: '#047857',
+      weight: 5,
+      opacity: 1,
+    },
+  },
+  carto: {
+    halo: null,
+    main: {
+      ...ROUTE_POLYLINE_BASE,
+      color: '#10b981',
+      weight: 3,
+      opacity: 0.9,
+    },
+  },
+}
+
+function addRoutePolylines(map: L.Map, latlngs: L.LatLng[], provider: BasemapProvider): L.Polyline {
+  const { halo, main } = ROUTE_BY_PROVIDER[provider]
+  if (halo)
+    L.polyline(latlngs, halo).addTo(map)
+  return L.polyline(latlngs, main).addTo(map)
+}
 
 const liveAbort = new Map<string, AbortController>()
 const liveMaps = new Map<string, L.Map>()
@@ -179,12 +224,7 @@ function initSingleMap(el: HTMLElement) {
 
   addLightBasemapTiles(map, { labels: true })
 
-  const routeLine = L.polyline(latlngs, {
-    color: '#10b981',
-    weight: 3,
-    opacity: 0.9,
-    smoothFactor: 1.35,
-  }).addTo(map)
+  const routeLine = addRoutePolylines(map, latlngs, getProvider())
 
   addMarker(map, latlngs[0], '#10b981')
   const endLatLng = latlngs.at(-1)
