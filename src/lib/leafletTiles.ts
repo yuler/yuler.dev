@@ -177,7 +177,7 @@ export function resolveBasemapProvider(): Promise<BasemapProvider> {
 /** 与 {@link nudgeZoomOutAfterFit} 合用，否则 `setZoom(12.55)` 会被默认 `zoomSnap: 1` 吃掉。 */
 export const LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM = { zoomSnap: 0.05 } as const
 
-/** 关闭缩放过渡（滚轮/控件瞬时变级）。 */
+/** 启用缩放动画过渡。 */
 export const LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION = {
   zoomAnimation: true,
   markerZoomAnimation: true,
