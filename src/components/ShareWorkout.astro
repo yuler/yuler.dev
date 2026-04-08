@@ -94,8 +94,8 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
           >
           </div>
 
-          <!-- Map background (renders into this div) -->
-          <div id={posterMapId} class="absolute inset-0 opacity-20" style="z-index: 0;"></div>
+          <!-- Map: basemap faded via CSS on .leaflet-tile-pane only; route stays opaque -->
+          <div id={posterMapId} class="poster-map-container absolute inset-0" style="z-index: 0;"></div>
 
           <!-- Content overlay -->
           <div class="absolute inset-0 flex flex-col justify-between px-3 py-5 md:px-5 z-10">
@@ -171,6 +171,7 @@ import QRCode from 'qrcode'
 import {
   addLightBasemapTiles,
   LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+  LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION,
   nudgeZoomOutAfterFit,
   resolveBasemapProvider,
   toMapCoords,
@@ -328,6 +329,7 @@ async function initPoster(wrapper: HTMLElement) {
     doubleClickZoom: false,
     keyboard: false,
     ...LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
+    ...LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION,
   })
 
   addLightBasemapTiles(map, { labels: false })
@@ -337,10 +339,23 @@ async function initPoster(wrapper: HTMLElement) {
     return L.latLng(lat, lng)
   })
 
+  // Draw a soft halo under the route so it stands out on light basemaps.
+  L.polyline(latlngs, {
+    color: '#34d399',
+    weight: 8,
+    opacity: 0.35,
+    lineCap: 'round',
+    lineJoin: 'round',
+    smoothFactor: 1,
+  }).addTo(map)
+
   const routeLine = L.polyline(latlngs, {
-    color: '#10b981',
-    weight: 2.5,
-    opacity: 0.9,
+    color: '#059669',
+    weight: 4,
+    opacity: 1,
+    lineCap: 'round',
+    lineJoin: 'round',
+    smoothFactor: 1,
   }).addTo(map)
 
   const startHtml = '<div class="poster-map-marker start-marker"></div>'
@@ -439,6 +454,11 @@ document.addEventListener('click', async (e) => {
 </script>
 
 <style is:global>
+  /* Faded basemap only; vectors/markers are sibling panes and stay fully opaque */
+  .poster-map-container .leaflet-tile-pane {
+    opacity: 0.8;
+  }
+
   .poster-map-marker {
     width: 8px;
     height: 8px;

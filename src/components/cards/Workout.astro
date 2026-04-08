@@ -116,24 +116,24 @@ const weeklyStats = weeks.map(([start, end], index) => {
                       : 'left-1/2 -translate-x-1/2',
                 ]}
               >
-                <div class="bg-gray-900 px-2 py-1 text-[10px] text-white shadow-xl ring-1 ring-white/10">
+                <div class="bg-white border border-gray-200 px-2 py-1 text-[10px] text-gray-900 shadow-md">
                   <div class="font-medium">{week.dateStr}</div>
-                  <div class="text-gray-400">
+                  <div class="text-gray-600">
                     {week.durationStr} · {week.names.length} {week.names.length === 1 ? 'activity' : 'activities'}
                   </div>
                   {week.names.length > 0 && (
-                    <div class="mt-1 max-w-[13.75rem] text-gray-200">
+                    <div class="mt-1 max-w-[13.75rem] text-gray-700">
                       {week.names.slice(0, 4).map(name => (
                         <div class="truncate">• {name}</div>
                       ))}
-                      {week.names.length > 4 && <div class="text-gray-400">…and {week.names.length - 4} more</div>}
+                      {week.names.length > 4 && <div class="text-gray-500">…and {week.names.length - 4} more</div>}
                     </div>
                   )}
                 </div>
                 <div
                   class:list={[
-                    'absolute top-full border-4 border-transparent border-t-gray-900',
-                    index < 5 ? 'left-2' : index > weeklyStats.length - 5 ? 'right-2' : 'left-1/2 -translate-x-1/2',
+                    'absolute top-full size-2 rotate-45 bg-white border-r border-b border-gray-200 -mt-[5px]',
+                    index < 5 ? 'left-[9px]' : index > weeklyStats.length - 5 ? 'right-[9px]' : 'left-1/2 -translate-x-1/2',
                   ]}
                 />
               </div>
