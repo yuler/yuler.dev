@@ -171,7 +171,7 @@ import QRCode from 'qrcode'
 import {
   addLightBasemapTiles,
   LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
-  LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION,
+  LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION,
   nudgeZoomOutAfterFit,
   resolveBasemapProvider,
   toMapCoords,
@@ -329,7 +329,7 @@ async function initPoster(wrapper: HTMLElement) {
     doubleClickZoom: false,
     keyboard: false,
     ...LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
-    ...LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION,
+    ...LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION,
   })
 
   addLightBasemapTiles(map, { labels: false })

@@ -39,7 +39,7 @@ const AMAP_LIGHT_LABELED
   = 'https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&scl=1&x={x}&y={y}&z={z}'
 
 const AMAP_LIGHT_NO_LABELS
-  = 'https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&scl=2&x={x}&y={y}&z={z}'
+  = 'https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7=&scl=2&x={x}&y={y}&z={z}'
 
 const AMAP_ATTRIBUTION = 'Map &copy; <a href="https://www.amap.com/" rel="noopener noreferrer">高德地图</a>'
 
@@ -178,7 +178,7 @@ export function resolveBasemapProvider(): Promise<BasemapProvider> {
 export const LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM = { zoomSnap: 0.05 } as const
 
 /** 关闭缩放过渡（滚轮/控件瞬时变级）。 */
-export const LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION = {
+export const LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION = {
   zoomAnimation: true,
   markerZoomAnimation: true,
 } as const
@@ -188,7 +188,7 @@ export const LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION = {
  * （细粒度 `zoomSnap: 0.05` 会让每次滚轮触发多段小缩放，比动画本身更容易卡。）
  */
 export const LEAFLET_MAP_OPTIONS_ACTIVITY_ROUTE = {
-  ...LEAFLET_MAP_OPTIONS_NO_ZOOM_ANIMATION,
+  ...LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION,
   zoomSnap: 1,
   zoomDelta: 1,
   preferCanvas: true,
