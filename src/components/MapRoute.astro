@@ -106,18 +106,19 @@ const switchBtnId = `switch-provider-btn-${randomId}`
 </style>
 
 <script>
+import type { BasemapProvider } from '../lib/leafletTiles'
 import { addSeconds, format } from 'date-fns'
 import L from 'leaflet'
 import {
   addLightBasemapTiles,
   BASEMAP_CHANGED_EVENT,
+
   getProvider,
   LEAFLET_MAP_OPTIONS_ACTIVITY_ROUTE,
   resolveBasemapProvider,
   syncProviderIcon,
   toggleProvider,
   toMapCoords,
-  type BasemapProvider,
 } from '../lib/leafletTiles'
 
 const MAP_BOUNDS_PADDING: L.PointExpression = [28, 28]
