@@ -10,6 +10,7 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ACTIVITIES_DIR = path.join(__dirname, '..', 'data', 'strava', 'activities')
 const IDS_FILE = path.join(ACTIVITIES_DIR, '_index.json')
+const META_FILE = path.join(ACTIVITIES_DIR, '_meta.json')
 
 fs.mkdirSync(ACTIVITIES_DIR, { recursive: true })
 
@@ -21,6 +22,20 @@ function readIds() {
   catch {
     return []
   }
+}
+
+function readMeta() {
+  try {
+    const data = JSON.parse(fs.readFileSync(META_FILE, 'utf-8'))
+    return data || {}
+  }
+  catch {
+    return {}
+  }
+}
+
+function writeMeta(meta) {
+  fs.writeFileSync(META_FILE, `${JSON.stringify(meta, null, 2)}\n`)
 }
 
 function writeIds(ids) {
@@ -38,11 +53,15 @@ function saveDetail(id, data) {
   )
 }
 
-async function fetchAllActivities() {
+async function fetchAllActivities(after = null) {
   const all = []
   let page = 1
   while (true) {
-    const batch = await getStravaActivities({ page, perPage: 100 })
+    const options = { page, perPage: 100 }
+    if (after) {
+      options.after = after
+    }
+    const batch = await getStravaActivities(options)
     if (!batch.length)
       break
     all.push(...batch)
@@ -59,15 +78,30 @@ async function syncActivities() {
 
   const knownIds = readIds()
   const knownSet = new Set(knownIds)
+  const meta = readMeta()
 
-  // Always paginate: incremental runs used to call getStravaActivities() once and
-  // missed IDs beyond the first page when total activities > per_page.
-  const activities = await fetchAllActivities()
+  // Use last sync timestamp for incremental fetch
+  const lastSync = meta.lastSync || null
+  const isFullSync = !lastSync
+
+  if (isFullSync) {
+    console.log('  Full sync: fetching all activities (no previous sync)')
+  }
+  else {
+    const syncDate = new Date(lastSync * 1000).toISOString()
+    console.log(`  Incremental sync: fetching activities since ${syncDate}`)
+  }
+
+  // Fetch activities (incremental if we have a lastSync timestamp)
+  const activities = await fetchAllActivities(lastSync)
 
   const freshIds = activities.map(a => a.id)
   const missingIds = freshIds.filter(id => !hasDetail(id))
 
   if (missingIds.length === 0) {
+    // Update lastSync even if no new activities
+    const now = Math.floor(Date.now() / 1000)
+    writeMeta({ ...meta, lastSync: now })
     console.log('✅ All activities up to date')
     return
   }
@@ -81,6 +115,10 @@ async function syncActivities() {
 
   for (const id of freshIds) knownSet.add(id)
   writeIds([...knownSet])
+
+  // Update lastSync timestamp
+  const now = Math.floor(Date.now() / 1000)
+  writeMeta({ ...meta, lastSync: now })
 
   console.log(`✅ Synced ${missingIds.length} activities (total: ${knownSet.size})`)
 }
