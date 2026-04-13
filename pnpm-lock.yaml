@@ -20,9 +20,6 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.2.2
         version: 4.2.2(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.2))
-      '@types/qrcode':
-        specifier: ^1.5.6
-        version: 1.5.6
       '@yuler/utils':
         specifier: ^0.3.1
         version: 0.3.1
@@ -60,6 +57,9 @@ importers:
       '@types/leaflet':
         specifier: ^1.9.21
         version: 1.9.21
+      '@types/qrcode':
+        specifier: ^1.5.6
+        version: 1.5.6
       autocorrect-node:
         specifier: ^2.14.0
         version: 2.14.0
