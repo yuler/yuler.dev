@@ -10,6 +10,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   site: 'https://yuler.dev',
 
+  image: {
+    service: {
+      entrypoint: 'astro/assets/services/sharp',
+    },
+  },
+
   integrations: [
     mdx({
       syntaxHighlight: 'shiki',
