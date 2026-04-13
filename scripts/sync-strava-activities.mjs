@@ -53,6 +53,12 @@ function saveDetail(id, data) {
   )
 }
 
+function getLatestActivityTimestamp(activities) {
+  return Math.max(
+    ...activities.map(activity => Math.floor(new Date(activity.start_date).getTime() / 1000)),
+  )
+}
+
 async function fetchAllActivities(after = null) {
   const all = []
   let page = 1
@@ -95,13 +101,17 @@ async function syncActivities() {
   // Fetch activities (incremental if we have a lastSync timestamp)
   const activities = await fetchAllActivities(lastSync)
 
+  if (activities.length === 0) {
+    console.log('✅ No new activities found')
+    return
+  }
+
   const freshIds = activities.map(a => a.id)
   const missingIds = freshIds.filter(id => !hasDetail(id))
 
   if (missingIds.length === 0) {
-    // Update lastSync even if no new activities
-    const now = Math.floor(Date.now() / 1000)
-    writeMeta({ ...meta, lastSync: now })
+    const latestTimestamp = getLatestActivityTimestamp(activities)
+    writeMeta({ ...meta, lastSync: latestTimestamp })
     console.log('✅ All activities up to date')
     return
   }
@@ -116,9 +126,9 @@ async function syncActivities() {
   for (const id of freshIds) knownSet.add(id)
   writeIds([...knownSet])
 
-  // Update lastSync timestamp
-  const now = Math.floor(Date.now() / 1000)
-  writeMeta({ ...meta, lastSync: now })
+  // Update lastSync timestamp based on the latest activity fetched
+  const latestTimestamp = getLatestActivityTimestamp(activities)
+  writeMeta({ ...meta, lastSync: latestTimestamp })
 
   console.log(`✅ Synced ${missingIds.length} activities (total: ${knownSet.size})`)
 }
