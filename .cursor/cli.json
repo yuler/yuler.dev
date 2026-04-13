@@ -1,5 +1,6 @@
 {
   "permissions": {
-    "allow": ["Shell(*)"]
+    "allow": ["Shell(*)"],
+    "deny": []
   }
 }

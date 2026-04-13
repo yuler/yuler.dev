@@ -1,6 +1,6 @@
 # Agent instructions (yuler.dev)
 
-Personal site at https://yuler.dev — Astro 5, MDX, Tailwind CSS 4, TypeScript. Package manager: **pnpm**.
+Personal site at https://yuler.dev — Astro 6, MDX, Tailwind CSS 4, TypeScript. Package manager: **pnpm**.
 
 ## Setup & Commands
 
