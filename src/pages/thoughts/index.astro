@@ -1,0 +1,29 @@
+---
+// src/pages/thoughts/index.astro
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Thought from '../../components/Thought.astro';
+import BackToHome from '../../components/BackToHome.astro';
+
+const thoughts = (await getCollection('thoughts'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Layout title="Thoughts — Yu Le">
+  <main class="mx-auto max-w-3xl px-6 py-12 md:py-20">
+    <BackToHome />
+    
+    <header class="mb-12 mt-8">
+      <h1 class="text-3xl font-bold text-gray-900 font-mono mb-2">Thoughts</h1>
+      <p class="text-gray-500">Short, instant, and casual updates.</p>
+    </header>
+
+    <div class="space-y-8">
+      {thoughts.map(thought => (
+        <div class="bg-white border border-gray-100 p-6 relative">
+          <Thought thought={thought} />
+        </div>
+      ))}
+    </div>
+  </main>
+</Layout>
