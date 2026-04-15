@@ -1,15 +1,15 @@
 ---
 // src/components/cards/Thoughts.astro
-import { getCollection } from 'astro:content';
-import CornerMarkers from '../CornerMarkers.astro';
-import ChevronRight from '../icons/ChevronRight.astro';
-import Thought from '../Thought.astro';
+import { getCollection } from 'astro:content'
+import CornerMarkers from '../CornerMarkers.astro'
+import ChevronRight from '../icons/ChevronRight.astro'
+import Thought from '../Thought.astro'
 
 interface Props {
-  limit?: number;
+  limit?: number
 }
 
-const { limit = 3 } = Astro.props;
+const { limit = 3 } = Astro.props
 
 const thoughts = (await getCollection('thoughts'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
