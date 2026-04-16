@@ -1,8 +1,9 @@
 ---
-import { getCollection } from "astro:content";
-import { formatDate } from "../../utils/date";
-import CornerMarkers from "../CornerMarkers.astro";
-import ChevronRight from "../icons/ChevronRight.astro";
+import { getCollection } from 'astro:content'
+import { formatDate } from '../../utils/date'
+import CornerMarkers from '../CornerMarkers.astro'
+import ArrowRight from '../icons/ArrowRight.astro'
+import ChevronRight from '../icons/ChevronRight.astro'
 
 interface Props {
   limit?: number;
@@ -73,7 +74,7 @@ const posts = (
       class="inline-flex items-center gap-2 px-4 py-3 min-h-[2.75rem] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
     >
       View more
-      <ChevronRight class="h-5 w-5" />
+      <ArrowRight class="h-5 w-5" />
     </a>
   </div>
 </div>
