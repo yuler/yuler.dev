@@ -6,14 +6,14 @@ import ArrowRight from '../icons/ArrowRight.astro'
 import ChevronRight from '../icons/ChevronRight.astro'
 
 interface Props {
-  limit?: number;
+  limit?: number
 }
 
-const { limit = 5 } = Astro.props;
+const { limit = 5 } = Astro.props
 
 const posts = (
-  await getCollection("posts", ({ data }) => {
-    return import.meta.env.PROD ? data.draft !== true : true;
+  await getCollection('posts', ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true
   })
 ).sort((a, b) => (b.data.date > a.data.date ? 1 : -1));
 ---
@@ -34,7 +34,7 @@ const posts = (
 
   <ul class="flex-1 space-y-1">
     {
-      posts.slice(0, limit).map((post) => (
+      posts.slice(0, limit).map(post => (
         <li>
           <a
             href={`/posts/${post.id}`}
