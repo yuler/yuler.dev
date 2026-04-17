@@ -1,11 +1,12 @@
 ---
 // src/components/Thought.astro
+import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
 import { render } from 'astro:content'
 import { humanize } from '../utils/date'
 
 const { thought } = Astro.props
-const { Content } = await render(thought);
+const { Content } = await render(thought)
 ---
 
 <div class="py-4 border-b border-gray-100 last:border-0">
@@ -28,7 +29,7 @@ const { Content } = await render(thought);
 
   {thought.data.images && thought.data.images.length > 0 && (
     <div class="mt-3 grid gap-2 grid-cols-3 max-w-120">
-      {thought.data.images.map((img: any, index: number) => (
+      {thought.data.images.map((img: ImageMetadata, index: number) => (
         <Image
           src={img}
           alt={`Thought image ${index + 1}`}

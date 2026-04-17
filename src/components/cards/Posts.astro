@@ -15,7 +15,7 @@ const posts = (
   await getCollection('posts', ({ data }) => {
     return import.meta.env.PROD ? data.draft !== true : true
   })
-).sort((a, b) => (b.data.date > a.data.date ? 1 : -1));
+).sort((a, b) => (b.data.date > a.data.date ? 1 : -1))
 ---
 
 <div
