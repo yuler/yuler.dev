@@ -5,6 +5,7 @@ import { render } from 'astro:content'
 import { getSortedThoughts } from '../../utils/thoughts'
 import CornerMarkers from '../CornerMarkers.astro'
 import ChevronRight from '../icons/ChevronRight.astro'
+import ArrowRight from '../icons/ArrowRight.astro'
 
 const thoughts = await getSortedThoughts()
 
@@ -34,7 +35,8 @@ const { Content } = await render(latest)
             <Image
               src={img}
               alt={`Thought image ${index + 1}`}
-              class="border border-gray-200 w-full aspect-square object-cover m-0!"
+              class="border border-gray-200 w-full aspect-square object-cover m-0! cursor-zoom-in transition-all duration-300 hover:border-gray-400 hover:shadow-sm"
+              data-lightbox="true"
             />
           ))}
         </div>
@@ -62,7 +64,7 @@ const { Content } = await render(latest)
       class="inline-flex items-center gap-2 px-4 py-3 min-h-[2.75rem] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
     >
       View more
-      <ChevronRight class="h-3 w-3" />
+      <ArrowRight class="h-3 w-3" />
     </a>
   </div>
 </div>

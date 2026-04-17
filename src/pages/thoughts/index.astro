@@ -1,5 +1,6 @@
 ---
 // src/pages/thoughts/index.astro
+import LightBox from '../../components/LightBox.astro'
 import Thought from '../../components/Thought.astro'
 import Layout from '../../layouts/Layout.astro'
 import { getSortedThoughts } from '../../utils/thoughts'
@@ -31,4 +32,5 @@ const thoughts = await getSortedThoughts();
       </div>
     </div>
   </div>
+  <LightBox />
 </Layout>

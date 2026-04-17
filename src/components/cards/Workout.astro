@@ -5,7 +5,7 @@ import { loadAllStoredActivities } from '../../utils/strava-activities'
 import { getWeekRangesForYear } from '../../utils/week-grid'
 import { formatDurationHeatmap } from '../../utils/workout-display'
 import CornerMarkers from '../CornerMarkers.astro'
-import ChevronRight from '../icons/ChevronRight.astro'
+import ArrowRight from '../icons/ArrowRight.astro'
 
 interface Props {
   class?: string
@@ -72,7 +72,7 @@ const weeklyStats = weeks.map(([start, end], index) => {
           class="inline-flex items-center gap-1 text-xs text-gray-400 font-mono hover:text-gray-600 transition-colors underline underline-offset-2 decoration-gray-200 hover:decoration-gray-400"
         >
           View all
-          <ChevronRight class="h-3 w-3" />
+          <ArrowRight class="h-3 w-3" />
         </a>
         <span class="text-xs text-gray-400 font-mono">{currentYear}</span>
       </div>

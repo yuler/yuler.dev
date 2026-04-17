@@ -22,7 +22,7 @@ const { Content } = await render(thought);
     )}
   </div>
 
-  <div class="max-w-none text-gray-800 leading-relaxed">
+  <div class="prose prose-sm max-w-none text-gray-800 leading-relaxed">
     <Content />
   </div>
 
@@ -32,7 +32,8 @@ const { Content } = await render(thought);
         <Image
           src={img}
           alt={`Thought image ${index + 1}`}
-          class="border border-gray-200 w-full aspect-square object-cover m-0! transition-all duration-300 hover:border-gray-400 hover:shadow-sm"
+          class="border border-gray-200 w-full aspect-square object-cover m-0! transition-all duration-300 hover:border-gray-400 hover:shadow-sm cursor-zoom-in"
+          data-lightbox="true"
         />
       ))}
     </div>
