@@ -20,6 +20,17 @@ const postsCollection = defineCollection({
   }),
 })
 
+const thoughtsCollection = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/thoughts' }),
+  schema: ({ image }) =>
+    z.object({
+      date: z.date(),
+      images: z.array(image()).max(3).optional(),
+      tags: z.array(z.string()).max(3).optional(),
+    }),
+})
+
 export const collections = {
   posts: postsCollection,
+  thoughts: thoughtsCollection,
 }

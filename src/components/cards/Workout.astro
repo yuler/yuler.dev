@@ -5,6 +5,7 @@ import { loadAllStoredActivities } from '../../utils/strava-activities'
 import { getWeekRangesForYear } from '../../utils/week-grid'
 import { formatDurationHeatmap } from '../../utils/workout-display'
 import CornerMarkers from '../CornerMarkers.astro'
+import ArrowRight from '../icons/ArrowRight.astro'
 
 interface Props {
   class?: string
@@ -61,16 +62,17 @@ const weeklyStats = weeks.map(([start, end], index) => {
 >
   <CornerMarkers />
 
-  <div class="flex flex-col gap-2">
+  <div class="flex flex-col gap-4">
     <!-- Header -->
-    <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-      <h3 class="text-lg font-semibold text-gray-900 font-mono">Workout</h3>
+    <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+      <h3 class="text-lg font-semibold text-gray-900 font-mono">Workouts</h3>
       <div class="flex items-center gap-3">
         <a
           href="/workouts"
-          class="text-xs text-gray-400 font-mono hover:text-gray-600 transition-colors underline underline-offset-2 decoration-gray-200 hover:decoration-gray-400"
+          class="inline-flex items-center gap-1 text-xs text-gray-400 font-mono hover:text-gray-600 transition-colors underline underline-offset-2 decoration-gray-200 hover:decoration-gray-400"
         >
-          View all →
+          View all
+          <ArrowRight class="h-3 w-3" />
         </a>
         <span class="text-xs text-gray-400 font-mono">{currentYear}</span>
       </div>

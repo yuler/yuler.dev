@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content'
 import { formatDate } from '../../utils/date'
 import CornerMarkers from '../CornerMarkers.astro'
+import ArrowRight from '../icons/ArrowRight.astro'
 import ChevronRight from '../icons/ChevronRight.astro'
 
 interface Props {
@@ -17,10 +18,14 @@ const posts = (
 ).sort((a, b) => (b.data.date > a.data.date ? 1 : -1))
 ---
 
-<div class="relative bg-white border border-gray-200 p-6 h-full flex flex-col">
+<div
+  class="relative bg-white border border-gray-200 p-6 h-full flex flex-col transition-all duration-300 hover:border-gray-400"
+>
   <CornerMarkers />
 
-  <div class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+  <div
+    class="mb-4 flex items-center justify-between border-b border-gray-100 pb-4"
+  >
     <h2 class="text-lg font-semibold text-gray-900 font-mono">Posts</h2>
     <span class="px-2 py-0.5 text-sm bg-gray-100 text-gray-600 font-mono">
       {posts.length}
@@ -38,10 +43,21 @@ const posts = (
             <div>
               <h3 class="font-medium text-gray-900 group-hover:text-gray-700">
                 {post.data.title}
-                {post.data.draft && <span class="ml-2 px-1.5 py-0.5 text-xs bg-gray-200 text-gray-600">Draft</span>}
-                {post.data.wip && <span class="ml-2 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700">WIP</span>}
+                {post.data.draft && (
+                  <span class="ml-2 px-1.5 py-0.5 text-xs bg-gray-200 text-gray-600">
+                    Draft
+                  </span>
+                )}
+                {post.data.wip && (
+                  <span class="ml-2 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700">
+                    WIP
+                  </span>
+                )}
               </h3>
-              <time class="text-xs text-gray-500 font-mono" datetime={post.data.date.toISOString()}>
+              <time
+                class="text-xs text-gray-500 font-mono"
+                datetime={post.data.date.toISOString()}
+              >
                 {formatDate(post.data.date)}
               </time>
             </div>
@@ -57,8 +73,8 @@ const posts = (
       href="/posts"
       class="inline-flex items-center gap-2 px-4 py-3 min-h-[2.75rem] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
     >
-      View all
-      <ChevronRight class="h-3 w-3" />
+      View more
+      <ArrowRight class="h-3 w-3" />
     </a>
   </div>
 </div>

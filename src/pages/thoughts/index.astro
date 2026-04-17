@@ -1,0 +1,36 @@
+---
+// src/pages/thoughts/index.astro
+import LightBox from '../../components/LightBox.astro'
+import Thought from '../../components/Thought.astro'
+import Layout from '../../layouts/Layout.astro'
+import { getSortedThoughts } from '../../utils/thoughts'
+
+const thoughts = await getSortedThoughts()
+---
+
+<Layout title="Thoughts — Yu Le">
+  <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
+    <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 font-mono">
+        <a href="/" class="hover:text-gray-900 transition-colors">~</a>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-900">thoughts</span>
+      </nav>
+
+      <header class="mb-12 mt-8">
+        <h1 class="text-3xl font-bold text-gray-900 font-mono mb-2">Thoughts</h1>
+        <p class="text-gray-500">Short, instant, and casual updates.</p>
+      </header>
+
+      <div class="space-y-8">
+        {thoughts.map(thought => (
+          <div class="bg-white border border-gray-100 p-6 relative">
+            <Thought thought={thought} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+  <LightBox />
+</Layout>

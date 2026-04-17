@@ -3,29 +3,35 @@ import Github from '../components/cards/Github.astro'
 import Location from '../components/cards/Location.astro'
 import Posts from '../components/cards/Posts.astro'
 import Profile from '../components/cards/Profile.astro'
+import Thoughts from '../components/cards/Thoughts.astro'
 import Workout from '../components/cards/Workout.astro'
 import X from '../components/cards/X.astro'
+import LightBox from '../components/LightBox.astro'
 import Layout from '../layouts/Layout.astro'
 ---
 
 <Layout title="Yu Le — A programmer">
   <div class="bg-[#f5f5f5] px-4 py-8 md:py-12 overflow-hidden">
     <div class="mx-auto max-w-7xl h-full">
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8">
-        <div class="flex h-full flex-col gap-4 lg:col-span-1">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Left Sidebar -->
+        <div class="flex flex-col gap-4 lg:col-span-1">
           <Profile />
           <div class="grid grid-cols-2 gap-4">
             <Github />
             <X />
+            <Location class="col-span-2 min-h-[8rem]" />
           </div>
-          <Location class="flex-1" />
-          <Workout class="flex-1" />
+          <Thoughts />
         </div>
 
-        <div class="h-full lg:col-span-2">
+        <!-- Right Content -->
+        <div class="grid grid-cols-1 gap-4 lg:col-span-2">
+          <Workout />
           <Posts />
         </div>
       </div>
     </div>
   </div>
+  <LightBox />
 </Layout>
