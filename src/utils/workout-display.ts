@@ -81,6 +81,22 @@ export function formatMaxSpeedKmh(maxSpeed: number): string {
   return `${(maxSpeed * 3.6).toFixed(1)} km/h`
 }
 
+/**
+ * Daily heat intensity from total moving time that day (all sessions summed).
+ * Three workout bands + empty; tuned for a single session most days.
+ */
+export function dailyMovingTimeHeatLevel(seconds: number): 0 | 1 | 2 | 3 {
+  const s = Math.max(0, Math.floor(seconds))
+  if (s <= 0)
+    return 0
+  const m = s / 60
+  if (m < 45)
+    return 1
+  if (m < 90)
+    return 2
+  return 3
+}
+
 /** Total weekly moving time for heatmap tooltips */
 export function formatDurationHeatmap(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds))
