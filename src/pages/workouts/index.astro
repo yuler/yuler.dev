@@ -12,6 +12,7 @@ import {
   formatPaceOrSpeed,
   sportIcons,
 } from '../../utils/workout-display'
+import { normalizeRange } from '../../utils/workouts-date-range'
 
 const activities = loadAllStoredActivities<StoredActivitySummary>()
 
@@ -26,6 +27,16 @@ const urlFrom = Astro.url.searchParams.get('from')
 const urlTo = Astro.url.searchParams.get('to')
 const initialFrom = isYmd(urlFrom) && isYmd(urlTo) ? urlFrom : null
 const initialTo = isYmd(urlFrom) && isYmd(urlTo) ? urlTo : null
+
+const serverFilterRange = initialFrom && initialTo ? normalizeRange(initialFrom, initialTo) : null
+const visibleInServerRange = serverFilterRange
+  ? activities.filter((a) => {
+      const d = formatDate(new Date(a.start_date_local))
+      return d >= serverFilterRange.from && d <= serverFilterRange.to
+    }).length
+  : activities.length
+const activityCountLabel = visibleInServerRange === 1 ? '1 activity' : `${visibleInServerRange} activities`
+const showEmptyRangeState = Boolean(serverFilterRange && visibleInServerRange === 0)
 ---
 
 <Layout title="Workouts — Yu Le">
@@ -47,14 +58,18 @@ const initialTo = isYmd(urlFrom) && isYmd(urlTo) ? urlTo : null
         <div class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
           <h1 class="text-lg font-semibold text-gray-900 font-mono">Workouts</h1>
           <span id="activity-count" class="px-2 py-0.5 text-sm bg-gray-100 text-gray-600 font-mono">
-            {activities.length} activities
+            {activityCountLabel}
           </span>
         </div>
 
         <ul id="activity-list" class="space-y-1">
           {
-            activities.map(activity => (
-              <li data-date={formatDate(new Date(activity.start_date_local))}>
+            activities.map((activity) => {
+              const dateStr = formatDate(new Date(activity.start_date_local))
+              const hiddenByRange = serverFilterRange
+                && (dateStr < serverFilterRange.from || dateStr > serverFilterRange.to)
+              return (
+              <li data-date={dateStr} style={hiddenByRange ? 'display: none' : undefined}>
                 <a
                   href={`/workouts/${activity.id}`}
                   class="group flex items-center justify-between p-3 min-h-[3.25rem] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
@@ -85,12 +100,74 @@ const initialTo = isYmd(urlFrom) && isYmd(urlTo) ? urlTo : null
                   <ChevronRight class="h-4 w-4 text-gray-400 shrink-0 transition-transform group-hover:translate-x-0.5" />
                 </a>
               </li>
-            ))
+              )
+            })
           }
         </ul>
 
+        <!-- Prerender has no search string; sync filter from the real URL before the following nodes paint. -->
+        <script is:inline>
+          (function () {
+            // eslint-disable-next-line e18e/prefer-static-regex -- inline guard; one-shot IIFE per navigation
+            const YMD = /^\d{4}-\d{2}-\d{2}$/
+            const list = document.getElementById('activity-list')
+            const countEl = document.getElementById('activity-count')
+            if (!list || !countEl)
+              return
+
+            const p = new URLSearchParams(window.location.search)
+            const rawFrom = p.get('from')
+            const rawTo = p.get('to')
+            if (!rawFrom || !rawTo || !YMD.test(rawFrom) || !YMD.test(rawTo))
+              return
+
+            let from = rawFrom
+            let to = rawTo
+            if (from > to) {
+              const t = from
+              from = to
+              to = t
+            }
+
+            const items = list.querySelectorAll('li')
+            let visible = 0
+            for (let i = 0; i < items.length; i++) {
+              const row = items[i]
+              const date = row.getAttribute('data-date')
+              if (date && date >= from && date <= to) {
+                row.style.display = ''
+                visible++
+              }
+              else {
+                row.style.display = 'none'
+              }
+            }
+
+            countEl.textContent = visible === 1 ? '1 activity' : `${visible} activities`
+
+            function syncEmpty() {
+              const el = document.getElementById('empty-state')
+              if (!el) {
+                requestAnimationFrame(syncEmpty)
+                return
+              }
+              if (visible > 0)
+                el.classList.add('hidden')
+              else
+                el.classList.remove('hidden')
+            }
+            syncEmpty()
+          })()
+        </script>
+
         <!-- Empty state -->
-        <div id="empty-state" class="hidden py-12 text-center text-gray-400 font-mono text-sm">
+        <div
+          id="empty-state"
+          class:list={[
+            'py-12 text-center text-gray-400 font-mono text-sm',
+            { hidden: !showEmptyRangeState },
+          ]}
+        >
           No activities in this range
         </div>
       </div>

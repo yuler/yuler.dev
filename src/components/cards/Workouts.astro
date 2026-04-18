@@ -1,10 +1,10 @@
 ---
 import type { StoredActivitySummary } from '../../utils/strava-activities'
 import { format } from 'date-fns'
-import { getRollingYearContributionColumns } from '../../utils/contribution-grid'
 import { formatDate } from '../../utils/date'
 import { loadAllStoredActivities } from '../../utils/strava-activities'
 import { dailyMovingTimeHeatLevel, formatDurationHeatmap } from '../../utils/workout-display'
+import { getRollingYearContributionColumns } from '../../utils/workouts-calendar'
 import CornerMarkers from '../CornerMarkers.astro'
 import ArrowRight from '../icons/ArrowRight.astro'
 
