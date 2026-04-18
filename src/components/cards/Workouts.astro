@@ -70,6 +70,27 @@ function tooltipArrowHorizontalClass(columnIndex: number, total: number): string
   return 'left-1/2 -translate-x-1/2'
 }
 
+function heatmapDayAriaLabel(date: string, durationStr: string, names: string[]): string {
+  const count = names.length
+  const countPhrase = count === 0 ? 'no activities' : count === 1 ? '1 activity' : `${count} activities`
+  let label = `${date}: ${durationStr}, ${countPhrase}`
+  if (count > 0) {
+    const shown = names.slice(0, 5)
+    const suffix = count > shown.length ? `, and ${count - shown.length} more` : ''
+    label += `: ${shown.join(', ')}${suffix}`
+  }
+  return label
+}
+
+function heatmapDayTitle(date: string, durationStr: string, names: string[]): string {
+  if (names.length === 0)
+    return `${date} · ${durationStr} · no activities`
+  const lines = names.slice(0, 8).map(n => `• ${n}`)
+  if (names.length > 8)
+    lines.push(`…and ${names.length - 8} more`)
+  return `${date} · ${durationStr}\n${lines.join('\n')}`
+}
+
 const columns = rawColumns.map((col, columnIndex) =>
   col.map((day) => {
     const seconds = day.inYear ? (secondsByDate.get(day.date) ?? 0) : 0
@@ -151,7 +172,8 @@ const columns = rawColumns.map((col, columnIndex) =>
                         ? (
                             <a
                               href={`/workouts?from=${day.date}&to=${day.date}`}
-                              aria-label={`${day.date}: ${day.durationStr}, ${day.names.length} ${day.names.length === 1 ? 'activity' : 'activities'}`}
+                              aria-label={heatmapDayAriaLabel(day.date, day.durationStr, day.names)}
+                              title={heatmapDayTitle(day.date, day.durationStr, day.names)}
                               class:list={[
                                 'block size-full min-h-0 min-w-0 transition-colors duration-200',
                                 day.level > 0 ? 'cursor-pointer' : 'cursor-default',
@@ -178,7 +200,7 @@ const columns = rawColumns.map((col, columnIndex) =>
                           )}
                       <div
                         class:list={[
-                          'absolute bottom-full mb-2 w-max scale-95 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 pointer-events-none z-50',
+                          'absolute bottom-full mb-2 w-max scale-95 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-focus-within:scale-100 group-focus-within:opacity-100 pointer-events-none z-50',
                           tooltipHorizontalClass(day.columnIndex, totalColumns),
                         ]}
                       >
@@ -273,6 +295,10 @@ const columns = rawColumns.map((col, columnIndex) =>
   requestAnimationFrame(() => {
     requestAnimationFrame(scrollWorkoutGridToRecent)
   })
-  document.addEventListener('astro:page-load', scrollWorkoutGridToRecent)
-  document.addEventListener('astro:after-swap', scrollWorkoutGridToRecent)
+  const root = document.documentElement
+  if (!root.dataset.wkContribScrollBound) {
+    root.dataset.wkContribScrollBound = ''
+    document.addEventListener('astro:page-load', scrollWorkoutGridToRecent)
+    document.addEventListener('astro:after-swap', scrollWorkoutGridToRecent)
+  }
 </script>

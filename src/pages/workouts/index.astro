@@ -14,6 +14,12 @@ import {
 } from '../../utils/workout-display'
 import { normalizeRange } from '../../utils/workouts-date-range'
 
+/**
+ * Date-range filter — keep these layers aligned when changing URL / filter rules:
+ * 1. Server: `serverFilterRange`, `visibleInServerRange`, `activityCountLabel`, row `hiddenByRange`
+ * 2. Inline script below (`is:inline`): reads `window.location` on prerendered HTML
+ * 3. `WorkoutsDateRangeSelector.ts`: `initWorkoutsDateRange`, `applyFilter`, `history.replaceState`
+ */
 const activities = loadAllStoredActivities<StoredActivitySummary>()
 
 activities.sort((a, b) => new Date(b.start_date_local).getTime() - new Date(a.start_date_local).getTime())
@@ -35,7 +41,11 @@ const visibleInServerRange = serverFilterRange
       return d >= serverFilterRange.from && d <= serverFilterRange.to
     }).length
   : activities.length
-const activityCountLabel = visibleInServerRange === 1 ? '1 activity' : `${visibleInServerRange} activities`
+const activityCountLabel = visibleInServerRange === 0
+  ? 'No activities'
+  : visibleInServerRange === 1
+    ? '1 activity'
+    : `${visibleInServerRange} activities`
 const showEmptyRangeState = Boolean(serverFilterRange && visibleInServerRange === 0)
 ---
 
@@ -143,7 +153,11 @@ const showEmptyRangeState = Boolean(serverFilterRange && visibleInServerRange ==
               }
             }
 
-            countEl.textContent = visible === 1 ? '1 activity' : `${visible} activities`
+            countEl.textContent = visible === 0
+              ? 'No activities'
+              : visible === 1
+                ? '1 activity'
+                : `${visible} activities`
 
             function syncEmpty() {
               const el = document.getElementById('empty-state')

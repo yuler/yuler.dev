@@ -102,7 +102,12 @@ export function initWorkoutsDateRange(root: HTMLElement): void {
         row.style.display = 'none'
       }
     })
-    dom.activityCount.textContent = (from ? visible : total) + (visible === 1 ? ' activity' : ' activities')
+    const n = from ? visible : total
+    dom.activityCount.textContent = n === 0
+      ? 'No activities'
+      : n === 1
+        ? '1 activity'
+        : `${n} activities`
     dom.emptyState.classList.toggle('hidden', visible > 0)
   }
 
