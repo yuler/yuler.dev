@@ -151,6 +151,7 @@ const columns = rawColumns.map((col, columnIndex) =>
                         ? (
                             <a
                               href={`/workouts?from=${day.date}&to=${day.date}`}
+                              aria-label={`${day.date}: ${day.durationStr}, ${day.names.length} ${day.names.length === 1 ? 'activity' : 'activities'}`}
                               class:list={[
                                 'block size-full min-h-0 min-w-0 transition-colors duration-200',
                                 day.level > 0 ? 'cursor-pointer' : 'cursor-default',
