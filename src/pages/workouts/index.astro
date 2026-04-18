@@ -25,6 +25,17 @@ const activityDates = new Set(activities.map(a => formatDate(new Date(a.start_da
 const weeks = allWeeks.filter(({ start, end }) =>
   [...activityDates].some(d => d >= start && d <= end),
 )
+
+const urlFrom = Astro.url.searchParams.get('from')
+const urlTo = Astro.url.searchParams.get('to')
+const isYmd = (s: string | null): s is string => Boolean(s && /^\d{4}-\d{2}-\d{2}$/.test(s))
+const urlRangeValue = isYmd(urlFrom) && isYmd(urlTo) ? `${urlFrom}~${urlTo}` : null
+const matchedWeek = urlRangeValue ? weeks.find(w => `${w.start}~${w.end}` === urlRangeValue) : undefined
+const urlRangeExtra =
+  urlRangeValue && !matchedWeek
+    ? { value: urlRangeValue, label: urlFrom === urlTo ? urlFrom : `${urlFrom} – ${urlTo}` }
+    : null
+const selectAllWeeks = !urlRangeValue
 ---
 
 <Layout title="Workouts — Yu Le">
@@ -43,7 +54,7 @@ const weeks = allWeeks.filter(({ start, end }) =>
         <div class="flex items-center justify-between gap-2">
           <button
             id="week-prev"
-            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
+            class="px-2 py-1.5 text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
           >
             ← Prev
           </button>
@@ -51,12 +62,22 @@ const weeks = allWeeks.filter(({ start, end }) =>
             <div class="relative flex items-center">
               <select
                 id="week-select"
-                class="appearance-none bg-transparent border border-gray-200 hover:border-gray-300 text-xs sm:text-sm font-mono text-gray-900 py-1 pl-2 pr-7 cursor-pointer transition-colors focus:outline-none focus:border-gray-400"
+                class="appearance-none bg-transparent border border-gray-200 hover:border-gray-300 text-xs sm:text-sm font-mono text-gray-900 py-1 pl-2 pr-7 cursor-pointer transition-colors focus:outline-none focus:border-gray-400 min-w-[10rem] sm:min-w-[12rem]"
               >
-                <option value="">All weeks</option>
+                <option value="" selected={selectAllWeeks}>All weeks</option>
+                {
+                  urlRangeExtra && (
+                    <option value={urlRangeExtra.value} selected>
+                      {urlRangeExtra.label}
+                    </option>
+                  )
+                }
                 {
                   weeks.map(w => (
-                    <option value={`${w.start}~${w.end}`}>
+                    <option
+                      value={`${w.start}~${w.end}`}
+                      selected={Boolean(matchedWeek && matchedWeek.start === w.start && matchedWeek.end === w.end)}
+                    >
                       W{String(w.index).padStart(2, '0')}: {w.start} ~ {w.end}
                     </option>
                   ))
@@ -71,7 +92,7 @@ const weeks = allWeeks.filter(({ start, end }) =>
           </div>
           <button
             id="week-next"
-            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
+            class="px-2 py-1.5 text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
           >
             Next →
           </button>
@@ -215,11 +236,23 @@ const weeks = allWeeks.filter(({ start, end }) =>
       setWeek(select.options[idx + 1].value)
   })
 
+  function ensureRangeOptionIfMissing(from, to) {
+    const value = `${from}~${to}`
+    if ([...select.options].some(o => o.value === value))
+      return
+    const opt = document.createElement('option')
+    opt.value = value
+    opt.textContent = from === to ? from : `${from} – ${to}`
+    select.insertBefore(opt, select.options[1] ?? null)
+  }
+
   // Init from URL params
   const params = new URLSearchParams(window.location.search)
   const from = params.get('from')
   const to = params.get('to')
-  if (from && to) {
+  const ymd = /^\d{4}-\d{2}-\d{2}$/
+  if (from && to && ymd.test(from) && ymd.test(to)) {
+    ensureRangeOptionIfMissing(from, to)
     setWeek(`${from}~${to}`)
   }
   else {
