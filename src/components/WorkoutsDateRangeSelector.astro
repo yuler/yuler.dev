@@ -1,0 +1,157 @@
+---
+import { formatRangeLabel } from '../utils/workouts-date-range'
+import CornerMarkers from './CornerMarkers.astro'
+
+interface Props {
+  /** yyyy-MM-dd from URL, or null for “all activities” */
+  initialFrom?: string | null
+  initialTo?: string | null
+  /** yyyy-MM-dd cap (no future days) */
+  today?: string
+  activityListSelector?: string
+  activityCountSelector?: string
+  emptyStateSelector?: string
+  class?: string
+}
+
+const {
+  initialFrom = null,
+  initialTo = null,
+  today = '',
+  activityListSelector = '#activity-list',
+  activityCountSelector = '#activity-count',
+  emptyStateSelector = '#empty-state',
+  class: className = '',
+} = Astro.props
+
+const fromValue = initialFrom ?? ''
+const toValue = initialTo ?? ''
+
+const triggerLabel = formatRangeLabel(fromValue, toValue)
+const triggerEmpty = !fromValue || !toValue
+
+const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const
+---
+
+<section
+  class={`relative border border-gray-200 bg-white px-4 py-4 sm:px-5 sm:py-4 ${className}`}
+  data-workouts-date-range
+  data-selector-list={activityListSelector}
+  data-selector-count={activityCountSelector}
+  data-selector-empty={emptyStateSelector}
+  data-today={today}
+  data-initial-from={fromValue}
+  data-initial-to={toValue}
+>
+  <CornerMarkers />
+  <div class="flex flex-col gap-2.5 sm:gap-3">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:justify-between sm:gap-3">
+      <div class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+        <p class="font-mono text-[10px] uppercase tracking-[0.12em] text-gray-400 sm:sr-only">
+          Date range
+        </p>
+        <div class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+          <button
+            type="button"
+            popovertarget="workouts-range-cal"
+            data-dr-trigger
+            data-empty={triggerEmpty ? 'true' : 'false'}
+            class="inline-flex min-h-11 min-w-0 flex-1 items-center justify-between gap-2 rounded-none border border-gray-200 bg-[#fafafa] px-3 py-2.5 text-left font-mono text-xs text-gray-900 transition-colors hover:border-gray-300 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 sm:py-2 sm:text-sm data-[empty=true]:text-gray-500"
+          >
+            <span class="min-w-0 truncate" data-dr-label>{triggerLabel}</span>
+            <svg
+              class="size-4 shrink-0 text-gray-500"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </button>
+          <button
+            type="button"
+            data-dr-clear
+            class="h-11 shrink-0 rounded-none border border-gray-200 bg-white px-4 font-mono text-xs text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900 sm:h-auto sm:py-2.5 sm:text-sm"
+          >
+            All activities
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="workouts-range-cal"
+    popover="auto"
+    data-dr-popover
+    class="fixed z-[100] m-0 max-h-none w-[min(100vw-2rem,20rem)] border-0 bg-transparent p-0 text-gray-900"
+  >
+    <div class="border border-gray-200 bg-white p-3 shadow-xl">
+      <p class="mb-2 font-mono text-[10px] uppercase tracking-wide text-gray-400">Quick range</p>
+      <div class="mb-3 flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          data-dr-preset="week"
+          class="rounded-none border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-[11px] text-gray-700 transition-colors hover:border-gray-300 hover:bg-white sm:text-xs data-[active=true]:border-gray-900 data-[active=true]:bg-gray-900 data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:hover:border-gray-900 data-[active=true]:hover:bg-gray-900 data-[active=true]:hover:text-white"
+        >
+          This week
+        </button>
+        <button
+          type="button"
+          data-dr-preset="month"
+          class="rounded-none border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-[11px] text-gray-700 transition-colors hover:border-gray-300 hover:bg-white sm:text-xs data-[active=true]:border-gray-900 data-[active=true]:bg-gray-900 data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:hover:border-gray-900 data-[active=true]:hover:bg-gray-900 data-[active=true]:hover:text-white"
+        >
+          This month
+        </button>
+        <button
+          type="button"
+          data-dr-preset="prev-month"
+          class="rounded-none border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-[11px] text-gray-700 transition-colors hover:border-gray-300 hover:bg-white sm:text-xs data-[active=true]:border-gray-900 data-[active=true]:bg-gray-900 data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:hover:border-gray-900 data-[active=true]:hover:bg-gray-900 data-[active=true]:hover:text-white"
+        >
+          Last month
+        </button>
+      </div>
+      <div class="mb-3 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          data-dr-month-prev
+          class="flex size-8 items-center justify-center rounded-none border border-transparent font-mono text-gray-600 hover:bg-gray-100"
+          aria-label="Previous month"
+        >
+          ‹
+        </button>
+        <span data-dr-month-label class="font-mono text-sm font-medium text-gray-900"></span>
+        <button
+          type="button"
+          data-dr-month-next
+          class="flex size-8 items-center justify-center rounded-none border border-transparent font-mono text-gray-600 hover:bg-gray-100"
+          aria-label="Next month"
+        >
+          ›
+        </button>
+      </div>
+      <div class="mb-1 grid grid-cols-7 gap-0.5 text-center font-mono text-[10px] uppercase tracking-wide text-gray-500">
+        {WEEKDAYS.map(d => <span>{d}</span>)}
+      </div>
+      <div data-dr-grid class="grid grid-cols-7 gap-0.5"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initWorkoutsDateRange } from './WorkoutsDateRangeSelector'
+
+  const root = document.querySelector('[data-workouts-date-range]')
+  if (root instanceof HTMLElement)
+    initWorkoutsDateRange(root)
+</script>

@@ -1,0 +1,304 @@
+---
+import type { StoredActivitySummary } from '../../utils/strava-activities'
+import { format } from 'date-fns'
+import { formatDate } from '../../utils/date'
+import { loadAllStoredActivities } from '../../utils/strava-activities'
+import { dailyMovingTimeHeatLevel, formatDurationHeatmap } from '../../utils/workout-display'
+import { getRollingYearContributionColumns } from '../../utils/workouts-calendar'
+import CornerMarkers from '../CornerMarkers.astro'
+import ArrowRight from '../icons/ArrowRight.astro'
+
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
+
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+
+type Activity = Pick<StoredActivitySummary, 'id' | 'name' | 'moving_time' | 'start_date_local'>
+
+const activities = loadAllStoredActivities<Activity>()
+
+const today = new Date()
+const todayStr = formatDate(today)
+
+const rawColumns = getRollingYearContributionColumns(today)
+const totalColumns = rawColumns.length
+const rangeStartStr = rawColumns[0]?.[0]?.date ?? todayStr
+const rangeEndStr = rawColumns.length > 0 ? (rawColumns.at(-1)?.[6]?.date ?? todayStr) : todayStr
+
+const secondsByDate = new Map<string, number>()
+const namesByDate = new Map<string, string[]>()
+
+for (const activity of activities) {
+  const date = new Date(activity.start_date_local)
+  const dateStr = formatDate(date)
+  if (dateStr < rangeStartStr || dateStr > rangeEndStr)
+    continue
+
+  secondsByDate.set(dateStr, (secondsByDate.get(dateStr) ?? 0) + activity.moving_time)
+  if (!namesByDate.has(dateStr))
+    namesByDate.set(dateStr, [])
+  namesByDate.get(dateStr)!.push(activity.name)
+}
+
+function monthTickLabelForColumn(col: { date: string }[]): string {
+  for (const { date } of col) {
+    const d = new Date(`${date}T12:00:00`)
+    if (d.getDate() === 1)
+      return format(d, 'MMM')
+  }
+  return ''
+}
+
+const columnMonthLabels = rawColumns.map(col => monthTickLabelForColumn(col))
+
+function tooltipHorizontalClass(columnIndex: number, total: number): string {
+  if (columnIndex < 4)
+    return 'left-0 translate-x-0'
+  if (columnIndex > total - 5)
+    return 'right-0 translate-x-0'
+  return 'left-1/2 -translate-x-1/2'
+}
+
+function tooltipArrowHorizontalClass(columnIndex: number, total: number): string {
+  if (columnIndex < 4)
+    return 'left-[5px]'
+  if (columnIndex > total - 5)
+    return 'right-[5px]'
+  return 'left-1/2 -translate-x-1/2'
+}
+
+function heatmapDayAriaLabel(date: string, durationStr: string, names: string[]): string {
+  const count = names.length
+  const countPhrase = count === 0 ? 'no activities' : count === 1 ? '1 activity' : `${count} activities`
+  let label = `${date}: ${durationStr}, ${countPhrase}`
+  if (count > 0) {
+    const shown = names.slice(0, 5)
+    const suffix = count > shown.length ? `, and ${count - shown.length} more` : ''
+    label += `: ${shown.join(', ')}${suffix}`
+  }
+  return label
+}
+
+function heatmapDayTitle(date: string, durationStr: string, names: string[]): string {
+  if (names.length === 0)
+    return `${date} · ${durationStr} · no activities`
+  const lines = names.slice(0, 8).map(n => `• ${n}`)
+  if (names.length > 8)
+    lines.push(`…and ${names.length - 8} more`)
+  return `${date} · ${durationStr}\n${lines.join('\n')}`
+}
+
+const columns = rawColumns.map((col, columnIndex) =>
+  col.map((day) => {
+    const seconds = day.inYear ? (secondsByDate.get(day.date) ?? 0) : 0
+    const names = day.inYear ? (namesByDate.get(day.date) ?? []) : []
+    const level = day.inYear ? dailyMovingTimeHeatLevel(seconds) : 0
+    const isToday = day.date === todayStr
+    const isFuture = day.inYear && day.date > todayStr
+
+    return {
+      date: day.date,
+      inYear: day.inYear,
+      columnIndex,
+      seconds,
+      names,
+      level,
+      isToday,
+      isFuture,
+      durationStr: formatDurationHeatmap(seconds),
+    }
+  }),
+)
+---
+
+<div
+  class={`relative bg-white border border-gray-200 p-6 transition-all duration-300 hover:border-gray-400 ${className}`}
+>
+  <CornerMarkers />
+
+  <div class="flex flex-col gap-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+      <h3 class="text-lg font-semibold text-gray-900 font-mono">Workouts</h3>
+      <a
+        href="/workouts"
+        class="inline-flex items-center gap-1 text-xs text-gray-400 font-mono hover:text-gray-600 transition-colors underline underline-offset-2 decoration-gray-200 hover:decoration-gray-400"
+      >
+        View all
+        <ArrowRight class="h-3 w-3" />
+      </a>
+    </div>
+
+    <!-- Y-axis fixed; months + cells scroll horizontally (GitHub-style). -->
+    <div class="flex min-w-0 flex-col gap-2">
+      <div class="flex min-w-0 gap-0.5">
+        <div class="wk-axis-col flex shrink-0 flex-col gap-0.5 self-start bg-white pr-0.5">
+          <div class="h-4 shrink-0" aria-hidden="true" />
+          {
+            WEEKDAY_LABELS.map(label => (
+              <div class="wk-y-label flex h-2.5 w-7 shrink-0 items-center justify-end pr-1 font-mono text-[9px] leading-none text-gray-500 sm:h-3 sm:w-8">
+                {label}
+              </div>
+            ))
+          }
+        </div>
+        <div
+          class="min-w-0 flex-1 overflow-x-auto scroll-smooth pb-0.5"
+          data-workout-contrib-scroll
+        >
+          <div
+            class="wk-scroll-grid w-max"
+            style={`--wk-col-count: ${totalColumns};`}
+          >
+            {
+              columnMonthLabels.map(monthLabel => (
+                <div class="wk-month flex items-end justify-center overflow-visible leading-none">
+                  <span class="whitespace-nowrap text-center text-[8px] font-mono text-gray-500 sm:text-[9px]">
+                    {monthLabel || '\u00A0'}
+                  </span>
+                </div>
+              ))
+            }
+            {
+              WEEKDAY_LABELS.flatMap((_label, rowIndex) =>
+                columns.map((weekDays) => {
+                  const day = weekDays[rowIndex]
+                  return (
+                    <div class="group relative min-h-0 min-w-0">
+                      {!day.isFuture
+                        ? (
+                            <a
+                              href={`/workouts?from=${day.date}&to=${day.date}`}
+                              aria-label={heatmapDayAriaLabel(day.date, day.durationStr, day.names)}
+                              title={heatmapDayTitle(day.date, day.durationStr, day.names)}
+                              class:list={[
+                                'block size-full min-h-0 min-w-0 transition-colors duration-200',
+                                day.level > 0 ? 'cursor-pointer' : 'cursor-default',
+                                {
+                                  'bg-gray-100': day.level === 0,
+                                  'bg-gray-300': day.level === 1,
+                                  'bg-gray-600': day.level === 2,
+                                  'bg-black': day.level === 3,
+                                  'ring-1 ring-black/40 ring-inset': day.isToday,
+                                },
+                              ]}
+                            />
+                          )
+                        : (
+                            <div
+                              class:list={[
+                                'block size-full min-h-0 min-w-0',
+                                {
+                                  'bg-gray-100 opacity-50': day.isFuture,
+                                  'ring-1 ring-black/40 ring-inset': day.isToday,
+                                },
+                              ]}
+                            />
+                          )}
+                      <div
+                        class:list={[
+                          'absolute bottom-full mb-2 w-max scale-95 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-focus-within:scale-100 group-focus-within:opacity-100 pointer-events-none z-50',
+                          tooltipHorizontalClass(day.columnIndex, totalColumns),
+                        ]}
+                      >
+                        <div class="bg-white border border-gray-200 px-2 py-1 text-[10px] text-gray-900 shadow-md">
+                          <div class="font-medium">{day.date}</div>
+                          <div class="text-gray-600">
+                            {day.isFuture
+                              ? 'Upcoming'
+                              : (
+                                  <span>
+                                    {day.durationStr} · {day.names.length}{' '}
+                                    {day.names.length === 1 ? 'activity' : 'activities'}
+                                  </span>
+                                )}
+                          </div>
+                          {day.names.length > 0 && (
+                            <div class="mt-1 max-w-[13.75rem] text-gray-700">
+                              {day.names.slice(0, 4).map(name => (
+                                <div class="truncate">• {name}</div>
+                              ))}
+                              {day.names.length > 4 && (
+                                <div class="text-gray-500">…and {day.names.length - 4} more</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          class:list={[
+                            'absolute top-full size-2 rotate-45 bg-white border-r border-b border-gray-200 -mt-[5px]',
+                            tooltipArrowHorizontalClass(day.columnIndex, totalColumns),
+                          ]}
+                        />
+                      </div>
+                    </div>
+                  )
+                }),
+              )
+            }
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 flex flex-row justify-between gap-2 sm:items-center text-[10px] text-gray-400">
+        <span>
+          Powered by{' '}
+          <a
+            href="https://www.strava.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline! text-xs underline-offset-2 decoration-gray-300 hover:decoration-gray-500 hover:text-gray-600 transition-colors"
+          >
+            Strava
+          </a>
+        </span>
+        <div class="flex gap-1 items-center flex-wrap">
+          <span>Less time</span>
+          <div class="flex gap-0.5">
+            <div class="size-1.5 bg-gray-100" />
+            <div class="size-1.5 bg-gray-300" />
+            <div class="size-1.5 bg-gray-600" />
+            <div class="size-1.5 bg-black" />
+          </div>
+          <span>More time</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .wk-scroll-grid {
+    display: grid;
+    gap: 0.125rem;
+    grid-template-columns: repeat(var(--wk-col-count), var(--wk-cell, 0.625rem));
+    grid-template-rows: 1rem repeat(7, var(--wk-cell, 0.625rem));
+    --wk-cell: 0.625rem;
+  }
+  @media (min-width: 640px) {
+    .wk-scroll-grid {
+      --wk-cell: 0.75rem;
+    }
+  }
+</style>
+
+<script>
+  function scrollWorkoutGridToRecent() {
+    document.querySelectorAll('[data-workout-contrib-scroll]').forEach((el) => {
+      const node = el as HTMLElement
+      node.scrollLeft = node.scrollWidth - node.clientWidth
+    })
+  }
+  scrollWorkoutGridToRecent()
+  requestAnimationFrame(() => {
+    requestAnimationFrame(scrollWorkoutGridToRecent)
+  })
+  const root = document.documentElement
+  if (!root.dataset.wkContribScrollBound) {
+    root.dataset.wkContribScrollBound = ''
+    document.addEventListener('astro:page-load', scrollWorkoutGridToRecent)
+    document.addEventListener('astro:after-swap', scrollWorkoutGridToRecent)
+  }
+</script>

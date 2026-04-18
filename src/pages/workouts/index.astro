@@ -1,99 +1,85 @@
 ---
 import type { StoredActivitySummary } from '../../utils/strava-activities'
 import CornerMarkers from '../../components/CornerMarkers.astro'
-import ChevronDown from '../../components/icons/ChevronDown.astro'
 import ChevronRight from '../../components/icons/ChevronRight.astro'
+import WorkoutsDateRangeSelector from '../../components/WorkoutsDateRangeSelector.astro'
 import Layout from '../../layouts/Layout.astro'
 import { formatDate } from '../../utils/date'
 import { loadAllStoredActivities } from '../../utils/strava-activities'
-import { getWeekRangesWithIndex } from '../../utils/week-grid'
 import {
   formatDistanceMetersCompact,
   formatMovingDuration,
   formatPaceOrSpeed,
   sportIcons,
 } from '../../utils/workout-display'
+import { normalizeRange } from '../../utils/workouts-date-range'
 
+/**
+ * Date-range filter — keep these layers aligned when changing URL / filter rules:
+ * 1. Server: `serverFilterRange`, `visibleInServerRange`, `activityCountLabel`, row `hiddenByRange`
+ * 2. Inline script below (`is:inline`): reads `window.location` on prerendered HTML
+ * 3. `WorkoutsDateRangeSelector.ts`: `initWorkoutsDateRange`, `applyFilter`, `history.replaceState`
+ */
 const activities = loadAllStoredActivities<StoredActivitySummary>()
 
 activities.sort((a, b) => new Date(b.start_date_local).getTime() - new Date(a.start_date_local).getTime())
 
-const currentYear = new Date().getFullYear()
-const allWeeks = getWeekRangesWithIndex(currentYear)
+const todayStr = formatDate(new Date())
 
-const activityDates = new Set(activities.map(a => formatDate(new Date(a.start_date_local))))
-const weeks = allWeeks.filter(({ start, end }) =>
-  [...activityDates].some(d => d >= start && d <= end),
-)
+const YMD = /^\d{4}-\d{2}-\d{2}$/
+const isYmd = (s: string | null): s is string => Boolean(s && YMD.test(s))
+
+const urlFrom = Astro.url.searchParams.get('from')
+const urlTo = Astro.url.searchParams.get('to')
+const initialFrom = isYmd(urlFrom) && isYmd(urlTo) ? urlFrom : null
+const initialTo = isYmd(urlFrom) && isYmd(urlTo) ? urlTo : null
+
+const serverFilterRange = initialFrom && initialTo ? normalizeRange(initialFrom, initialTo) : null
+const visibleInServerRange = serverFilterRange
+  ? activities.filter((a) => {
+      const d = formatDate(new Date(a.start_date_local))
+      return d >= serverFilterRange.from && d <= serverFilterRange.to
+    }).length
+  : activities.length
+const activityCountLabel = visibleInServerRange === 0
+  ? 'No activities'
+  : visibleInServerRange === 1
+    ? '1 activity'
+    : `${visibleInServerRange} activities`
+const showEmptyRangeState = Boolean(serverFilterRange && visibleInServerRange === 0)
 ---
 
 <Layout title="Workouts — Yu Le">
   <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
-    <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
-      <!-- Breadcrumb -->
-      <nav class="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 font-mono">
-        <a href="/" class="hover:text-gray-900 transition-colors">~</a>
-        <span class="text-gray-300">/</span>
-        <span class="text-gray-900">workouts</span>
-      </nav>
+    <div class="mx-auto max-w-4xl px-4 py-8 md:py-12">
+      <header class="mb-6 space-y-4 sm:mb-8 sm:space-y-5">
+        <nav class="flex items-center gap-1.5 font-mono text-xs text-gray-500 sm:text-sm">
+          <a href="/" class="transition-colors hover:text-gray-900">~</a>
+          <span class="text-gray-300">/</span>
+          <span class="text-gray-900">workouts</span>
+        </nav>
+        <WorkoutsDateRangeSelector initialFrom={initialFrom} initialTo={initialTo} today={todayStr} />
+      </header>
 
-      <!-- Week Filter -->
-      <div class="mb-4 bg-white border border-gray-200 px-3 py-2 sm:px-4 sm:py-3 relative">
-        <CornerMarkers />
-        <div class="flex items-center justify-between gap-2">
-          <button
-            id="week-prev"
-            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
-          >
-            ← Prev
-          </button>
-          <div class="flex flex-col gap-2 items-center">
-            <div class="relative flex items-center">
-              <select
-                id="week-select"
-                class="appearance-none bg-transparent border border-gray-200 hover:border-gray-300 text-xs sm:text-sm font-mono text-gray-900 py-1 pl-2 pr-7 cursor-pointer transition-colors focus:outline-none focus:border-gray-400"
-              >
-                <option value="">All weeks</option>
-                {
-                  weeks.map(w => (
-                    <option value={`${w.start}~${w.end}`}>
-                      W{String(w.index).padStart(2, '0')}: {w.start} ~ {w.end}
-                    </option>
-                  ))
-                }
-              </select>
-              <ChevronDown class="absolute right-2.5 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-gray-400 pointer-events-none" />
-            </div>
-            <span
-              id="filter-count"
-              class="text-xs text-gray-400 font-mono whitespace-pre-line sm:whitespace-normal text-center sm:text-left leading-[1.1] sm:leading-normal"
-            ></span>
-          </div>
-          <button
-            id="week-next"
-            class="px-2 py-1.5 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors font-mono disabled:opacity-30 disabled:cursor-not-allowed min-h-11 min-w-11"
-          >
-            Next →
-          </button>
-        </div>
-      </div>
-
-      <!-- Main Card -->
-      <div class="relative bg-white border border-gray-200 p-4 sm:p-6">
+      <div class="relative border border-gray-200 bg-white p-4 sm:p-6">
         <CornerMarkers />
 
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
           <h1 class="text-lg font-semibold text-gray-900 font-mono">Workouts</h1>
           <span id="activity-count" class="px-2 py-0.5 text-sm bg-gray-100 text-gray-600 font-mono">
-            {activities.length} activities
+            {activityCountLabel}
           </span>
         </div>
 
         <ul id="activity-list" class="space-y-1">
           {
-            activities.map(activity => (
-              <li data-date={formatDate(new Date(activity.start_date_local))}>
+            activities.map((activity) => {
+              const dateStr = formatDate(new Date(activity.start_date_local))
+              const hiddenByRange = serverFilterRange
+                && (dateStr < serverFilterRange.from || dateStr > serverFilterRange.to)
+              return (
+              <li data-date={dateStr} style={hiddenByRange ? 'display: none' : undefined}>
                 <a
                   href={`/workouts/${activity.id}`}
                   class="group flex items-center justify-between p-3 min-h-[3.25rem] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
@@ -124,108 +110,74 @@ const weeks = allWeeks.filter(({ start, end }) =>
                   <ChevronRight class="h-4 w-4 text-gray-400 shrink-0 transition-transform group-hover:translate-x-0.5" />
                 </a>
               </li>
-            ))
+              )
+            })
           }
         </ul>
 
-        <!-- Empty state -->
-        <div id="empty-state" class="hidden py-12 text-center text-gray-400 font-mono text-sm">
-          No activities this week
+        <!-- Empty state (before inline URL sync script so `getElementById` runs without rAF polling). -->
+        <div
+          id="empty-state"
+          class:list={[
+            'py-12 text-center text-gray-400 font-mono text-sm',
+            { hidden: !showEmptyRangeState },
+          ]}
+        >
+          No activities in this range
         </div>
 
-        <!-- Footer -->
-        <div
-          class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400 font-mono"
-        >
-          <span>
-            Powered by{' '}
-            <a
-              href="https://www.strava.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="underline! underline-offset-2 decoration-gray-300 hover:decoration-gray-500 hover:text-gray-600 transition-colors"
-            >
-              Strava
-            </a>
-          </span>
-          <a href="/" class="hover:text-gray-600 transition-colors">← Home</a>
-        </div>
+        <!-- Prerender has no search string; sync filter from the real URL before paint settles. -->
+        <script is:inline>
+          (function () {
+            // eslint-disable-next-line e18e/prefer-static-regex -- inline guard; one-shot IIFE per navigation
+            const YMD = /^\d{4}-\d{2}-\d{2}$/
+            const list = document.getElementById('activity-list')
+            const countEl = document.getElementById('activity-count')
+            const emptyEl = document.getElementById('empty-state')
+            if (!list || !countEl || !emptyEl)
+              return
+
+            const p = new URLSearchParams(window.location.search)
+            const rawFrom = p.get('from')
+            const rawTo = p.get('to')
+            if (!rawFrom || !rawTo || !YMD.test(rawFrom) || !YMD.test(rawTo))
+              return
+
+            let from = rawFrom
+            let to = rawTo
+            if (from > to) {
+              const t = from
+              from = to
+              to = t
+            }
+
+            const items = list.querySelectorAll('li')
+            let visible = 0
+            for (let i = 0; i < items.length; i++) {
+              const row = items[i]
+              const date = row.getAttribute('data-date')
+              if (date && date >= from && date <= to) {
+                row.style.display = ''
+                visible++
+              }
+              else {
+                row.style.display = 'none'
+              }
+            }
+
+            countEl.textContent = visible === 0
+              ? 'No activities'
+              : visible === 1
+                ? '1 activity'
+                : `${visible} activities`
+
+            if (visible > 0)
+              emptyEl.classList.add('hidden')
+            else
+              emptyEl.classList.remove('hidden')
+          })()
+        </script>
       </div>
     </div>
   </div>
-
-  <script is:inline>
-;(function () {
-  const select = document.getElementById('week-select')
-  const prevBtn = document.getElementById('week-prev')
-  const nextBtn = document.getElementById('week-next')
-  const countEl = document.getElementById('filter-count')
-  const activityCount = document.getElementById('activity-count')
-  const emptyState = document.getElementById('empty-state')
-  const items = document.querySelectorAll('#activity-list > li')
-  const total = items.length
-
-  function applyFilter(from, to) {
-    let visible = 0
-    items.forEach((li) => {
-      const date = li.getAttribute('data-date')
-      if (!from || (date >= from && date <= to)) {
-        li.style.display = ''
-        visible++
-      }
-      else {
-        li.style.display = 'none'
-      }
-    })
-    countEl.textContent = from ? `${visible} matched` : ''
-    activityCount.textContent = (from ? visible : total) + (visible === 1 ? ' activity' : ' activities')
-    emptyState.classList.toggle('hidden', visible > 0)
-
-    const idx = select.selectedIndex
-    prevBtn.disabled = idx <= 1
-    nextBtn.disabled = idx <= 0 || idx >= select.options.length - 1
-  }
-
-  function setWeek(value) {
-    select.value = value
-    if (value) {
-      const parts = value.split('~')
-      applyFilter(parts[0], parts[1])
-      history.replaceState(null, '', `?from=${parts[0]}&to=${parts[1]}`)
-    }
-    else {
-      applyFilter(null, null)
-      history.replaceState(null, '', window.location.pathname)
-    }
-  }
-
-  select.addEventListener('change', () => {
-    setWeek(select.value)
-  })
-
-  prevBtn.addEventListener('click', () => {
-    const idx = select.selectedIndex
-    if (idx > 1)
-      setWeek(select.options[idx - 1].value)
-  })
-
-  nextBtn.addEventListener('click', () => {
-    const idx = select.selectedIndex
-    if (idx > 0 && idx < select.options.length - 1)
-      setWeek(select.options[idx + 1].value)
-  })
-
-  // Init from URL params
-  const params = new URLSearchParams(window.location.search)
-  const from = params.get('from')
-  const to = params.get('to')
-  if (from && to) {
-    setWeek(`${from}~${to}`)
-  }
-  else {
-    prevBtn.disabled = true
-    nextBtn.disabled = true
-  }
-})()
-</script>
 </Layout>
