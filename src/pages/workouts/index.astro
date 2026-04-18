@@ -115,14 +115,26 @@ const showEmptyRangeState = Boolean(serverFilterRange && visibleInServerRange ==
           }
         </ul>
 
-        <!-- Prerender has no search string; sync filter from the real URL before the following nodes paint. -->
+        <!-- Empty state (before inline URL sync script so `getElementById` runs without rAF polling). -->
+        <div
+          id="empty-state"
+          class:list={[
+            'py-12 text-center text-gray-400 font-mono text-sm',
+            { hidden: !showEmptyRangeState },
+          ]}
+        >
+          No activities in this range
+        </div>
+
+        <!-- Prerender has no search string; sync filter from the real URL before paint settles. -->
         <script is:inline>
           (function () {
             // eslint-disable-next-line e18e/prefer-static-regex -- inline guard; one-shot IIFE per navigation
             const YMD = /^\d{4}-\d{2}-\d{2}$/
             const list = document.getElementById('activity-list')
             const countEl = document.getElementById('activity-count')
-            if (!list || !countEl)
+            const emptyEl = document.getElementById('empty-state')
+            if (!list || !countEl || !emptyEl)
               return
 
             const p = new URLSearchParams(window.location.search)
@@ -159,31 +171,12 @@ const showEmptyRangeState = Boolean(serverFilterRange && visibleInServerRange ==
                 ? '1 activity'
                 : `${visible} activities`
 
-            function syncEmpty() {
-              const el = document.getElementById('empty-state')
-              if (!el) {
-                requestAnimationFrame(syncEmpty)
-                return
-              }
-              if (visible > 0)
-                el.classList.add('hidden')
-              else
-                el.classList.remove('hidden')
-            }
-            syncEmpty()
+            if (visible > 0)
+              emptyEl.classList.add('hidden')
+            else
+              emptyEl.classList.remove('hidden')
           })()
         </script>
-
-        <!-- Empty state -->
-        <div
-          id="empty-state"
-          class:list={[
-            'py-12 text-center text-gray-400 font-mono text-sm',
-            { hidden: !showEmptyRangeState },
-          ]}
-        >
-          No activities in this range
-        </div>
       </div>
     </div>
   </div>

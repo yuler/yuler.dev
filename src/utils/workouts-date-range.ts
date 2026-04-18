@@ -1,4 +1,5 @@
 import {
+  differenceInCalendarDays,
   endOfMonth,
   endOfWeek,
   format,
@@ -27,7 +28,7 @@ export function daysInclusive(fromStr: string, toStr: string): number {
   const b = parseYmd(toStr)
   if (!a || !b)
     return 1
-  return Math.floor(Math.abs(b.getTime() - a.getTime()) / 86400000) + 1
+  return Math.abs(differenceInCalendarDays(b, a)) + 1
 }
 
 export function addDaysStr(ymdStr: string, delta: number): string {
