@@ -102,18 +102,13 @@ const columns = rawColumns.map((col, columnIndex) =>
     <!-- Header -->
     <div class="flex items-center justify-between border-b border-gray-100 pb-4">
       <h3 class="text-lg font-semibold text-gray-900 font-mono">Workouts</h3>
-      <div class="flex items-center gap-3">
-        <a
-          href="/workouts"
-          class="inline-flex items-center gap-1 text-xs text-gray-400 font-mono hover:text-gray-600 transition-colors underline underline-offset-2 decoration-gray-200 hover:decoration-gray-400"
-        >
-          View all
-          <ArrowRight class="h-3 w-3" />
-        </a>
-        <span class="text-xs text-gray-400 font-mono" title="Rolling year (local), week-aligned">
-          {rangeStartStr}–{rangeEndStr}
-        </span>
-      </div>
+      <a
+        href="/workouts"
+        class="inline-flex items-center gap-1 text-xs text-gray-400 font-mono hover:text-gray-600 transition-colors underline underline-offset-2 decoration-gray-200 hover:decoration-gray-400"
+      >
+        View all
+        <ArrowRight class="h-3 w-3" />
+      </a>
     </div>
 
     <!-- Y-axis fixed; months + cells scroll horizontally (GitHub-style). -->
