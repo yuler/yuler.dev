@@ -129,7 +129,6 @@ const showEmptyRangeState = Boolean(serverFilterRange && visibleInServerRange ==
         <!-- Prerender has no search string; sync filter from the real URL before paint settles. -->
         <script is:inline>
           (function () {
-            // eslint-disable-next-line e18e/prefer-static-regex -- inline guard; one-shot IIFE per navigation
             const YMD = /^\d{4}-\d{2}-\d{2}$/
             const list = document.getElementById('activity-list')
             const countEl = document.getElementById('activity-count')

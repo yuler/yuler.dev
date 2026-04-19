@@ -29,7 +29,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.2",
     "@yuler/utils": "^0.3.1",
-    "astro": "^6.1.3",
+    "astro": "^6.1.8",
     "date-fns": "^4.1.0",
     "html-to-image": "^1.11.13",
     "leaflet": "^1.9.4",
@@ -37,20 +37,20 @@
     "qrcode": "^1.5.4",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^8.0.0",
+    "@antfu/eslint-config": "^8.2.0",
     "@astrojs/check": "^0.9.8",
     "@types/leaflet": "^1.9.21",
     "@types/qrcode": "^1.5.6",
     "autocorrect-node": "^2.14.0",
-    "eslint": "^10.1.0",
-    "eslint-plugin-astro": "^1.6.0",
+    "eslint": "^10.2.1",
+    "eslint-plugin-astro": "^1.7.0",
     "eslint-plugin-format": "^2.0.1",
     "playwright": "^1.59.1",
     "tsx": "^4.21.0",
     "vite": "7.3.1",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.4"
   }
 }
