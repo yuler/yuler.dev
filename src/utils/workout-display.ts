@@ -6,6 +6,7 @@ export const sportIcons: Record<string, string> = {
   Hike: '🥾',
   Yoga: '🧘',
   WeightTraining: '🏋️',
+  Badminton: '🏸',
 }
 
 export function deviceEmoji(name: string): string {
@@ -79,6 +80,17 @@ export function formatPaceOrSpeed(sportType: string, avgSpeed: number): string {
 
 export function formatMaxSpeedKmh(maxSpeed: number): string {
   return `${(maxSpeed * 3.6).toFixed(1)} km/h`
+}
+
+/**
+ * Seconds to use when summing “time that day” for heatmaps.
+ * Strava often sends `moving_time: 0` for indoor / Workout (e.g. badminton) while `elapsed_time` holds a useful duration.
+ */
+export function effectiveMovingSeconds(movingTime: number, elapsedTime: number): number {
+  const m = Math.max(0, Math.floor(movingTime))
+  if (m > 0)
+    return m
+  return Math.max(0, Math.floor(elapsedTime))
 }
 
 /**

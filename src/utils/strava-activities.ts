@@ -81,6 +81,7 @@ export type StoredActivitySummary = Pick<
   | 'sport_type'
   | 'distance'
   | 'moving_time'
+  | 'elapsed_time'
   | 'start_date_local'
   | 'average_speed'
   | 'total_elevation_gain'
