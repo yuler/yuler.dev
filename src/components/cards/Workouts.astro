@@ -305,6 +305,16 @@ const columns = rawColumns.map((col, columnIndex) =>
     border-right: 1px solid #e5e7eb;
     border-bottom: 1px solid #e5e7eb;
   }
+  .wk-heatmap-tooltip--below .wk-heatmap-tooltip__arrow {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: -5px;
+    border-right: none;
+    border-bottom: none;
+    border-left: 1px solid #e5e7eb;
+    border-top: 1px solid #e5e7eb;
+  }
 </style>
 
 <script>
@@ -385,6 +395,8 @@ const columns = rawColumns.map((col, columnIndex) =>
     const gap = 8
     const pad = 6
     const cellCenterX = r.left + r.width / 2
+    const viewW = document.documentElement.clientWidth
+    const viewH = document.documentElement.clientHeight
 
     const w = bubble.offsetWidth
     const h = bubble.offsetHeight
@@ -395,9 +407,28 @@ const columns = rawColumns.map((col, columnIndex) =>
     else if (tip.columnIndex > tip.totalColumns - 5)
       left = r.right - w
 
-    left = Math.max(pad, Math.min(left, window.innerWidth - w - pad))
-    const top = Math.max(pad, r.top - gap - h)
+    left = Math.max(pad, Math.min(left, viewW - w - pad))
 
+    const spaceAbove = r.top - gap - pad
+    const spaceBelow = viewH - pad - gap - r.bottom
+    let top: number
+    let placeBelow = false
+    if (spaceAbove >= h) {
+      top = r.top - gap - h
+    }
+    else if (spaceBelow >= h) {
+      top = r.bottom + gap
+      placeBelow = true
+    }
+    else {
+      placeBelow = spaceBelow > spaceAbove
+      if (placeBelow)
+        top = Math.min(viewH - pad - h, r.bottom + gap)
+      else
+        top = Math.max(pad, r.top - gap - h)
+    }
+
+    bubble.classList.toggle('wk-heatmap-tooltip--below', placeBelow)
     bubble.style.left = `${left}px`
     bubble.style.top = `${top}px`
 
@@ -408,13 +439,7 @@ const columns = rawColumns.map((col, columnIndex) =>
 
     const tw = inner.offsetWidth
     const bl = bubble.getBoundingClientRect().left
-    let ax = cellCenterX - bl
-    if (tip.columnIndex < 4)
-      ax = 10
-    else if (tip.columnIndex > tip.totalColumns - 5)
-      ax = Math.max(10, tw - 10)
-    else
-      ax = Math.max(10, Math.min(ax, tw - 10))
+    const ax = Math.max(10, Math.min(cellCenterX - bl, tw - 10))
 
     arrow.style.left = `${ax}px`
   }
