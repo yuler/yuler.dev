@@ -146,7 +146,8 @@ const columns = rawColumns.map((col, columnIndex) =>
                     date: day.date,
                     isFuture: day.isFuture,
                     durationStr: day.durationStr,
-                    names: day.names,
+                    names: day.names.slice(0, 5),
+                    totalCount: day.names.length,
                     columnIndex: day.columnIndex,
                     totalColumns,
                   }
@@ -323,6 +324,7 @@ const columns = rawColumns.map((col, columnIndex) =>
     isFuture: boolean
     durationStr: string
     names: string[]
+    totalCount: number
     columnIndex: number
     totalColumns: number
   }
@@ -359,13 +361,14 @@ const columns = rawColumns.map((col, columnIndex) =>
 
     const meta = document.createElement('div')
     meta.className = 'wk-heatmap-tooltip__meta'
+    const total = tip.totalCount
     meta.textContent = tip.isFuture
       ? 'Upcoming'
-      : `${tip.durationStr} · ${tip.names.length} ${tip.names.length === 1 ? 'activity' : 'activities'}`
+      : `${tip.durationStr} · ${total} ${total === 1 ? 'activity' : 'activities'}`
 
     panel.append(dateEl, meta)
 
-    if (tip.names.length > 0) {
+    if (total > 0) {
       const namesWrap = document.createElement('div')
       namesWrap.className = 'wk-heatmap-tooltip__names'
       for (const name of tip.names.slice(0, 4)) {
@@ -374,10 +377,10 @@ const columns = rawColumns.map((col, columnIndex) =>
         row.textContent = `• ${name}`
         namesWrap.append(row)
       }
-      if (tip.names.length > 4) {
+      if (total > 4) {
         const more = document.createElement('div')
         more.className = 'wk-heatmap-tooltip__more'
-        more.textContent = `…and ${tip.names.length - 4} more`
+        more.textContent = `…and ${total - 4} more`
         namesWrap.append(more)
       }
       panel.append(namesWrap)
