@@ -62,7 +62,7 @@ function rollingYearWindow(reference: Date) {
 }
 
 /** Inclusive yyyy-MM-dd bounds for the rolling-year window (anniversary → reference day, local). */
-export function getRollingYearWindowBounds(reference: Date = new Date()): { start: string; end: string } {
+export function getRollingYearWindowBounds(reference: Date = new Date()): { start: string, end: string } {
   const w = rollingYearWindow(reference)
   return { start: w.rangeStart, end: w.rangeEnd }
 }
