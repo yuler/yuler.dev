@@ -12,7 +12,7 @@ export interface ContributionCalendarDay {
   /**
    * True when the day is part of the plotted range.
    * Calendar-year mode: false for padding outside that year.
-   * Rolling mode: always true (every cell is in range).
+   * Rolling mode: false for grid padding before the anniversary or after `reference`.
    */
   inYear: boolean
 }
@@ -49,21 +49,34 @@ function startOfWeekSunday(d: Date): Date {
   return t
 }
 
-function endOfWeekSaturday(d: Date): Date {
-  return addDays(startOfWeekSunday(d), 6)
-}
-
-/**
- * GitHub-style rolling window: same calendar date last year → end of the week that contains `reference` (local).
- * Columns are full weeks (Sun–Sat); first column starts on the Sunday of the week that contains the anniversary.
- */
-export function getRollingYearContributionColumns(reference: Date = new Date()): ContributionCalendarDay[][] {
+function rollingYearWindow(reference: Date) {
   const ref = new Date(reference.getFullYear(), reference.getMonth(), reference.getDate(), 12, 0, 0, 0)
   const oneYearBefore = new Date(ref)
   oneYearBefore.setFullYear(ref.getFullYear() - 1)
+  return {
+    ref,
+    oneYearBefore,
+    rangeStart: formatDate(oneYearBefore),
+    rangeEnd: formatDate(ref),
+  }
+}
+
+/** Inclusive yyyy-MM-dd bounds for the rolling-year window (anniversary → reference day, local). */
+export function getRollingYearWindowBounds(reference: Date = new Date()): { start: string; end: string } {
+  const w = rollingYearWindow(reference)
+  return { start: w.rangeStart, end: w.rangeEnd }
+}
+
+/**
+ * GitHub-style rolling window: same calendar date last year → `reference` (local), inclusive.
+ * Columns are full weeks (Sun–Sat) for layout; days outside [anniversary, reference] use `inYear: false`
+ * so the UI does not paint cells for padding or future days in the current week.
+ */
+export function getRollingYearContributionColumns(reference: Date = new Date()): ContributionCalendarDay[][] {
+  const { ref, oneYearBefore, rangeStart, rangeEnd } = rollingYearWindow(reference)
 
   const gridStart = startOfWeekSunday(oneYearBefore)
-  const gridEnd = endOfWeekSaturday(ref)
+  const gridEnd = ref
 
   const columns: ContributionCalendarDay[][] = []
   let weekStart = new Date(gridStart)
@@ -71,7 +84,9 @@ export function getRollingYearContributionColumns(reference: Date = new Date()):
     const col: ContributionCalendarDay[] = []
     for (let i = 0; i < 7; i++) {
       const d = addDays(weekStart, i)
-      col.push({ date: formatDate(d), inYear: true })
+      const date = formatDate(d)
+      const inYear = date >= rangeStart && date <= rangeEnd
+      col.push({ date, inYear })
     }
     columns.push(col)
     weekStart = addDays(weekStart, 7)

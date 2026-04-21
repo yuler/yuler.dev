@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 import { formatDate } from '../../utils/date'
 import { loadAllStoredActivities } from '../../utils/strava-activities'
 import { dailyMovingTimeHeatLevel, effectiveMovingSeconds, formatDurationHeatmap } from '../../utils/workout-display'
-import { getRollingYearContributionColumns } from '../../utils/workouts-calendar'
+import { getRollingYearContributionColumns, getRollingYearWindowBounds } from '../../utils/workouts-calendar'
 import CornerMarkers from '../CornerMarkers.astro'
 import ArrowRight from '../icons/ArrowRight.astro'
 
@@ -25,8 +25,7 @@ const todayStr = formatDate(today)
 
 const rawColumns = getRollingYearContributionColumns(today)
 const totalColumns = rawColumns.length
-const rangeStartStr = rawColumns[0]?.[0]?.date ?? todayStr
-const rangeEndStr = rawColumns.length > 0 ? (rawColumns.at(-1)?.[6]?.date ?? todayStr) : todayStr
+const { start: rangeStartStr, end: rangeEndStr } = getRollingYearWindowBounds(today)
 
 const secondsByDate = new Map<string, number>()
 const namesByDate = new Map<string, string[]>()
@@ -142,6 +141,13 @@ const columns = rawColumns.map((col, columnIndex) =>
               WEEKDAY_LABELS.flatMap((_label, rowIndex) =>
                 columns.map((weekDays) => {
                   const day = weekDays[rowIndex]
+                  if (!day.inYear) {
+                    return (
+                      <div class="relative min-h-0 min-w-0 pointer-events-none" aria-hidden="true">
+                        <div class="block size-full min-h-0 min-w-0 bg-transparent" />
+                      </div>
+                    )
+                  }
                   const tipPayload = {
                     date: day.date,
                     isFuture: day.isFuture,
