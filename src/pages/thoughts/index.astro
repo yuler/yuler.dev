@@ -2,35 +2,164 @@
 // src/pages/thoughts/index.astro
 import LightBox from '../../components/LightBox.astro'
 import Thought from '../../components/Thought.astro'
+import ThoughtsMobileCanvasToggle from '../../components/thoughts/ThoughtsMobileCanvasToggle.astro'
 import Layout from '../../layouts/Layout.astro'
+import {
+  layoutStickyNotes,
+  THOUGHT_STICKY_NOTE_H,
+  THOUGHT_STICKY_NOTE_W,
+  worldBounds,
+} from '../../utils/thoughts-canvas-layout'
+import { stickyBackground } from '../../utils/thoughts-canvas-theme'
 import { getSortedThoughts } from '../../utils/thoughts'
 
 const thoughts = await getSortedThoughts()
+
+const layoutRows = layoutStickyNotes(
+  thoughts.map(t => ({
+    id: t.id,
+    slug: t.id,
+    dateMs: t.data.date.getTime(),
+  })),
+  { focusOrder: 'new-first' },
+)
+const layoutBySlug = new Map(layoutRows.map(r => [r.slug, r]))
+const bounds = worldBounds(layoutRows)
+
+const stickyShell = [
+  'rounded-sm border border-black/8 p-4 shadow-lg ring-1 ring-black/6',
+  'outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
+  'motion-reduce:shadow-md motion-reduce:ring-black/5',
+].join(' ')
 ---
 
 <Layout title="Thoughts — Yu Le">
-  <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
-    <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
-      <!-- Breadcrumb -->
-      <nav class="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 font-mono">
-        <a href="/" class="hover:text-gray-900 transition-colors">~</a>
+  <style is:global>
+    @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+      #thoughts-root[data-mobile-canvas='true'] #thoughts-list-view {
+        display: none !important;
+      }
+      #thoughts-root[data-mobile-canvas='true'] #thoughts-canvas-view {
+        display: block !important;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #thoughts-root .thought-stick-rot {
+        transform: none !important;
+      }
+    }
+  </style>
+
+  <div class="min-h-screen bg-[#ebe8e3] text-gray-900">
+    <div id="thoughts-root" class="mx-auto max-w-6xl px-4 py-8 md:py-12">
+      <nav class="mb-6 flex items-center gap-1.5 font-mono text-xs text-gray-500 sm:mb-8 sm:text-sm">
+        <a href="/" class="transition-colors hover:text-gray-900">~</a>
         <span class="text-gray-300">/</span>
         <span class="text-gray-900">thoughts</span>
       </nav>
 
-      <header class="mb-12 mt-8">
-        <h1 class="text-3xl font-bold text-gray-900 font-mono mb-2">Thoughts</h1>
-        <p class="text-gray-500">Short, instant, and casual updates.</p>
+      <header class="mb-8 mt-4 md:mb-10">
+        <h1 class="mb-2 font-mono text-3xl font-bold text-gray-900">Thoughts</h1>
+        <p class="text-gray-600">Short, instant, and casual updates.</p>
       </header>
 
-      <div class="space-y-8">
-        {thoughts.map(thought => (
-          <div class="bg-white border border-gray-100 p-6 relative">
-            <Thought thought={thought} />
+      <ThoughtsMobileCanvasToggle />
+
+      <section
+        id="thoughts-list-view"
+        class="block space-y-6 motion-reduce:block md:motion-safe:hidden"
+        aria-label="Thoughts list"
+      >
+        {
+          thoughts.map(thought => {
+            const row = layoutBySlug.get(thought.id)
+            const rot = row?.rotateDeg ?? 0
+            return (
+              <article
+                id={`thought-${thought.id}`}
+                class={`thought-stick-rot ${stickyShell} origin-top-left`}
+                style={{
+                  backgroundColor: stickyBackground(thought.id),
+                  transform: `rotate(${rot}deg)`,
+                }}
+                tabindex={row?.tabIndex ?? 0}
+              >
+                <Thought thought={thought} variant="sticky" />
+              </article>
+            )
+          })
+        }
+      </section>
+
+      <section
+        id="thoughts-canvas-view"
+        class="motion-reduce:hidden hidden motion-safe:max-md:hidden md:motion-safe:block"
+        aria-label="Thoughts canvas"
+      >
+        <div
+          id="thoughts-canvas-viewport"
+          class="h-[min(72vh,620px)] w-full cursor-grab overflow-hidden overscroll-none rounded-lg border border-gray-200/80 bg-[#d8d4ce] shadow-inner"
+        >
+          <div
+            id="thoughts-canvas-world"
+            class="relative will-change-transform"
+            style={`width:${bounds.width}px;height:${bounds.height}px`}
+          >
+            {
+              thoughts.map(thought => {
+                const row = layoutBySlug.get(thought.id)
+                if (!row)
+                  return null
+                return (
+                  <article
+                    id={`thought-canvas-${thought.id}`}
+                    class={`thought-stick-rot absolute ${stickyShell} origin-top-left`}
+                    style={{
+                      left: `${row.x}px`,
+                      top: `${row.y}px`,
+                      width: `${THOUGHT_STICKY_NOTE_W}px`,
+                      minHeight: `${THOUGHT_STICKY_NOTE_H}px`,
+                      backgroundColor: stickyBackground(thought.id),
+                      transform: `rotate(${row.rotateDeg}deg)`,
+                    }}
+                    tabindex={row.tabIndex}
+                  >
+                    <Thought thought={thought} variant="sticky" />
+                  </article>
+                )
+              })
+            }
           </div>
-        ))}
-      </div>
+        </div>
+      </section>
+
     </div>
   </div>
+
+  <script>
+    import { initThoughtsCanvas } from '../../components/thoughts/thoughts-canvas-controller'
+
+    const mq = window.matchMedia('(min-width: 768px) and (prefers-reduced-motion: no-preference)')
+    let desktopActive: ReturnType<typeof initThoughtsCanvas> | null = null
+
+    function syncDesktopCanvas() {
+      const viewport = document.getElementById('thoughts-canvas-viewport')
+      const world = document.getElementById('thoughts-canvas-world')
+      if (!viewport || !world)
+        return
+      if (mq.matches) {
+        if (!desktopActive)
+          desktopActive = initThoughtsCanvas(viewport, world)
+      }
+      else {
+        desktopActive?.destroy()
+        desktopActive = null
+      }
+    }
+
+    syncDesktopCanvas()
+    mq.addEventListener('change', syncDesktopCanvas)
+  </script>
+
   <LightBox />
 </Layout>
