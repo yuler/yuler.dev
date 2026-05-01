@@ -1,0 +1,157 @@
+{
+  "resource_state": 3,
+  "athlete": {
+    "id": 1596917895,
+    "resource_state": 1
+  },
+  "name": "Lunch Badminton",
+  "distance": 3.7,
+  "moving_time": 3,
+  "elapsed_time": 1125,
+  "total_elevation_gain": 0,
+  "type": "Workout",
+  "sport_type": "Badminton",
+  "workout_type": null,
+  "device_name": "Apple Watch Series 7",
+  "id": 18327071841,
+  "start_date": "2026-05-01T04:01:35Z",
+  "start_date_local": "2026-05-01T12:01:35Z",
+  "timezone": "(GMT+08:00) Asia/Shanghai",
+  "utc_offset": 28800,
+  "location_city": null,
+  "location_state": null,
+  "location_country": null,
+  "achievement_count": 0,
+  "kudos_count": 0,
+  "comment_count": 0,
+  "athlete_count": 1,
+  "photo_count": 0,
+  "map": {
+    "id": "a18327071841",
+    "polyline": "y`sqFu_aeUGB",
+    "resource_state": 3,
+    "summary_polyline": "y`sqFu_aeUGB"
+  },
+  "trainer": false,
+  "commute": false,
+  "manual": false,
+  "private": false,
+  "visibility": "everyone",
+  "flagged": false,
+  "gear_id": null,
+  "start_latlng": [
+    39.751978,
+    116.336753
+  ],
+  "end_latlng": [
+    39.752019,
+    116.336737
+  ],
+  "average_speed": 1.233,
+  "max_speed": 0.076,
+  "has_heartrate": true,
+  "average_heartrate": 124,
+  "max_heartrate": 138,
+  "heartrate_opt_out": false,
+  "display_hide_heartrate_option": true,
+  "elev_high": 43.5,
+  "elev_low": 43.5,
+  "upload_id": 19430771542,
+  "upload_id_str": "19430771542",
+  "external_id": "5127782E-9BCD-4ABF-A5F0-C3397AE12799-activity.fit",
+  "from_accepted_tag": false,
+  "pr_count": 0,
+  "total_photo_count": 0,
+  "has_kudoed": false,
+  "description": null,
+  "calories": 0,
+  "perceived_exertion": null,
+  "prefer_perceived_exertion": null,
+  "segment_efforts": [],
+  "splits_metric": [
+    {
+      "distance": 5,
+      "elapsed_time": 1125,
+      "elevation_difference": 0,
+      "moving_time": 1073,
+      "split": 1,
+      "average_speed": 0,
+      "average_grade_adjusted_speed": 0,
+      "average_heartrate": 124,
+      "pace_zone": 0
+    }
+  ],
+  "splits_standard": [
+    {
+      "distance": 5,
+      "elapsed_time": 1125,
+      "elevation_difference": 0,
+      "moving_time": 1073,
+      "split": 1,
+      "average_speed": 0,
+      "average_grade_adjusted_speed": 0,
+      "average_heartrate": 124,
+      "pace_zone": 0
+    }
+  ],
+  "laps": [
+    {
+      "id": 65561497784,
+      "resource_state": 2,
+      "name": "Lap 1",
+      "activity": {
+        "id": 18327071841,
+        "visibility": "everyone",
+        "resource_state": 1
+      },
+      "athlete": {
+        "id": 1596917895,
+        "resource_state": 1
+      },
+      "elapsed_time": 1127,
+      "moving_time": 1073,
+      "start_date": "2026-05-01T04:01:35Z",
+      "start_date_local": "2026-05-01T12:01:35Z",
+      "distance": 5.01,
+      "average_speed": 0,
+      "max_speed": 0.076,
+      "lap_index": 1,
+      "split": 1,
+      "start_index": 0,
+      "end_index": 219,
+      "total_elevation_gain": 0,
+      "device_watts": false,
+      "average_heartrate": 124,
+      "max_heartrate": 138
+    }
+  ],
+  "photos": {
+    "primary": null,
+    "count": 0
+  },
+  "stats_visibility": [
+    {
+      "type": "heart_rate",
+      "visibility": "everyone"
+    },
+    {
+      "type": "pace",
+      "visibility": "everyone"
+    },
+    {
+      "type": "power",
+      "visibility": "everyone"
+    },
+    {
+      "type": "speed",
+      "visibility": "everyone"
+    },
+    {
+      "type": "calories",
+      "visibility": "everyone"
+    }
+  ],
+  "hide_from_home": false,
+  "embed_token": "8624ab829a8694a8360b56d8463840c42e4e49f3",
+  "available_zones": []
+}
