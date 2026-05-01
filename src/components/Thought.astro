@@ -15,8 +15,8 @@ interface Props {
 const { thought, variant = 'inline' } = Astro.props
 const { Content } = await render(thought)
 
-const rootClass =
-  variant === 'sticky'
+const rootClass
+  = variant === 'sticky'
     ? 'py-3 px-0.5'
     : 'py-4 border-b border-gray-100 last:border-0'
 ---

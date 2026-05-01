@@ -1,12 +1,12 @@
 import { fnv1a32 } from './fnv1a32'
 
-export type ThoughtLayoutInput = {
+export interface ThoughtLayoutInput {
   id: string
   slug: string
   dateMs: number
 }
 
-export type ThoughtLayoutRow = {
+export interface ThoughtLayoutRow {
   slug: string
   bandIndex: number
   bandKey: string
@@ -16,7 +16,7 @@ export type ThoughtLayoutRow = {
   tabIndex: number
 }
 
-export type LayoutOptions = {
+export interface LayoutOptions {
   /** Tab 顺序：新→旧（设计 3.1） */
   focusOrder?: 'new-first' | 'old-first'
 }
@@ -65,7 +65,8 @@ export function layoutStickyNotes(
     const rw = 900
     const x = PAD + u * (rw - NOTE_W)
     const yPx = PAD + bandIndex * BAND_H + v * (BAND_H - NOTE_H - PAD)
-    const rot = (unitFloat(t.slug, 'rot') - 0.5) * 7
+    /** ±13° from slug — reads like casually placed stickers */
+    const rot = (unitFloat(t.slug, 'rot') - 0.5) * 26
     rows.push({
       slug: t.slug,
       bandIndex,

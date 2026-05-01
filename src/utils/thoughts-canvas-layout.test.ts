@@ -1,5 +1,6 @@
+import type { ThoughtLayoutInput } from './thoughts-canvas-layout'
 import { describe, expect, it } from 'vitest'
-import { layoutStickyNotes, type ThoughtLayoutInput } from './thoughts-canvas-layout'
+import { layoutStickyNotes } from './thoughts-canvas-layout'
 
 function T(slug: string, dateIso: string): ThoughtLayoutInput {
   return { id: slug, slug, dateMs: new Date(dateIso).getTime() }

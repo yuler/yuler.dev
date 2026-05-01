@@ -4,14 +4,14 @@ import LightBox from '../../components/LightBox.astro'
 import Thought from '../../components/Thought.astro'
 import ThoughtsMobileCanvasToggle from '../../components/thoughts/ThoughtsMobileCanvasToggle.astro'
 import Layout from '../../layouts/Layout.astro'
+import { getSortedThoughts } from '../../utils/thoughts'
 import {
   layoutStickyNotes,
   THOUGHT_STICKY_NOTE_H,
   THOUGHT_STICKY_NOTE_W,
   worldBounds,
 } from '../../utils/thoughts-canvas-layout'
-import { stickyBackground } from '../../utils/thoughts-canvas-theme'
-import { getSortedThoughts } from '../../utils/thoughts'
+import { stickyBackground, stickyTapeRotateDeg } from '../../utils/thoughts-canvas-theme'
 
 const thoughts = await getSortedThoughts()
 
@@ -27,14 +27,47 @@ const layoutBySlug = new Map(layoutRows.map(r => [r.slug, r]))
 const bounds = worldBounds(layoutRows)
 
 const stickyShell = [
-  'rounded-sm border border-black/8 p-4 shadow-lg ring-1 ring-black/6',
-  'outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2',
-  'motion-reduce:shadow-md motion-reduce:ring-black/5',
+  'thought-sticky-paper relative rounded-[3px] border border-black/[0.07] p-4',
+  'outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+  'motion-reduce:border-black/10 motion-reduce:shadow-[0_2px_8px_rgba(0,0,0,0.06)]',
 ].join(' ')
 ---
 
 <Layout title="Thoughts — Yu Le">
   <style is:global>
+    .thought-sticky-paper {
+      box-shadow:
+        0 1px 1px rgba(0, 0, 0, 0.04),
+        0 2px 4px rgba(0, 0, 0, 0.05),
+        0 8px 18px rgba(0, 0, 0, 0.07),
+        0 18px 40px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    }
+    .thought-sticky-paper::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: -5px;
+      width: 44%;
+      max-width: 140px;
+      height: 13px;
+      transform: translateX(-50%) rotate(var(--thought-tape-rot, 0deg));
+      border-radius: 2px;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.62) 0%,
+        rgba(255, 255, 255, 0.28) 45%,
+        rgba(240, 240, 240, 0.35) 100%
+      );
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      opacity: 0.92;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .thought-sticky-paper::before {
+        display: none;
+      }
+    }
     @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
       #thoughts-root[data-mobile-canvas='true'] #thoughts-list-view {
         display: none !important;
@@ -50,55 +83,16 @@ const stickyShell = [
     }
   </style>
 
-  <div class="min-h-screen bg-[#ebe8e3] text-gray-900">
-    <div id="thoughts-root" class="mx-auto max-w-6xl px-4 py-8 md:py-12">
-      <nav class="mb-6 flex items-center gap-1.5 font-mono text-xs text-gray-500 sm:mb-8 sm:text-sm">
-        <a href="/" class="transition-colors hover:text-gray-900">~</a>
-        <span class="text-gray-300">/</span>
-        <span class="text-gray-900">thoughts</span>
-      </nav>
-
-      <header class="mb-8 mt-4 md:mb-10">
-        <h1 class="mb-2 font-mono text-3xl font-bold text-gray-900">Thoughts</h1>
-        <p class="text-gray-600">Short, instant, and casual updates.</p>
-      </header>
-
-      <ThoughtsMobileCanvasToggle />
-
-      <section
-        id="thoughts-list-view"
-        class="block space-y-6 motion-reduce:block md:motion-safe:hidden"
-        aria-label="Thoughts list"
-      >
-        {
-          thoughts.map(thought => {
-            const row = layoutBySlug.get(thought.id)
-            const rot = row?.rotateDeg ?? 0
-            return (
-              <article
-                id={`thought-${thought.id}`}
-                class={`thought-stick-rot ${stickyShell} origin-top-left`}
-                style={{
-                  backgroundColor: stickyBackground(thought.id),
-                  transform: `rotate(${rot}deg)`,
-                }}
-                tabindex={row?.tabIndex ?? 0}
-              >
-                <Thought thought={thought} variant="sticky" />
-              </article>
-            )
-          })
-        }
-      </section>
-
+  <div class="bg-white text-gray-900">
+    <div id="thoughts-root" class="relative min-h-[100dvh]">
       <section
         id="thoughts-canvas-view"
-        class="motion-reduce:hidden hidden motion-safe:max-md:hidden md:motion-safe:block"
+        class="motion-reduce:hidden fixed inset-0 z-0 hidden bg-white md:motion-safe:block"
         aria-label="Thoughts canvas"
       >
         <div
           id="thoughts-canvas-viewport"
-          class="h-[min(72vh,620px)] w-full cursor-grab overflow-hidden overscroll-none rounded-lg border border-gray-200/80 bg-[#d8d4ce] shadow-inner"
+          class="h-full w-full cursor-grab overflow-hidden overscroll-none bg-white touch-none"
         >
           <div
             id="thoughts-canvas-world"
@@ -106,7 +100,7 @@ const stickyShell = [
             style={`width:${bounds.width}px;height:${bounds.height}px`}
           >
             {
-              thoughts.map(thought => {
+              thoughts.map((thought) => {
                 const row = layoutBySlug.get(thought.id)
                 if (!row)
                   return null
@@ -115,12 +109,13 @@ const stickyShell = [
                     id={`thought-canvas-${thought.id}`}
                     class={`thought-stick-rot absolute ${stickyShell} origin-top-left`}
                     style={{
-                      left: `${row.x}px`,
-                      top: `${row.y}px`,
-                      width: `${THOUGHT_STICKY_NOTE_W}px`,
-                      minHeight: `${THOUGHT_STICKY_NOTE_H}px`,
-                      backgroundColor: stickyBackground(thought.id),
-                      transform: `rotate(${row.rotateDeg}deg)`,
+                      '--thought-tape-rot': `${stickyTapeRotateDeg(thought.id)}deg`,
+                      'left': `${row.x}px`,
+                      'top': `${row.y}px`,
+                      'width': `${THOUGHT_STICKY_NOTE_W}px`,
+                      'minHeight': `${THOUGHT_STICKY_NOTE_H}px`,
+                      'background': stickyBackground(thought.id),
+                      'transform': `rotate(${row.rotateDeg}deg)`,
                     }}
                     tabindex={row.tabIndex}
                   >
@@ -133,6 +128,54 @@ const stickyShell = [
         </div>
       </section>
 
+      <header
+        class="pointer-events-none fixed inset-x-0 top-0 z-20"
+        aria-label="Thoughts page header"
+      >
+        <div
+          class="pointer-events-auto mx-auto max-w-6xl border-b border-gray-200/70 bg-white/90 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-white/75"
+        >
+          <nav class="mb-3 flex items-center gap-1.5 font-mono text-xs text-gray-500 sm:text-sm">
+            <a href="/" class="transition-colors hover:text-gray-900">~</a>
+            <span class="text-gray-300">/</span>
+            <span class="text-gray-900">thoughts</span>
+          </nav>
+
+          <div class="mb-3">
+            <h1 class="font-mono text-2xl font-bold text-gray-900 sm:text-3xl">Thoughts</h1>
+            <p class="mt-1 text-sm text-gray-600 sm:text-base">Short, instant, and casual updates.</p>
+          </div>
+
+          <ThoughtsMobileCanvasToggle />
+        </div>
+      </header>
+
+      <section
+        id="thoughts-list-view"
+        class="relative z-10 mx-auto block max-w-6xl space-y-6 px-4 pb-12 pt-[calc(10.5rem+env(safe-area-inset-top))] motion-reduce:block md:motion-safe:hidden sm:pt-[calc(11rem+env(safe-area-inset-top))]"
+        aria-label="Thoughts list"
+      >
+        {
+          thoughts.map((thought) => {
+            const row = layoutBySlug.get(thought.id)
+            const rot = row?.rotateDeg ?? 0
+            return (
+              <article
+                id={`thought-${thought.id}`}
+                class={`thought-stick-rot ${stickyShell} origin-top-left`}
+                style={{
+                  '--thought-tape-rot': `${stickyTapeRotateDeg(thought.id)}deg`,
+                  'background': stickyBackground(thought.id),
+                  'transform': `rotate(${rot}deg)`,
+                }}
+                tabindex={row?.tabIndex ?? 0}
+              >
+                <Thought thought={thought} variant="sticky" />
+              </article>
+            )
+          })
+        }
+      </section>
     </div>
   </div>
 
