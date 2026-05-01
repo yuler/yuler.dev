@@ -22,8 +22,19 @@ export function initThoughtsCanvas(viewport: HTMLElement, world: HTMLElement): C
   function onWheel(e: WheelEvent) {
     e.preventDefault()
     const delta = -e.deltaY * 0.0012
-    const next = Math.min(1.65, Math.max(0.38, scale + delta))
-    scale = next
+    const nextScale = Math.min(1.65, Math.max(0.38, scale + delta))
+
+    const rect = viewport.getBoundingClientRect()
+    const mx = e.clientX - rect.left
+    const my = e.clientY - rect.top
+
+    const wx = (mx - tx) / scale
+    const wy = (my - ty) / scale
+
+    scale = nextScale
+    tx = mx - wx * scale
+    ty = my - wy * scale
+
     apply()
   }
 
@@ -73,6 +84,7 @@ export function initThoughtsCanvas(viewport: HTMLElement, world: HTMLElement): C
       viewport.removeEventListener('pointermove', onMove)
       viewport.removeEventListener('pointerup', onUp)
       viewport.removeEventListener('pointercancel', onUp)
+      viewport.style.touchAction = ''
       delete (viewport as HTMLElement & { [viewportKey]?: Cleanup })[viewportKey]
       world.style.transform = ''
     },

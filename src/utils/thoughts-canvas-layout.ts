@@ -1,3 +1,5 @@
+import { fnv1a32 } from './fnv1a32'
+
 export type ThoughtLayoutInput = {
   id: string
   slug: string
@@ -23,15 +25,6 @@ const NOTE_W = 300
 const NOTE_H = 280
 const BAND_H = 420
 const PAD = 48
-
-function fnv1a32(input: string): number {
-  let h = 0x811c9dc5
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i)
-    h = Math.imul(h, 0x01000193)
-  }
-  return h >>> 0
-}
 
 function unitFloat(seed: string, salt: string): number {
   const h = fnv1a32(`${seed}\0${salt}`)
@@ -86,8 +79,9 @@ export function layoutStickyNotes(
 
   const chron = [...inputs].sort((a, b) => a.dateMs - b.dateMs)
   const order = focusOrder === 'new-first' ? [...chron].reverse() : chron
+  const rowMap = new Map(rows.map(r => [r.slug, r]))
   order.forEach((t, i) => {
-    const row = rows.find(r => r.slug === t.slug)
+    const row = rowMap.get(t.slug)
     if (row)
       row.tabIndex = 10 + i
   })
