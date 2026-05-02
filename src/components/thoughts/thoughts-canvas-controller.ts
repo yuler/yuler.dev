@@ -13,7 +13,7 @@ const ZOOM_STEP_RATIO = 1.25
 /** 指数缩放的灵敏度（越大，同样 delta 缩放越多） */
 const WHEEL_ZOOM_SENSITIVITY = 0.0035
 
-export type ThoughtsCanvasChromeOptions = {
+export interface ThoughtsCanvasChromeOptions {
   zoomOutBtn?: HTMLButtonElement | null
   zoomInBtn?: HTMLButtonElement | null
   zoomLevelEl?: HTMLElement | null
