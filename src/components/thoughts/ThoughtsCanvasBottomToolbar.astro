@@ -1,0 +1,198 @@
+---
+---
+
+<div
+  id="thoughts-canvas-bottom-toolbar"
+  class="motion-reduce:hidden pointer-events-none fixed inset-x-0 bottom-[max(1.75rem,calc(env(safe-area-inset-bottom)+0.75rem))] z-40 hidden justify-center px-4 max-md:flex md:motion-safe:flex"
+  aria-label="Thoughts canvas controls"
+>
+  <div
+    class="pointer-events-auto flex max-w-[min(42rem,calc(100vw-2rem))] items-center gap-2 rounded-full border border-gray-200/90 bg-white/90 px-2 py-1.5 font-mono text-xs text-gray-800 shadow-sm backdrop-blur-sm supports-[backdrop-filter]:bg-white/80"
+  >
+    <div
+      class="flex items-center rounded-full border border-gray-200/80 bg-gray-50/80 p-0.5"
+      role="group"
+      aria-label="View mode"
+    >
+      <button
+        type="button"
+        id="thoughts-mode-canvas"
+        class="cursor-pointer rounded-full px-2.5 py-1 text-[11px] text-gray-700 hover:bg-white/90 sm:text-xs"
+        aria-pressed="false"
+      >
+        Canvas
+      </button>
+      <button
+        type="button"
+        id="thoughts-mode-card"
+        class="cursor-pointer rounded-full px-2.5 py-1 text-[11px] text-gray-700 hover:bg-white/90 sm:text-xs"
+        aria-pressed="true"
+      >
+        Card
+      </button>
+    </div>
+
+    <div class="mx-0.5 hidden h-5 w-px bg-gray-200/90 sm:block" aria-hidden="true"></div>
+
+    <div
+      id="thoughts-canvas-zoom-cluster"
+      class="flex items-center gap-0.5 rounded-full border border-gray-200/80 bg-white/80 px-1 py-0.5 tabular-nums"
+      aria-label="Canvas zoom"
+    >
+      <button
+        type="button"
+        id="thoughts-canvas-zoom-out"
+        class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-base leading-none text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-35"
+        aria-label="Zoom out"
+      >
+        −
+      </button>
+      <span id="thoughts-canvas-zoom-level" class="min-w-[3.25rem] select-none px-1 text-center">100%</span>
+      <button
+        type="button"
+        id="thoughts-canvas-zoom-in"
+        class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-base leading-none text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-35"
+        aria-label="Zoom in"
+      >
+        +
+      </button>
+      <div class="mx-0.5 h-4 w-px bg-gray-200/90" aria-hidden="true"></div>
+      <button
+        type="button"
+        id="thoughts-canvas-reset"
+        class="cursor-pointer rounded-full px-2 py-1 text-[11px] text-gray-700 hover:bg-gray-100 sm:text-xs disabled:cursor-not-allowed disabled:opacity-35"
+        aria-label="Reset canvas view"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+import type { ThoughtsCanvasChromeOptions } from './thoughts-canvas-controller'
+import { initThoughtsCanvas } from './thoughts-canvas-controller'
+
+function qs<T extends HTMLElement>(sel: string) {
+  return document.querySelector<T>(sel)
+}
+
+function chromeOpts(): ThoughtsCanvasChromeOptions {
+  return {
+    zoomOutBtn: qs<HTMLButtonElement>('#thoughts-canvas-zoom-out'),
+    zoomInBtn: qs<HTMLButtonElement>('#thoughts-canvas-zoom-in'),
+    zoomLevelEl: qs<HTMLElement>('#thoughts-canvas-zoom-level'),
+    resetBtn: qs<HTMLButtonElement>('#thoughts-canvas-reset'),
+  }
+}
+
+const root = qs<HTMLElement>('#thoughts-root')
+const toolbar = qs<HTMLElement>('#thoughts-canvas-bottom-toolbar')
+const cardBtn = qs<HTMLButtonElement>('#thoughts-mode-card')
+const canvasBtn = qs<HTMLButtonElement>('#thoughts-mode-canvas')
+const viewport = qs<HTMLElement>('#thoughts-canvas-viewport')
+const world = qs<HTMLElement>('#thoughts-canvas-world')
+const zoomCluster = qs<HTMLElement>('#thoughts-canvas-zoom-cluster')
+const resetBtn = qs<HTMLButtonElement>('#thoughts-canvas-reset')
+
+if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster && resetBtn) {
+  const R = root
+  const cardB = cardBtn
+  const canvasB = canvasBtn
+  const V = viewport
+  const W = world
+  const Z = zoomCluster
+  const Reset = resetBtn
+
+  let activeCanvas: ReturnType<typeof initThoughtsCanvas> | null = null
+
+  const mqDesktopCanvas = window.matchMedia('(min-width: 768px) and (prefers-reduced-motion: no-preference)')
+  const mqMobile = window.matchMedia('(max-width: 767px)')
+
+  let currentMode: 'canvas' | 'card' = mqDesktopCanvas.matches ? 'canvas' : 'card'
+
+  function setModeUi(mode: 'card' | 'canvas') {
+    const onCanvas = mode === 'canvas'
+    cardB.setAttribute('aria-pressed', onCanvas ? 'false' : 'true')
+    canvasB.setAttribute('aria-pressed', onCanvas ? 'true' : 'false')
+    cardB.classList.toggle('bg-white', !onCanvas)
+    cardB.classList.toggle('shadow-sm', !onCanvas)
+    canvasB.classList.toggle('bg-white', onCanvas)
+    canvasB.classList.toggle('shadow-sm', onCanvas)
+
+    const zoomLocked = !onCanvas
+    Z.classList.toggle('opacity-45', zoomLocked)
+    const zoomOut = qs<HTMLButtonElement>('#thoughts-canvas-zoom-out')
+    const zoomIn = qs<HTMLButtonElement>('#thoughts-canvas-zoom-in')
+    const zoomLevel = qs<HTMLElement>('#thoughts-canvas-zoom-level')
+    if (zoomLocked) {
+      if (zoomLevel)
+        zoomLevel.textContent = '100%'
+      if (zoomOut)
+        zoomOut.disabled = true
+      if (zoomIn)
+        zoomIn.disabled = true
+      if (Reset) {
+        Reset.disabled = true
+      }
+    }
+    else {
+      if (zoomOut)
+        zoomOut.disabled = false
+      if (zoomIn)
+        zoomIn.disabled = false
+      if (Reset) {
+        Reset.disabled = false
+      }
+    }
+  }
+
+  function setViewMode(mode: 'card' | 'canvas') {
+    if (mode === currentMode)
+      return
+    currentMode = mode
+
+    if (mode === 'canvas') {
+      R.dataset.viewUi = 'preparing'
+      R.dataset.viewMode = 'canvas'
+
+      if (!activeCanvas)
+        activeCanvas = initThoughtsCanvas(V, W, chromeOpts())
+
+      delete R.dataset.viewUi
+      setModeUi('canvas')
+    }
+    else {
+      R.dataset.viewUi = 'closing'
+      R.dataset.viewMode = 'card'
+
+      activeCanvas?.destroy()
+      activeCanvas = null
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          delete R.dataset.viewUi
+          setModeUi('card')
+        })
+      })
+    }
+  }
+
+  cardB.addEventListener('click', () => setViewMode('card'))
+  canvasB.addEventListener('click', () => setViewMode('canvas'))
+
+  mqDesktopCanvas.addEventListener('change', (e) => {
+    setViewMode(e.matches ? 'canvas' : 'card')
+  })
+  mqMobile.addEventListener('change', (e) => {
+    if (e.matches)
+      setViewMode('card')
+  })
+
+  if (currentMode === 'canvas') {
+    if (!activeCanvas)
+      activeCanvas = initThoughtsCanvas(V, W, chromeOpts())
+  }
+  setModeUi(currentMode)
+}
+</script>
