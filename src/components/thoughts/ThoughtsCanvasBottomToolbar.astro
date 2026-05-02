@@ -153,28 +153,16 @@ if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster 
     currentMode = mode
 
     if (mode === 'canvas') {
-      R.dataset.viewUi = 'preparing'
       R.dataset.viewMode = 'canvas'
-
       if (!activeCanvas)
         activeCanvas = initThoughtsCanvas(V, W, chromeOpts())
-
-      delete R.dataset.viewUi
       setModeUi('canvas')
     }
     else {
-      R.dataset.viewUi = 'closing'
       R.dataset.viewMode = 'card'
-
       activeCanvas?.destroy()
       activeCanvas = null
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          delete R.dataset.viewUi
-          setModeUi('card')
-        })
-      })
+      setModeUi('card')
     }
   }
 

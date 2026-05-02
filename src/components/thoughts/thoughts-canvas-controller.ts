@@ -37,10 +37,6 @@ export function initThoughtsCanvas(
   const prev = (viewport as HTMLElement & { [viewportKey]?: Cleanup })[viewportKey]
   prev?.destroy()
 
-  const root = viewport.closest('#thoughts-root') as HTMLElement | null
-  let readyOuter = 0
-  let readyInner = 0
-
   let scale = 1
   let tx = 0
   let ty = 0
@@ -117,15 +113,6 @@ export function initThoughtsCanvas(
     syncChrome()
   }
 
-  function setCanvasStage(stage: 'boot' | 'ready') {
-    if (!root)
-      return
-    if (stage === 'boot')
-      root.dataset.thoughtsCanvasStage = 'boot'
-    else
-      delete root.dataset.thoughtsCanvasStage
-  }
-
   function scheduleFlush() {
     if (rafId)
       return
@@ -192,11 +179,20 @@ export function initThoughtsCanvas(
   function onDown(e: PointerEvent) {
     if (e.button !== 0)
       return
+
+    const target = e.target as HTMLElement
+    const interactiveOrText = target.closest('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, code, a, span, time, strong, em, del, img, button, input, textarea')
+    if (interactiveOrText) {
+      return
+    }
+
     dragging = true
     lastX = e.clientX
     lastY = e.clientY
     viewport.setPointerCapture(e.pointerId)
     viewport.classList.add('cursor-grabbing')
+    document.body.classList.add('select-none')
+    window.getSelection()?.removeAllRanges()
     setHoverFromClient(e.clientX, e.clientY)
   }
 
@@ -212,6 +208,9 @@ export function initThoughtsCanvas(
   }
 
   function onUp(e: PointerEvent) {
+    if (dragging) {
+      document.body.classList.remove('select-none')
+    }
     dragging = false
     viewport.classList.remove('cursor-grabbing')
     flushNow()
@@ -234,8 +233,6 @@ export function initThoughtsCanvas(
   chrome?.zoomInBtn?.addEventListener('click', onZoomInClick)
   chrome?.resetBtn?.addEventListener('click', onResetClick)
 
-  setCanvasStage('boot')
-
   recenterContentInViewport()
   {
     const rect = viewportRect()
@@ -245,29 +242,12 @@ export function initThoughtsCanvas(
   }
   flushNow()
 
-  readyOuter = requestAnimationFrame(() => {
-    readyOuter = 0
-    readyInner = requestAnimationFrame(() => {
-      readyInner = 0
-      setCanvasStage('ready')
-    })
-  })
-
   const cleanup: Cleanup = {
     destroy() {
       if (rafId) {
         cancelAnimationFrame(rafId)
         rafId = 0
       }
-      if (readyOuter) {
-        cancelAnimationFrame(readyOuter)
-        readyOuter = 0
-      }
-      if (readyInner) {
-        cancelAnimationFrame(readyInner)
-        readyInner = 0
-      }
-      setCanvasStage('ready')
       viewport.removeEventListener('wheel', onWheel)
       viewport.removeEventListener('pointerdown', onDown)
       viewport.removeEventListener('pointermove', onMove)

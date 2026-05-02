@@ -5,77 +5,42 @@ import type { CollectionEntry } from 'astro:content'
 import { Image } from 'astro:assets'
 import { render } from 'astro:content'
 import { format } from 'date-fns'
-import { humanize } from '../utils/date'
 
 interface Props {
   thought: CollectionEntry<'thoughts'>
-  /** inline: 原列表条目；sticky: 画布 / 白板卡片内排版 */
-  variant?: 'inline' | 'sticky'
 }
 
-const { thought, variant = 'inline' } = Astro.props
+const { thought } = Astro.props
 const { Content } = await render(thought)
 
 const tags = thought.data.tags ?? []
-
-const rootClass
-  = variant === 'sticky'
-    ? 'relative'
-    : 'py-4 border-b border-gray-100 last:border-0'
 ---
 
-<div class={rootClass}>
-  {
-    variant === 'sticky'
-? (
-      <>
-        <div class="mb-3 flex items-center justify-between gap-3">
-          <time
-            class="shrink-0 text-xs tabular-nums text-gray-500"
-            datetime={thought.data.date.toISOString()}
-          >
-            {format(thought.data.date, 'MMM d, yyyy')}
-          </time>
-          <div class="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
-            {tags.length > 0
-? (
-              tags.map((tag: string) => (
-                <span class="rounded border border-gray-200/90 bg-gray-50/90 px-1.5 py-0.5 text-xs text-gray-700">
-                  #{tag.replace(/^#/, '')}
-                </span>
-              ))
-            )
-: (
-              <span class="text-xs text-gray-400">—</span>
-            )}
-          </div>
-        </div>
-      </>
-    )
-: (
-      <div class="mb-2 flex items-center justify-between">
-        <time class="font-mono text-xs text-gray-500" datetime={thought.data.date.toISOString()}>
-          {humanize(thought.data.date)}
-        </time>
-        {thought.data.tags && (
-          <div class="flex gap-2">
-            {thought.data.tags.map((tag: string) => (
-              <span class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-500">
-                #{tag}
+<div class="relative">
+  <div class="mb-3 flex items-center justify-between gap-3">
+    <time
+      class="shrink-0 text-xs tabular-nums text-gray-500"
+      datetime={thought.data.date.toISOString()}
+    >
+      {format(thought.data.date, 'MMM d, yyyy')}
+    </time>
+    <div class="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
+      {tags.length > 0
+        ? (
+            tags.map((tag: string) => (
+              <span class="rounded border border-gray-200/90 bg-gray-50/90 px-1.5 py-0.5 text-xs text-gray-700">
+                #{tag.replace(/^#/, '')}
               </span>
-            ))}
-          </div>
-        )}
-      </div>
-    )
-  }
+            ))
+          )
+        : (
+            <span class="text-xs text-gray-400">—</span>
+          )}
+    </div>
+  </div>
 
   <div
-    class:list={[
-      variant === 'sticky'
-        ? 'max-w-none text-sm leading-relaxed text-gray-900 [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-700 [&_code]:rounded [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:py-px [&_code]:text-[0.8125rem] [&_h2]:mb-2 [&_h2]:mt-4 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-gray-900 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:text-gray-800 [&_li]:my-0.5 [&_p]:my-2.5 [&_p:first-child]:mt-0 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ul]:my-2'
-        : 'prose prose-sm max-w-none text-gray-800 leading-relaxed',
-    ]}
+    class="max-w-none text-sm leading-relaxed text-gray-900 [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-700 [&_code]:rounded [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:py-px [&_code]:text-[0.8125rem] [&_h2]:mb-2 [&_h2]:mt-4 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-gray-900 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:text-gray-800 [&_li]:my-0.5 [&_p]:my-2.5 [&_p:first-child]:mt-0 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ul]:my-2"
   >
     <Content />
   </div>
@@ -86,12 +51,7 @@ const rootClass
         <Image
           src={img}
           alt={`Thought image ${index + 1}`}
-          class:list={[
-            'm-0! aspect-square w-full cursor-zoom-in object-cover transition-all duration-300',
-            variant === 'sticky'
-              ? 'rounded border border-gray-200 hover:border-gray-300'
-              : 'border border-gray-200 hover:border-gray-400 hover:shadow-sm',
-          ]}
+          class="m-0! aspect-square w-full cursor-zoom-in rounded border border-gray-200 object-cover transition-all duration-300 hover:border-gray-300"
           data-lightbox="true"
         />
       ))}

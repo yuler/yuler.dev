@@ -71,15 +71,6 @@ const boardCardShell = [
         display: block !important;
         pointer-events: auto !important;
       }
-      /* 切换画布时：先保持不可见，等 JS 完成 init（避免 world transform 未就绪的一帧跳变） */
-      #thoughts-root[data-view-mode='canvas'][data-view-ui='preparing'] #thoughts-canvas-view {
-        visibility: hidden !important;
-      }
-      /* 切回卡片：先隐藏画布再销毁 transform，避免“未变换的一帧”叠在列表上闪一下 */
-      #thoughts-root[data-view-ui='closing'] #thoughts-canvas-view {
-        visibility: hidden !important;
-        pointer-events: none !important;
-      }
     }
     @media (prefers-reduced-motion: reduce) {
       #thoughts-root .thought-stick-rot {
@@ -90,14 +81,10 @@ const boardCardShell = [
     #thoughts-canvas-world {
       backface-visibility: hidden;
     }
-    /* 首次 init：先隐藏 world，等 pan/zoom 计算完成后再显示，避免刷新时一帧跳到最终位置 */
-    #thoughts-root[data-thoughts-canvas-stage='boot'] #thoughts-canvas-world {
-      visibility: hidden !important;
-    }
   </style>
 
   <div class="bg-[#f5f5f5] text-gray-900">
-    <div id="thoughts-root" class="relative min-h-dvh" data-thoughts-canvas-stage="boot">
+    <div id="thoughts-root" class="relative min-h-dvh">
       <section
         id="thoughts-canvas-view"
         class="motion-reduce:hidden fixed inset-0 z-0 hidden bg-[#f5f5f5] md:motion-safe:block"
@@ -105,7 +92,7 @@ const boardCardShell = [
       >
         <div
           id="thoughts-canvas-viewport"
-          class="relative h-full w-full cursor-grab select-none overflow-hidden overscroll-none touch-none"
+          class="relative h-full w-full cursor-grab overflow-hidden overscroll-none touch-none"
         >
           <div
             class="thoughts-canvas-grid-bg pointer-events-none absolute inset-0 z-0"
@@ -135,7 +122,7 @@ const boardCardShell = [
                     }}
                     tabindex={row.tabIndex}
                   >
-                    <Thought thought={thought} variant="sticky" />
+                    <Thought thought={thought} />
                   </article>
                 )
               })
@@ -177,7 +164,7 @@ const boardCardShell = [
                 }}
                 tabindex={row?.tabIndex ?? 0}
               >
-                <Thought thought={thought} variant="sticky" />
+                <Thought thought={thought} />
               </article>
             )
           })

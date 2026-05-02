@@ -16,6 +16,7 @@ export const PAGES = [
   { url: '/posts/hi', slug: 'posts-hi' },
   { url: '/workouts', slug: 'workouts' },
   { url: '/workouts/17883105335', slug: 'workouts-17883105335' },
+  { url: '/thoughts', slug: 'thoughts' },
 ]
 
 export const VIEWPORTS = [
