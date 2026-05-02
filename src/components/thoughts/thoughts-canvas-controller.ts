@@ -138,12 +138,35 @@ export function initThoughtsCanvas(
   }
 
   function recenterContentInViewport() {
-    const vr = viewport.getBoundingClientRect()
+    const vr = viewportRect()
     tx = (vr.width - world.offsetWidth * scale) / 2
     ty = (vr.height - world.offsetHeight * scale) / 2
   }
 
+  /** 若滚轮应由内部可滚动区消费（如卡片正文），则不要 preventDefault，避免卡死滚动 */
+  function wheelShouldPassToScrollableTarget(el: EventTarget | null, e: WheelEvent): boolean {
+    let node = el instanceof HTMLElement ? el : null
+    while (node && viewport.contains(node)) {
+      if (node === viewport)
+        break
+      const st = getComputedStyle(node)
+      const oy = st.overflowY
+      const canScrollY = (oy === 'auto' || oy === 'scroll') && node.scrollHeight > node.clientHeight + 1
+      if (canScrollY) {
+        const dy = e.deltaY
+        if (dy > 0 && node.scrollTop + node.clientHeight < node.scrollHeight - 1)
+          return true
+        if (dy < 0 && node.scrollTop > 0)
+          return true
+      }
+      node = node.parentElement
+    }
+    return false
+  }
+
   function onWheel(e: WheelEvent) {
+    if (!e.ctrlKey && wheelShouldPassToScrollableTarget(e.target, e))
+      return
     e.preventDefault()
     const rect = viewportRect()
     const mx = e.clientX - rect.left
@@ -181,10 +204,11 @@ export function initThoughtsCanvas(
       return
 
     const target = e.target as HTMLElement
-    const interactiveOrText = target.closest('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, code, a, span, time, strong, em, del, img, button, input, textarea')
-    if (interactiveOrText) {
+    const onInteractive = target.closest(
+      'a, button, input, textarea, select, img, [contenteditable="true"], [data-lightbox="true"]',
+    )
+    if (onInteractive)
       return
-    }
 
     dragging = true
     lastX = e.clientX
@@ -192,7 +216,6 @@ export function initThoughtsCanvas(
     viewport.setPointerCapture(e.pointerId)
     viewport.classList.add('cursor-grabbing')
     document.body.classList.add('select-none')
-    window.getSelection()?.removeAllRanges()
     setHoverFromClient(e.clientX, e.clientY)
   }
 

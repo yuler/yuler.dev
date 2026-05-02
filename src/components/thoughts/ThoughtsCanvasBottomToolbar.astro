@@ -93,15 +93,21 @@ const canvasBtn = qs<HTMLButtonElement>('#thoughts-mode-canvas')
 const viewport = qs<HTMLElement>('#thoughts-canvas-viewport')
 const world = qs<HTMLElement>('#thoughts-canvas-world')
 const zoomCluster = qs<HTMLElement>('#thoughts-canvas-zoom-cluster')
+const zoomOutEl = qs<HTMLButtonElement>('#thoughts-canvas-zoom-out')
+const zoomInEl = qs<HTMLButtonElement>('#thoughts-canvas-zoom-in')
+const zoomLevelEl = qs<HTMLElement>('#thoughts-canvas-zoom-level')
 const resetBtn = qs<HTMLButtonElement>('#thoughts-canvas-reset')
 
-if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster && resetBtn) {
+if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster && zoomOutEl && zoomInEl && zoomLevelEl && resetBtn) {
   const R = root
   const cardB = cardBtn
   const canvasB = canvasBtn
   const V = viewport
   const W = world
   const Z = zoomCluster
+  const ZoomOut = zoomOutEl
+  const ZoomIn = zoomInEl
+  const ZoomLevel = zoomLevelEl
   const Reset = resetBtn
 
   let activeCanvas: ReturnType<typeof initThoughtsCanvas> | null = null
@@ -122,28 +128,16 @@ if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster 
 
     const zoomLocked = !onCanvas
     Z.classList.toggle('opacity-45', zoomLocked)
-    const zoomOut = qs<HTMLButtonElement>('#thoughts-canvas-zoom-out')
-    const zoomIn = qs<HTMLButtonElement>('#thoughts-canvas-zoom-in')
-    const zoomLevel = qs<HTMLElement>('#thoughts-canvas-zoom-level')
     if (zoomLocked) {
-      if (zoomLevel)
-        zoomLevel.textContent = '100%'
-      if (zoomOut)
-        zoomOut.disabled = true
-      if (zoomIn)
-        zoomIn.disabled = true
-      if (Reset) {
-        Reset.disabled = true
-      }
+      ZoomLevel.textContent = '100%'
+      ZoomOut.disabled = true
+      ZoomIn.disabled = true
+      Reset.disabled = true
     }
     else {
-      if (zoomOut)
-        zoomOut.disabled = false
-      if (zoomIn)
-        zoomIn.disabled = false
-      if (Reset) {
-        Reset.disabled = false
-      }
+      ZoomOut.disabled = false
+      ZoomIn.disabled = false
+      Reset.disabled = false
     }
   }
 
