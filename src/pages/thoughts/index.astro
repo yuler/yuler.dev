@@ -156,10 +156,10 @@ const boardCardShell = [
     const W = document.getElementById('thoughts-canvas-world')
     if (V && W && V.clientWidth > 0) {
       const scale = window.innerWidth < 1024 ? 0.75 : 1
-      const wDesk = parseFloat(W.style.getPropertyValue('--world-w-desk'))
-      const wMob = parseFloat(W.style.getPropertyValue('--world-w-mob')) || wDesk
-      const hDesk = parseFloat(W.style.getPropertyValue('--world-h-desk'))
-      const hMob = parseFloat(W.style.getPropertyValue('--world-h-mob')) || hDesk
+      const wDesk = Number.parseFloat(W.style.getPropertyValue('--world-w-desk'))
+      const wMob = Number.parseFloat(W.style.getPropertyValue('--world-w-mob')) || wDesk
+      const hDesk = Number.parseFloat(W.style.getPropertyValue('--world-h-desk'))
+      const hMob = Number.parseFloat(W.style.getPropertyValue('--world-h-mob')) || hDesk
 
       const w = window.innerWidth >= 768 ? wDesk : wMob
       const h = window.innerWidth >= 768 ? hDesk : hMob

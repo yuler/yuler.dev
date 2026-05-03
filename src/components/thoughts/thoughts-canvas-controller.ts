@@ -231,7 +231,7 @@ export function initThoughtsCanvas(
 
   function onMove(e: PointerEvent) {
     setHoverFromClient(e.clientX, e.clientY)
-    
+
     if (!pointerDown)
       return
 
@@ -249,7 +249,8 @@ export function initThoughtsCanvas(
         viewport.setPointerCapture(e.pointerId)
         viewport.classList.add('cursor-grabbing')
         document.body.classList.add('select-none')
-      } else {
+      }
+      else {
         return
       }
     }
