@@ -56,8 +56,16 @@ export function initThoughtsCanvas(
     world.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`
   }
 
+  let cachedViewportRect: DOMRect | undefined
+
+  function onResize() {
+    cachedViewportRect = undefined
+  }
+
   function viewportRect() {
-    return viewport.getBoundingClientRect()
+    if (!cachedViewportRect)
+      cachedViewportRect = viewport.getBoundingClientRect()
+    return cachedViewportRect
   }
 
   function setHoverFromClient(clientX: number, clientY: number) {
@@ -152,15 +160,17 @@ export function initThoughtsCanvas(
     while (node && viewport.contains(node)) {
       if (node === viewport)
         break
-      const st = getComputedStyle(node)
-      const oy = st.overflowY
-      const canScrollY = (oy === 'auto' || oy === 'scroll') && node.scrollHeight > node.clientHeight + 1
-      if (canScrollY) {
-        const dy = e.deltaY
-        if (dy > 0 && node.scrollTop + node.clientHeight < node.scrollHeight - 1)
-          return true
-        if (dy < 0 && node.scrollTop > 0)
-          return true
+      if (node.scrollHeight > node.clientHeight + 1) {
+        const st = getComputedStyle(node)
+        const oy = st.overflowY
+        const canScrollY = oy === 'auto' || oy === 'scroll'
+        if (canScrollY) {
+          const dy = e.deltaY
+          if (dy > 0 && node.scrollTop + node.clientHeight < node.scrollHeight - 1)
+            return true
+          if (dy < 0 && node.scrollTop > 0)
+            return true
+        }
       }
       node = node.parentElement
     }
@@ -213,11 +223,6 @@ export function initThoughtsCanvas(
     if (onInteractive)
       return
 
-    // If using a mouse and clicking on a card, let the browser handle text selection
-    // Users can pan by dragging the canvas background.
-    if (e.pointerType === 'mouse' && target.closest('article'))
-      return
-
     pointerDown = true
     lastX = e.clientX
     lastY = e.clientY
@@ -263,11 +268,8 @@ export function initThoughtsCanvas(
       dragging = false
       viewport.classList.remove('cursor-grabbing')
       flushNow()
-      try {
+      if (viewport.hasPointerCapture(e.pointerId)) {
         viewport.releasePointerCapture(e.pointerId)
-      }
-      catch {
-        /* ignore */
       }
     }
   }
@@ -278,6 +280,7 @@ export function initThoughtsCanvas(
   viewport.addEventListener('pointermove', onMove)
   viewport.addEventListener('pointerup', onUp)
   viewport.addEventListener('pointercancel', onUp)
+  window.addEventListener('resize', onResize)
 
   chrome?.zoomOutBtn?.addEventListener('click', onZoomOutClick)
   chrome?.zoomInBtn?.addEventListener('click', onZoomInClick)
@@ -303,6 +306,7 @@ export function initThoughtsCanvas(
       viewport.removeEventListener('pointermove', onMove)
       viewport.removeEventListener('pointerup', onUp)
       viewport.removeEventListener('pointercancel', onUp)
+      window.removeEventListener('resize', onResize)
       chrome?.zoomOutBtn?.removeEventListener('click', onZoomOutClick)
       chrome?.zoomInBtn?.removeEventListener('click', onZoomInClick)
       chrome?.resetBtn?.removeEventListener('click', onResetClick)

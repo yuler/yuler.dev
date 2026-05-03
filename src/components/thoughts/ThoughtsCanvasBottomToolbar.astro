@@ -83,7 +83,7 @@ function chromeOpts(): ThoughtsCanvasChromeOptions {
     zoomInBtn: qs<HTMLButtonElement>('#thoughts-canvas-zoom-in'),
     zoomLevelEl: qs<HTMLElement>('#thoughts-canvas-zoom-level'),
     resetBtn: qs<HTMLButtonElement>('#thoughts-canvas-reset'),
-    initialScale: window.innerWidth < 768 ? 0.75 : 1,
+    initialScale: window.innerWidth < 1024 ? 0.75 : 1,
   }
 }
 
@@ -100,45 +100,32 @@ const zoomLevelEl = qs<HTMLElement>('#thoughts-canvas-zoom-level')
 const resetBtn = qs<HTMLButtonElement>('#thoughts-canvas-reset')
 
 if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster && zoomOutEl && zoomInEl && zoomLevelEl && resetBtn) {
-  const R = root
-  const cardB = cardBtn
-  const canvasB = canvasBtn
-  const V = viewport
-  const W = world
-  const Z = zoomCluster
-  const ZoomOut = zoomOutEl
-  const ZoomIn = zoomInEl
-  const ZoomLevel = zoomLevelEl
-  const Reset = resetBtn
-
   let activeCanvas: ReturnType<typeof initThoughtsCanvas> | null = null
 
   const mqDesktopCanvas = window.matchMedia('(min-width: 768px) and (prefers-reduced-motion: no-preference)')
-  const mqMobile = window.matchMedia('(max-width: 767px)')
-
   let currentMode: 'canvas' | 'card' = mqDesktopCanvas.matches ? 'canvas' : 'card'
 
   function setModeUi(mode: 'card' | 'canvas') {
     const onCanvas = mode === 'canvas'
-    cardB.setAttribute('aria-pressed', onCanvas ? 'false' : 'true')
-    canvasB.setAttribute('aria-pressed', onCanvas ? 'true' : 'false')
-    cardB.classList.toggle('bg-white', !onCanvas)
-    cardB.classList.toggle('shadow-sm', !onCanvas)
-    canvasB.classList.toggle('bg-white', onCanvas)
-    canvasB.classList.toggle('shadow-sm', onCanvas)
+    cardBtn!.setAttribute('aria-pressed', onCanvas ? 'false' : 'true')
+    canvasBtn!.setAttribute('aria-pressed', onCanvas ? 'true' : 'false')
+    cardBtn!.classList.toggle('bg-white', !onCanvas)
+    cardBtn!.classList.toggle('shadow-sm', !onCanvas)
+    canvasBtn!.classList.toggle('bg-white', onCanvas)
+    canvasBtn!.classList.toggle('shadow-sm', onCanvas)
 
     const zoomLocked = !onCanvas
-    Z.classList.toggle('opacity-45', zoomLocked)
+    zoomCluster!.classList.toggle('opacity-45', zoomLocked)
     if (zoomLocked) {
-      ZoomLevel.textContent = '100%'
-      ZoomOut.disabled = true
-      ZoomIn.disabled = true
-      Reset.disabled = true
+      zoomLevelEl!.textContent = '100%'
+      zoomOutEl!.disabled = true
+      zoomInEl!.disabled = true
+      resetBtn!.disabled = true
     }
     else {
-      ZoomOut.disabled = false
-      ZoomIn.disabled = false
-      Reset.disabled = false
+      zoomOutEl!.disabled = false
+      zoomInEl!.disabled = false
+      resetBtn!.disabled = false
     }
   }
 
@@ -148,33 +135,29 @@ if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster 
     currentMode = mode
 
     if (mode === 'canvas') {
-      R.dataset.viewMode = 'canvas'
+      root!.dataset.viewMode = 'canvas'
       if (!activeCanvas)
-        activeCanvas = initThoughtsCanvas(V, W, chromeOpts())
+        activeCanvas = initThoughtsCanvas(viewport!, world!, chromeOpts())
       setModeUi('canvas')
     }
     else {
-      R.dataset.viewMode = 'card'
+      root!.dataset.viewMode = 'card'
       activeCanvas?.destroy()
       activeCanvas = null
       setModeUi('card')
     }
   }
 
-  cardB.addEventListener('click', () => setViewMode('card'))
-  canvasB.addEventListener('click', () => setViewMode('canvas'))
+  cardBtn!.addEventListener('click', () => setViewMode('card'))
+  canvasBtn!.addEventListener('click', () => setViewMode('canvas'))
 
   mqDesktopCanvas.addEventListener('change', (e) => {
     setViewMode(e.matches ? 'canvas' : 'card')
   })
-  mqMobile.addEventListener('change', (e) => {
-    if (e.matches)
-      setViewMode('card')
-  })
 
   if (currentMode === 'canvas') {
     if (!activeCanvas)
-      activeCanvas = initThoughtsCanvas(V, W, chromeOpts())
+      activeCanvas = initThoughtsCanvas(viewport!, world!, chromeOpts())
   }
   setModeUi(currentMode)
 }
