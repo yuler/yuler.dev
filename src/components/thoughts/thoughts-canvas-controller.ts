@@ -4,13 +4,13 @@ interface Cleanup {
 
 const viewportKey = '__thoughtsCanvasCleanup' as const
 
-/** 滚轮与 +/- 按钮共用：最小 50%，最大 150% */
+/** Shared by wheel and +/- buttons: min 50%, max 150% */
 export const THOUGHTS_CANVAS_SCALE_MIN = 0.5
 export const THOUGHTS_CANVAS_SCALE_MAX = 1.5
 
 const ZOOM_STEP_RATIO = 1.25
 
-/** 指数缩放的灵敏度（越大，同样 delta 缩放越多） */
+/** Exponential zoom sensitivity (larger = more zoom for same delta) */
 const WHEEL_ZOOM_SENSITIVITY = 0.0035
 
 export interface ThoughtsCanvasChromeOptions {
@@ -18,6 +18,7 @@ export interface ThoughtsCanvasChromeOptions {
   zoomInBtn?: HTMLButtonElement | null
   zoomLevelEl?: HTMLElement | null
   resetBtn?: HTMLButtonElement | null
+  initialScale?: number
 }
 
 function normalizeWheelDeltaY(e: WheelEvent): number {
@@ -37,14 +38,15 @@ export function initThoughtsCanvas(
   const prev = (viewport as HTMLElement & { [viewportKey]?: Cleanup })[viewportKey]
   prev?.destroy()
 
-  let scale = 1
+  const defaultScale = chrome?.initialScale ?? 1
+  let scale = defaultScale
   let tx = 0
   let ty = 0
   let dragging = false
   let lastX = 0
   let lastY = 0
   let rafId = 0
-  /** 最近一次指针在 viewport 内位置（用于 +/- 围绕“当前鼠标附近”缩放） */
+  /** Last pointer position in viewport (used for +/- zooming around "current mouse area") */
   let hoverMx = 0
   let hoverMy = 0
   let hasHover = false
@@ -78,13 +80,13 @@ export function initThoughtsCanvas(
   function expectedCenterTranslate() {
     const vr = viewportRect()
     return {
-      x: (vr.width - world.offsetWidth * scale) / 2,
-      y: (vr.height - world.offsetHeight * scale) / 2,
+      x: (vr.width - world.offsetWidth * defaultScale) / 2,
+      y: (vr.height - world.offsetHeight * defaultScale) / 2,
     }
   }
 
   function isDefaultView() {
-    if (Math.abs(scale - 1) > 0.002)
+    if (Math.abs(scale - defaultScale) > 0.002)
       return false
     const want = expectedCenterTranslate()
     return Math.abs(tx - want.x) < 0.75 && Math.abs(ty - want.y) < 0.75
@@ -124,8 +126,8 @@ export function initThoughtsCanvas(
   }
 
   /**
-   * 以视口内一点 (mx, my) 为锚缩放（鼠标 / 触控板位置用 client 相对 viewport）。
-   * 依赖 world 为 `transform-origin: 0 0` 且 `translate3d(tx,ty,0) scale(s)`。
+   * Zoom anchored at a point (mx, my) in viewport.
+   * Relies on world having `transform-origin: 0 0` and `translate3d(tx,ty,0) scale(s)`.
    */
   function setScaleAroundScreenPoint(mx: number, my: number, nextScale: number) {
     const clamped = Math.min(THOUGHTS_CANVAS_SCALE_MAX, Math.max(THOUGHTS_CANVAS_SCALE_MIN, nextScale))
@@ -143,7 +145,7 @@ export function initThoughtsCanvas(
     ty = (vr.height - world.offsetHeight * scale) / 2
   }
 
-  /** 若滚轮应由内部可滚动区消费（如卡片正文），则不要 preventDefault，避免卡死滚动 */
+  /** If wheel should be consumed by an internal scrollable area (like card content), don't preventDefault to avoid breaking scrolling */
   function wheelShouldPassToScrollableTarget(el: EventTarget | null, e: WheelEvent): boolean {
     let node = el instanceof HTMLElement ? el : null
     while (node && viewport.contains(node)) {
@@ -194,7 +196,7 @@ export function initThoughtsCanvas(
   }
 
   function onResetClick() {
-    scale = 1
+    scale = defaultScale
     recenterContentInViewport()
     flushNow()
   }

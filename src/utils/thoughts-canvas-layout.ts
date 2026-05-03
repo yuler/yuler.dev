@@ -17,23 +17,25 @@ export interface ThoughtLayoutRow {
 }
 
 export interface LayoutOptions {
-  /** Tab 顺序：新→旧（设计 3.1） */
+  /** Tab order: new to old (design 3.1) */
   focusOrder?: 'new-first' | 'old-first'
+  /** Optional container width for responsive layout */
+  containerWidth?: number
 }
 
-/** 与顶栏 / 列表 `px-4` 一致（1rem，根字号 16px 时 16px） */
+/** Matches top bar / list `px-4` (1rem, 16px when root font size is 16px) */
 const PAD_X = 16
-/** 分带与 world 纵向留白 */
+/** Vertical padding between bands and world */
 const PAD_Y = 48
 const NOTE_W = 300
-/** 卡片内容最大高度（布局与 world 估算按此上限，避免重叠） */
+/** Max height of card content (layout and world estimation use this limit to avoid overlap) */
 const NOTE_MAX_H = 480
-/** 单年份分带高度：须 ≥ NOTE_MAX_H + 竖向随机余量 */
+/** Single year band height: must be ≥ NOTE_MAX_H + vertical random margin */
 const BAND_H = NOTE_MAX_H + PAD_Y + 72
 
 /**
- * 与 `max-w-6xl` + `px-4` 内容区等宽：72rem − 2×1rem（根 16px 时 1120px）。
- * 卡片横向随机范围限制在此宽度内。
+ * Same width as `max-w-6xl` + `px-4` content area: 72rem - 2x1rem (1120px when root is 16px).
+ * Card horizontal random range is limited within this width.
  */
 export const THOUGHT_LAYOUT_CONTAINER_W = 1120
 
@@ -47,8 +49,8 @@ function calendarYear(ms: number): number {
 }
 
 /**
- * 按 UTC 日历年份分带；新年份 bandIndex 更大。
- * 带内位置由 slug 确定性分散。
+ * Band by UTC calendar year; newer years have higher bandIndex.
+ * Position within band is deterministically scattered by slug.
  */
 export function layoutStickyNotes(
   inputs: ThoughtLayoutInput[],
@@ -67,7 +69,8 @@ export function layoutStickyNotes(
   yearsAsc.forEach((y, i) => yearRank.set(y, i))
 
   const rows: ThoughtLayoutRow[] = []
-  const xSpread = Math.max(0, THOUGHT_LAYOUT_CONTAINER_W - NOTE_W - 2 * PAD_X)
+  const containerW = options.containerWidth ?? THOUGHT_LAYOUT_CONTAINER_W
+  const xSpread = Math.max(0, containerW - NOTE_W - 2 * PAD_X)
   for (const t of inputs) {
     const y = calendarYear(t.dateMs)
     const bandIndex = yearRank.get(y) ?? 0
@@ -104,9 +107,9 @@ export function layoutStickyNotes(
 export const THOUGHT_STICKY_NOTE_W = NOTE_W
 export const THOUGHT_STICKY_NOTE_MAX_H = NOTE_MAX_H
 
-export function worldBounds(rows: ThoughtLayoutRow[]): { width: number, height: number } {
+export function worldBounds(rows: ThoughtLayoutRow[], containerWidth = THOUGHT_LAYOUT_CONTAINER_W): { width: number, height: number } {
   if (rows.length === 0)
-    return { width: THOUGHT_LAYOUT_CONTAINER_W, height: PAD_Y * 2 + BAND_H }
+    return { width: containerWidth, height: PAD_Y * 2 + BAND_H }
   let maxX = 0
   let maxY = 0
   let maxBand = 0
@@ -115,10 +118,10 @@ export function worldBounds(rows: ThoughtLayoutRow[]): { width: number, height: 
     maxY = Math.max(maxY, r.y + NOTE_MAX_H)
     maxBand = Math.max(maxBand, r.bandIndex)
   }
-  /** 纵向至少盖住所有年份分带 */
+  /** Vertically cover at least all year bands */
   const minH = PAD_Y + (maxBand + 1) * BAND_H + PAD_Y
   return {
-    width: Math.max(THOUGHT_LAYOUT_CONTAINER_W, maxX + PAD_X),
+    width: Math.max(containerWidth, maxX + PAD_X),
     height: Math.max(minH, maxY + PAD_Y),
   }
 }

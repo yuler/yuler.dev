@@ -83,6 +83,7 @@ function chromeOpts(): ThoughtsCanvasChromeOptions {
     zoomInBtn: qs<HTMLButtonElement>('#thoughts-canvas-zoom-in'),
     zoomLevelEl: qs<HTMLElement>('#thoughts-canvas-zoom-level'),
     resetBtn: qs<HTMLButtonElement>('#thoughts-canvas-reset'),
+    initialScale: window.innerWidth < 768 ? 0.75 : 1,
   }
 }
 

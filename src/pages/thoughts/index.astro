@@ -14,16 +14,19 @@ import {
 
 const thoughts = await getSortedThoughts()
 
-const layoutRows = layoutStickyNotes(
-  thoughts.map(t => ({
-    id: t.id,
-    slug: t.id,
-    dateMs: t.data.date.getTime(),
-  })),
-  { focusOrder: 'new-first' },
-)
-const layoutBySlug = new Map(layoutRows.map(r => [r.slug, r]))
-const bounds = worldBounds(layoutRows)
+const thoughtsMapped = thoughts.map(t => ({
+  id: t.id,
+  slug: t.id,
+  dateMs: t.data.date.getTime(),
+}))
+
+const deskRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first' })
+const deskBySlug = new Map(deskRows.map(r => [r.slug, r]))
+const deskBounds = worldBounds(deskRows)
+
+const mobRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', containerWidth: 375 })
+const mobBySlug = new Map(mobRows.map(r => [r.slug, r]))
+const mobBounds = worldBounds(mobRows, 375)
 
 const boardCardShell = [
   'thought-board-card relative rounded-lg border border-gray-200/80 bg-white p-4',
@@ -33,7 +36,7 @@ const boardCardShell = [
 
 <Layout title="Thoughts — Yu Le">
   <style is:global>
-    /* 白板卡片：白底轻阴影（线框由 Tailwind border 承担） */
+    /* Board card: white background with light shadow (wireframe is handled by Tailwind border) */
     .thought-board-card {
       box-shadow:
         0 1px 2px rgba(0, 0, 0, 0.04),
@@ -44,7 +47,7 @@ const boardCardShell = [
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
       }
     }
-    /* 点阵在 viewport：不随 world transform，任意缩放下仍铺满可视区域 */
+    /* Dot grid in viewport: doesn't transform with world, always covers visible area regardless of scale */
     .thoughts-canvas-grid-bg {
       background-color: #f5f5f5;
       background-image: radial-gradient(
@@ -77,9 +80,25 @@ const boardCardShell = [
         transform: none !important;
       }
     }
-    /* 画布层：减少缩放/平移时的合成抖动 */
+    /* Canvas layer: reduce compositing jitter during scale/pan */
     #thoughts-canvas-world {
+      width: var(--world-w-mob);
+      height: var(--world-h-mob);
       backface-visibility: hidden;
+    }
+    .thought-canvas-card {
+      left: var(--x-mob);
+      top: var(--y-mob);
+    }
+    @media (min-width: 768px) {
+      #thoughts-canvas-world {
+        width: var(--world-w-desk);
+        height: var(--world-h-desk);
+      }
+      .thought-canvas-card {
+        left: var(--x-desk);
+        top: var(--y-desk);
+      }
     }
   </style>
 
@@ -101,26 +120,29 @@ const boardCardShell = [
           <div
             id="thoughts-canvas-world"
             class="absolute left-0 top-0 z-[1] origin-top-left will-change-transform"
-            style={`width:${bounds.width}px;height:${bounds.height}px`}
+            style={`--world-w-mob:${mobBounds.width}px;--world-h-mob:${mobBounds.height}px;--world-w-desk:${deskBounds.width}px;--world-h-desk:${deskBounds.height}px;`}
           >
             {
               thoughts.map((thought) => {
-                const row = layoutBySlug.get(thought.id)
-                if (!row)
+                const deskRow = deskBySlug.get(thought.id)
+                const mobRow = mobBySlug.get(thought.id)
+                if (!deskRow || !mobRow)
                   return null
                 return (
                   <article
                     id={`thought-canvas-${thought.id}`}
-                    class={`thought-stick-rot absolute z-[1] ${boardCardShell} origin-top-left`}
+                    class={`thought-stick-rot thought-canvas-card absolute z-[1] ${boardCardShell} origin-top-left`}
                     style={{
-                      left: `${row.x}px`,
-                      top: `${row.y}px`,
-                      width: `${THOUGHT_STICKY_NOTE_W}px`,
-                      maxHeight: `${THOUGHT_STICKY_NOTE_MAX_H}px`,
-                      overflowY: 'auto',
-                      transform: `rotate(${row.rotateDeg}deg)`,
+                      '--x-desk': `${deskRow.x}px`,
+                      '--y-desk': `${deskRow.y}px`,
+                      '--x-mob': `${mobRow.x}px`,
+                      '--y-mob': `${mobRow.y}px`,
+                      'width': `${THOUGHT_STICKY_NOTE_W}px`,
+                      'maxHeight': `${THOUGHT_STICKY_NOTE_MAX_H}px`,
+                      'overflowY': 'auto',
+                      'transform': `rotate(${deskRow.rotateDeg}deg)`,
                     }}
-                    tabindex={row.tabIndex}
+                    tabindex={deskRow.tabIndex}
                   >
                     <Thought thought={thought} />
                   </article>
@@ -128,6 +150,18 @@ const boardCardShell = [
               })
             }
           </div>
+          <script is:inline>
+  (function () {
+    const V = document.getElementById('thoughts-canvas-viewport')
+    const W = document.getElementById('thoughts-canvas-world')
+    if (V && W && V.clientWidth > 0) {
+      const scale = window.innerWidth < 768 ? 0.75 : 1
+      const tx = (V.clientWidth - W.offsetWidth * scale) / 2
+      const ty = (V.clientHeight - W.offsetHeight * scale) / 2
+      W.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`
+    }
+  })()
+  </script>
         </div>
       </section>
 
@@ -148,12 +182,12 @@ const boardCardShell = [
 
       <section
         id="thoughts-list-view"
-        class="relative z-10 mx-auto block max-w-6xl columns-2 gap-4 px-4 pb-[calc(6.25rem+env(safe-area-inset-bottom))] pt-[calc(5.75rem+env(safe-area-inset-top))] motion-reduce:block md:columns-3 md:gap-6 md:motion-safe:hidden sm:pt-[calc(6rem+env(safe-area-inset-top))]"
+        class="relative z-10 mx-auto block max-w-6xl columns-1 sm:columns-2 md:columns-3 gap-4 px-4 pb-[calc(6.25rem+env(safe-area-inset-bottom))] pt-[calc(5.75rem+env(safe-area-inset-top))] motion-reduce:block md:gap-6 md:motion-safe:hidden sm:pt-[calc(6rem+env(safe-area-inset-top))]"
         aria-label="Thoughts list"
       >
         {
           thoughts.map((thought) => {
-            const row = layoutBySlug.get(thought.id)
+            const row = deskBySlug.get(thought.id)
             return (
               <article
                 id={`thought-${thought.id}`}
