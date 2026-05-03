@@ -24,6 +24,10 @@ const deskRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first' })
 const deskBySlug = new Map(deskRows.map(r => [r.slug, r]))
 const deskBounds = worldBounds(deskRows)
 
+const padRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', containerWidth: 768 })
+const padBySlug = new Map(padRows.map(r => [r.slug, r]))
+const padBounds = worldBounds(padRows, 768)
+
 const mobRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', containerWidth: 375 })
 const mobBySlug = new Map(mobRows.map(r => [r.slug, r]))
 const mobBounds = worldBounds(mobRows, 375)
@@ -92,6 +96,16 @@ const boardCardShell = [
     }
     @media (min-width: 768px) {
       #thoughts-canvas-world {
+        width: var(--world-w-pad);
+        height: var(--world-h-pad);
+      }
+      .thought-canvas-card {
+        left: var(--x-pad);
+        top: var(--y-pad);
+      }
+    }
+    @media (min-width: 1024px) {
+      #thoughts-canvas-world {
         width: var(--world-w-desk);
         height: var(--world-h-desk);
       }
@@ -120,13 +134,14 @@ const boardCardShell = [
           <div
             id="thoughts-canvas-world"
             class="absolute left-0 top-0 z-[1] origin-top-left will-change-transform"
-            style={`--world-w-mob:${mobBounds.width}px;--world-h-mob:${mobBounds.height}px;--world-w-desk:${deskBounds.width}px;--world-h-desk:${deskBounds.height}px;`}
+            style={`--world-w-mob:${mobBounds.width}px;--world-h-mob:${mobBounds.height}px;--world-w-pad:${padBounds.width}px;--world-h-pad:${padBounds.height}px;--world-w-desk:${deskBounds.width}px;--world-h-desk:${deskBounds.height}px;`}
           >
             {
               thoughts.map((thought) => {
                 const deskRow = deskBySlug.get(thought.id)
+                const padRow = padBySlug.get(thought.id)
                 const mobRow = mobBySlug.get(thought.id)
-                if (!deskRow || !mobRow)
+                if (!deskRow || !padRow || !mobRow)
                   return null
                 return (
                   <article
@@ -135,6 +150,8 @@ const boardCardShell = [
                     style={{
                       '--x-desk': `${deskRow.x}px`,
                       '--y-desk': `${deskRow.y}px`,
+                      '--x-pad': `${padRow.x}px`,
+                      '--y-pad': `${padRow.y}px`,
                       '--x-mob': `${mobRow.x}px`,
                       '--y-mob': `${mobRow.y}px`,
                       'width': `${THOUGHT_STICKY_NOTE_W}px`,

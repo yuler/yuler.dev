@@ -43,6 +43,7 @@ export function initThoughtsCanvas(
   let tx = 0
   let ty = 0
   let dragging = false
+  let pointerDown = false
   let lastX = 0
   let lastY = 0
   let rafId = 0
@@ -212,19 +213,42 @@ export function initThoughtsCanvas(
     if (onInteractive)
       return
 
-    dragging = true
+    // If using a mouse and clicking on a card, let the browser handle text selection
+    // Users can pan by dragging the canvas background.
+    if (e.pointerType === 'mouse' && target.closest('article'))
+      return
+
+    pointerDown = true
     lastX = e.clientX
     lastY = e.clientY
-    viewport.setPointerCapture(e.pointerId)
-    viewport.classList.add('cursor-grabbing')
-    document.body.classList.add('select-none')
     setHoverFromClient(e.clientX, e.clientY)
   }
 
   function onMove(e: PointerEvent) {
     setHoverFromClient(e.clientX, e.clientY)
-    if (!dragging)
+    
+    if (!pointerDown)
       return
+
+    if (!dragging) {
+      const dx = Math.abs(e.clientX - lastX)
+      const dy = Math.abs(e.clientY - lastY)
+      if (dx > 3 || dy > 3) {
+        // Double check if a text selection somehow started (e.g. on touch devices via long press)
+        const sel = window.getSelection()
+        if (sel && !sel.isCollapsed) {
+          pointerDown = false
+          return
+        }
+        dragging = true
+        viewport.setPointerCapture(e.pointerId)
+        viewport.classList.add('cursor-grabbing')
+        document.body.classList.add('select-none')
+      } else {
+        return
+      }
+    }
+
     tx += e.clientX - lastX
     ty += e.clientY - lastY
     lastX = e.clientX
@@ -233,17 +257,18 @@ export function initThoughtsCanvas(
   }
 
   function onUp(e: PointerEvent) {
+    pointerDown = false
     if (dragging) {
       document.body.classList.remove('select-none')
-    }
-    dragging = false
-    viewport.classList.remove('cursor-grabbing')
-    flushNow()
-    try {
-      viewport.releasePointerCapture(e.pointerId)
-    }
-    catch {
-      /* ignore */
+      dragging = false
+      viewport.classList.remove('cursor-grabbing')
+      flushNow()
+      try {
+        viewport.releasePointerCapture(e.pointerId)
+      }
+      catch {
+        /* ignore */
+      }
     }
   }
 
