@@ -35,72 +35,73 @@ const { class: className = '' } = Astro.props
 </div>
 
 <script>
-  const DEFAULT_DURATION_MS = 2400
-  const EASING = 'cubic-bezier(0.4, 0, 0.2, 1)'
+ const DEFAULT_DURATION_MS = 2400
+ const EASING = 'cubic-bezier(0.4, 0, 0.2, 1)'
 
-  function setupSignature(root: Element): void {
-    const path = root.querySelector<SVGPathElement>('.signature-path')
-    if (!path) {
-      return
-    }
-    const signaturePath = path
+ function setupSignature(root: Element): void {
+   const path = root.querySelector<SVGPathElement>('.signature-path')
+   if (!path) {
+     return
+   }
+   const signaturePath = path
 
-    let token = 0
-    const cssDuration = Number.parseFloat(getComputedStyle(root).getPropertyValue('--signature-duration'))
-    const durationMs = Number.isFinite(cssDuration) && cssDuration > 0
-      ? cssDuration * 1000
-      : DEFAULT_DURATION_MS
+   let token = 0
+   const cssDuration = Number.parseFloat(getComputedStyle(root).getPropertyValue('--signature-duration'))
+   const durationMs = Number.isFinite(cssDuration) && cssDuration > 0
+     ? cssDuration * 1000
+     : DEFAULT_DURATION_MS
 
-    async function play(from: number, to: number, duration: number): Promise<void> {
-      const animation = signaturePath.animate(
-        [{ strokeDashoffset: String(from) }, { strokeDashoffset: String(to) }],
-        {
-          duration: Math.max(1, duration),
-          easing: EASING,
-          fill: 'forwards',
-        },
-      )
+   async function play(from: number, to: number, duration: number): Promise<void> {
+     const animation = signaturePath.animate(
+       [{ strokeDashoffset: String(from) }, { strokeDashoffset: String(to) }],
+       {
+         duration: Math.max(1, duration),
+         easing: EASING,
+         fill: 'forwards',
+       },
+     )
 
-      try {
-        await animation.finished
-        signaturePath.style.strokeDashoffset = String(to)
-      } catch {
-        // Animation was cancelled (e.g. mouseenter), ignore
-      }
-    }
+     try {
+       await animation.finished
+       signaturePath.style.strokeDashoffset = String(to)
+     }
+     catch {
+       // Animation was cancelled (e.g. mouseenter), ignore
+     }
+   }
 
-    function getOffset(): number {
-      const offset = Number.parseFloat(getComputedStyle(signaturePath).strokeDashoffset)
-      if (Number.isNaN(offset)) {
-        return 0
-      }
+   function getOffset(): number {
+     const offset = Number.parseFloat(getComputedStyle(signaturePath).strokeDashoffset)
+     if (Number.isNaN(offset)) {
+       return 0
+     }
 
-      return Math.max(0, Math.min(1, offset))
-    }
+     return Math.max(0, Math.min(1, offset))
+   }
 
-    void play(1, 0, durationMs)
+   void play(1, 0, durationMs)
 
-    root.addEventListener('mouseenter', () => {
-      token += 1
-      const run = token
-      const offset = getOffset()
-      signaturePath.getAnimations().forEach(animation => animation.cancel())
+   root.addEventListener('mouseenter', () => {
+     token += 1
+     const run = token
+     const offset = getOffset()
+     signaturePath.getAnimations().forEach(animation => animation.cancel())
 
-      const reverseDuration = Math.round(durationMs * (1 - offset))
+     const reverseDuration = Math.round(durationMs * (1 - offset))
 
-      void play(offset, 1, reverseDuration).then(() => {
-        if (run !== token) {
-          return
-        }
+     void play(offset, 1, reverseDuration).then(() => {
+       if (run !== token) {
+         return
+       }
 
-        void play(1, 0, durationMs)
-      })
-    })
-  }
+       void play(1, 0, durationMs)
+     })
+   })
+ }
 
-  document.querySelectorAll('[data-signature-root]').forEach((root) => {
-    setupSignature(root)
-  })
+ document.querySelectorAll('[data-signature-root]').forEach((root) => {
+   setupSignature(root)
+ })
 </script>
 
 <style>
