@@ -1,0 +1,120 @@
+---
+import { readFile } from 'node:fs/promises'
+import AgentsContent from '../../AGENTS.md'
+import Switch from '../components/Switch.astro'
+import Layout from '../layouts/Layout.astro'
+
+const rawAgentsMd = await readFile(new URL('../../AGENTS.md', import.meta.url), 'utf-8')
+
+const agentsDescription = (() => {
+  const lines = rawAgentsMd.split('\n')
+  if (lines[0]?.trim() !== '---')
+    return 'at repository root.'
+
+  for (let i = 1; i < lines.length; i += 1) {
+    const line = lines[i]
+    if (line.trim() === '---')
+      break
+
+    if (line.startsWith('description:')) {
+      return line.slice('description:'.length).trim() || 'at repository root.'
+    }
+  }
+
+  return 'at repository root.'
+})()
+
+---
+
+<Layout title="Agents" description="Rendered AGENTS.md for yuler.dev agent instructions.">
+  <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
+    <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <nav class="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 font-mono">
+        <a href="/" class="hover:text-gray-900 transition-colors">~</a>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-900">agents</span>
+      </nav>
+
+      <div class="bg-white border border-gray-200 p-6 md:p-8 mb-6">
+        <div class="mb-2 flex items-center justify-between gap-3">
+          <h1 class="text-2xl md:text-3xl font-bold font-mono text-gray-900">AGENTS.md</h1>
+          <Switch
+            switchId="render-mode-switch"
+            ariaLabel="Render mode"
+            value="preview"
+            eventName="render-mode:change"
+            options={[
+              { label: 'Preview', value: 'preview' },
+              { label: 'Markdown', value: 'markdown' },
+            ]}
+          />
+        </div>
+        <p class="text-sm text-gray-500 font-mono mb-5">
+          {agentsDescription}
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 p-6 md:p-8" data-render-root data-mode="preview">
+        <section data-mode-panel="preview">
+          <article
+            class="prose prose-gray max-w-none
+              prose-headings:font-bold prose-headings:text-gray-900 prose-headings:font-mono
+              prose-h2:text-xl prose-h2:md:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2
+              prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
+              prose-a:break-all prose-a:text-gray-900 prose-a:underline! prose-a:underline-offset-4 prose-a:decoration-gray-400 prose-a:hover:decoration-gray-900
+              prose-strong:text-gray-900 prose-strong:font-semibold
+              prose-code:border-gray-300 prose-code:text-rose-600 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+              prose-pre:bg-gray-200 prose-pre:p-4 prose-pre:rounded-none prose-pre:border prose-pre:border-gray-300
+              prose-pre:code:text-gray-800 prose-pre:code:bg-transparent prose-pre:code:p-0 prose-pre:code:rounded-none
+              prose-ul:my-4 prose-ul:pl-6 prose-ol:my-4 prose-ol:pl-6
+              prose-li:my-1 prose-li:text-gray-700
+              prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:bg-gray-50 prose-blockquote:pl-4 prose-blockquote:py-2 prose-blockquote:my-4 prose-blockquote:not-italic prose-blockquote:text-gray-600
+              prose-hr:border-gray-200 prose-hr:my-8
+              prose-table:w-full prose-table:border-collapse prose-table:my-4
+              prose-th:border prose-th:border-gray-200 prose-th:bg-gray-50 prose-th:p-2 prose-th:text-left prose-th:text-gray-900 prose-th:font-semibold prose-th:text-sm prose-th:font-mono
+              prose-td:border prose-td:border-gray-200 prose-td:p-2 prose-td:text-gray-700 prose-td:text-sm"
+          >
+            <AgentsContent />
+          </article>
+        </section>
+
+        <section id="markdown-text" data-mode-panel="markdown" class="hidden">
+          <pre class="overflow-x-auto border border-gray-300 bg-gray-100 p-4 text-sm text-gray-800 leading-relaxed"><code>{rawAgentsMd}</code></pre>
+        </section>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-render-root]')
+  const modeSwitch = document.querySelector<HTMLElement>('#render-mode-switch')
+  const modeLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[data-mode-value]'))
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-mode-panel]'))
+
+  function setMode(mode: string) {
+    if (!root)
+      return
+
+    root.dataset.mode = mode
+
+    for (const panel of panels) {
+      const shouldShow = panel.dataset.modePanel === mode
+      panel.classList.toggle('hidden', !shouldShow)
+    }
+  }
+
+  modeSwitch?.addEventListener('render-mode:change', (event) => {
+    const nextMode = (event as CustomEvent<{ value?: string }>).detail?.value ?? 'preview'
+    setMode(nextMode)
+  })
+
+  for (const link of modeLinks) {
+    link.addEventListener('click', () => {
+      const nextMode = link.dataset.modeValue ?? 'preview'
+      setMode(nextMode)
+    })
+  }
+
+  setMode('preview')
+</script>

@@ -1,3 +1,8 @@
+---
+name: yuler.dev
+description: Agent instructions for the yuler.dev repository.
+---
+
 # Agent instructions (yuler.dev)
 
 Personal site at https://yuler.dev — Astro 6, MDX, Tailwind CSS 4, TypeScript. Package manager: **pnpm**.

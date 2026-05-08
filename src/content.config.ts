@@ -30,12 +30,7 @@ const thoughtsCollection = defineCollection({
     }),
 })
 
-const designCollection = defineCollection({
-  loader: glob({ pattern: 'DESIGN.md', base: '.' }),
-})
-
 export const collections = {
   posts: postsCollection,
   thoughts: thoughtsCollection,
-  design: designCollection,
 }

@@ -1,12 +1,10 @@
 ---
 import { readFile } from 'node:fs/promises'
-import { getCollection, render } from 'astro:content'
+import DesignContent from '../../DESIGN.md'
+import Switch from '../components/Switch.astro'
 import Layout from '../layouts/Layout.astro'
 
 const YAML_KEY_VALUE_RE = /^([^:]+):(.*)$/
-const [designDoc] = await getCollection('design')
-if (!designDoc)
-  throw new Error('Missing DESIGN.md at repository root')
 const rawDesignMd = await readFile(new URL('../../DESIGN.md', import.meta.url), 'utf-8')
 
 let yamlFrontmatter = ''
@@ -122,6 +120,7 @@ const tokenValueByPath = tokenRows.reduce<Record<string, string>>((acc, row) => 
   acc[row.path] = row.value
   return acc
 }, {})
+const designDescription = stripWrappingQuotes(tokenValueByPath.description ?? '')
 
 function resolveTokenValue(rawValue: string, visited = new Set<string>()): string {
   const normalized = stripWrappingQuotes(rawValue.trim())
@@ -163,16 +162,6 @@ const groupedTokens = tokenRowsResolved.reduce<Record<string, TokenRowResolved[]
   return acc
 }, {})
 
-const totalTokens = tokenRowsResolved.length
-const previewColorCount = tokenRowsResolved.filter(row => Boolean(row.preview.colorHex)).length
-const previewPxCount = tokenRowsResolved.filter(row => row.preview.pxValues.length > 0).length
-const previewRemCount = tokenRowsResolved.filter(row => row.preview.remValues.length > 0).length
-const previewFontSizeCount = tokenRowsResolved.filter(row => Boolean(row.preview.fontSize)).length
-const previewFontFamilyCount = tokenRowsResolved.filter(row => Boolean(row.preview.fontFamily)).length
-const previewFontWeightCount = tokenRowsResolved.filter(row => row.preview.fontWeight !== null).length
-const previewLineHeightCount = tokenRowsResolved.filter(row => Boolean(row.preview.lineHeight)).length
-
-const { Content } = await render(designDoc)
 ---
 
 <Layout title="Design System" description="Rendered DESIGN.md for yuler.dev UI consistency.">
@@ -186,56 +175,22 @@ const { Content } = await render(designDoc)
       </nav>
 
       <div class="bg-white border border-gray-200 p-6 md:p-8 mb-6">
-        <h1 class="text-2xl md:text-3xl font-bold font-mono text-gray-900 mb-2">DESIGN.md</h1>
-        <p class="text-sm text-gray-500 font-mono mb-5">
-          Rendered from
-          <a href="#markdown-text" data-mode-value="markdown" class="ml-2 underline! decoration-gray-300 underline-offset-4 hover:decoration-gray-700">
-            <code>DESIGN.md</code>
-          </a>
-          at repository root.
-        </p>
-
-        <div class="border border-gray-300 bg-white p-4">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="space-y-2">
-              <div class="text-sm text-gray-700 font-mono">
-                Total tokens: <span class="font-bold text-gray-900">{totalTokens}</span>
-              </div>
-              <div class="text-sm text-gray-700 font-mono">
-                Preview: <span class="font-bold text-gray-900">{previewColorCount}</span> color hex,{' '}
-                <span class="font-bold text-gray-900">{previewPxCount}</span> px values,{' '}
-                <span class="font-bold text-gray-900">{previewRemCount}</span> rem values,{' '}
-                <span class="font-bold text-gray-900">{previewFontSizeCount}</span> font sizes,{' '}
-                <span class="font-bold text-gray-900">{previewFontFamilyCount}</span> font families,{' '}
-                <span class="font-bold text-gray-900">{previewFontWeightCount}</span> font weights,{' '}
-                <span class="font-bold text-gray-900">{previewLineHeightCount}</span> line heights
-              </div>
-            </div>
-            <div class="inline-flex rounded-sm border border-gray-300 p-1 bg-gray-50 font-mono text-xs" role="group" aria-label="Render mode">
-              <button
-                type="button"
-                data-mode-switch
-                data-mode-value="preview"
-                aria-pressed="true"
-                class="rounded-sm px-2.5 py-1 transition-colors bg-gray-900 text-white"
-              >
-                Preview
-              </button>
-              <button
-                type="button"
-                data-mode-switch
-                data-mode-value="markdown"
-                aria-pressed="false"
-                class="rounded-sm px-2.5 py-1 transition-colors text-gray-700 hover:text-gray-900"
-              >
-                Markdown
-              </button>
-            </div>
-          </div>
-          <div class="mt-2 text-xs text-gray-500">
-            Colors render as swatches, `px` as line blocks, `fontFamily`/`fontWeight` as an "Aa" sample.
-          </div>
+        <div class="mb-2 flex items-center justify-between gap-3">
+          <h1 class="text-2xl md:text-3xl font-bold font-mono text-gray-900">DESIGN.md</h1>
+          <Switch
+            switchId="render-mode-switch"
+            ariaLabel="Render mode"
+            value="preview"
+            eventName="render-mode:change"
+            options={[
+              { label: 'Preview', value: 'preview' },
+              { label: 'Markdown', value: 'markdown' },
+            ]}
+          />
         </div>
+        <p class="text-sm text-gray-500 font-mono mb-5">
+          {designDescription || 'Rendered from DESIGN.md at repository root.'}
+        </p>
       </div>
 
       <div class="bg-white border border-gray-200 p-6 md:p-8" data-render-root data-mode="preview">
@@ -395,7 +350,7 @@ const { Content } = await render(designDoc)
                 prose-th:border prose-th:border-gray-200 prose-th:bg-gray-50 prose-th:p-2 prose-th:text-left prose-th:text-gray-900 prose-th:font-semibold prose-th:text-sm prose-th:font-mono
                 prose-td:border prose-td:border-gray-200 prose-td:p-2 prose-td:text-gray-700 prose-td:text-sm"
             >
-              <Content />
+              <DesignContent />
             </article>
           </section>
         </section>
@@ -410,7 +365,7 @@ const { Content } = await render(designDoc)
 
 <script>
   const root = document.querySelector<HTMLElement>('[data-render-root]')
-  const switches = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-mode-switch]'))
+  const modeSwitch = document.querySelector<HTMLElement>('#render-mode-switch')
   const modeLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[data-mode-value]'))
   const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-mode-panel]'))
 
@@ -420,27 +375,16 @@ const { Content } = await render(designDoc)
 
     root.dataset.mode = mode
 
-    for (const button of switches) {
-      const isActive = button.dataset.modeValue === mode
-      button.setAttribute('aria-pressed', String(isActive))
-      button.classList.toggle('bg-gray-900', isActive)
-      button.classList.toggle('text-white', isActive)
-      button.classList.toggle('text-gray-700', !isActive)
-      button.classList.toggle('hover:text-gray-900', !isActive)
-    }
-
     for (const panel of panels) {
       const shouldShow = panel.dataset.modePanel === mode
       panel.classList.toggle('hidden', !shouldShow)
     }
   }
 
-  for (const button of switches) {
-    button.addEventListener('click', () => {
-      const nextMode = button.dataset.modeValue ?? 'preview'
-      setMode(nextMode)
-    })
-  }
+  modeSwitch?.addEventListener('render-mode:change', (event) => {
+    const nextMode = (event as CustomEvent<{ value?: string }>).detail?.value ?? 'preview'
+    setMode(nextMode)
+  })
 
   for (const link of modeLinks) {
     link.addEventListener('click', () => {
