@@ -1,6 +1,6 @@
 ---
 version: alpha
-name: yuler.dev
+name: yuler.dev's website design
 description: Personal site — Astro, Tailwind CSS 4, Inter + monospace accents. Light, editorial cards on a neutral canvas.
 colors:
   primary: "#1a1a1a"
@@ -10,14 +10,10 @@ colors:
   surface: "#ffffff"
   border: "#e5e7eb"
   border-muted: "#f3f4f6"
-  code-inline: "#be123c"
-  wip-bg: "#fef3c7"
-  wip-text: "#b45309"
   heatmap-low: "#f3f4f6"
   heatmap-mid: "#d1d5db"
   heatmap-high: "#4b5563"
   heatmap-max: "#000000"
-  decorative-shadow: "#fde047"
 typography:
   body:
     fontFamily: Inter
@@ -74,10 +70,6 @@ components:
     textColor: "#374151"
     typography: "{typography.mono-label}"
     padding: 12px 16px
-  wip-callout:
-    backgroundColor: "{colors.wip-bg}"
-    textColor: "{colors.wip-text}"
-    padding: 16px
   caption-text:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.secondary}"
@@ -88,10 +80,6 @@ components:
     textColor: "{colors.primary}"
     height: 1px
     padding: 0px
-  prose-inline-code:
-    backgroundColor: "{colors.border-muted}"
-    textColor: "{colors.code-inline}"
-    padding: 2px 6px
   page-canvas:
     backgroundColor: "{colors.neutral}"
     textColor: "{colors.primary}"
@@ -117,11 +105,6 @@ components:
     backgroundColor: transparent
     textColor: "{colors.tertiary}"
     padding: 0px
-  decorative-button:
-    backgroundColor: "{colors.decorative-shadow}"
-    textColor: "{colors.primary}"
-    typography: "{typography.mono-label}"
-    padding: 12px 32px
 ---
 
 ## Overview
@@ -137,10 +120,7 @@ yuler.dev is a **light, content-first** personal site: soft neutral canvas, whit
 - **Surface (`#ffffff`):** All primary cards and article shells.
 - **Border (`#e5e7eb`) / border-muted (`#f3f4f6`):** Default card and list borders; lighter rules for section dividers (`border-gray-100`).
 - **Muted UI (`#9ca3af`, Tailwind `gray-400`):** Chevron and separator icons; decorative only, not for long text on white (contrast). Not a named YAML token—use Tailwind classes in code.
-- **Code inline (`#e11d48`):** MDX `prose-code` (rose) inside articles—keep code blocks gray, not rose.
-- **WIP / amber tokens:** Drafts and work-in-progress badges and callouts (`wip-*`); use consistently for “incomplete” messaging only.
 - **Heatmap scale (`heatmap-*`):** Workout contribution cells only—from empty light gray through black for intensity; today’s cell may use an inset ring, not a fifth fill color.
-- **Decorative shadow (`#fde047`):** Rare marketing-style `Button.astro` offset layer; do not use as a primary CTA color elsewhere.
 
 ## Typography
 
@@ -177,10 +157,8 @@ yuler.dev is a **light, content-first** personal site: soft neutral canvas, whit
 - **Text link (muted):** `text-xs text-gray-400`, underline with `decoration-gray-200`, hover to gray-600 and stronger decoration (workouts “View all”).
 - **Tags:** `border border-gray-300 text-gray-600`, hover darkens border and text to gray-900.
 - **Status chips:** Draft = gray-200/gray-600; WIP = amber-100/amber-700; align padding `text-xs`.
-- **Article callout (WIP):** Amber left border, light amber background, small mono note—match existing banner in post template.
 - **Heatmap cells:** Four gray/black steps only; “today” uses inset ring; future days muted empty state.
 - **Icons:** Implement as **small Astro components** under `src/components/icons/`; stroke/fill colors follow `muted` / `secondary`, inheriting `currentColor` where possible.
-- **Decorative button (`Button.astro`):** Yellow offset block + black border; reserve for rare emphasis, not form submits site-wide.
 
 ## Do's and Don'ts
 
