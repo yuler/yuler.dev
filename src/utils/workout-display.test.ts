@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
+  dailyActivityCountHeatLevel,
   formatDistanceMeters,
   formatDistanceMetersCompact,
   formatMovingDuration,
   formatPaceOrSpeed,
-  dailyActivityCountHeatLevel,
 } from './workout-display'
 
 describe('workout-display', () => {
