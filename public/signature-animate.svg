@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <style>
+    :root {
+      --logo-stroke: #0f172a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --logo-stroke: #f8fafc;
+      }
+    }
+
+    .yuler-logo {
+      fill: transparent;
+      stroke: var(--logo-stroke);
+      stroke-width: 2.3;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      /* Normalize path to guarantee full draw and full reverse */
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: signForwardReverse 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes signForwardReverse {
+      0% {
+        stroke-dashoffset: 1;
+      }
+      48% {
+        stroke-dashoffset: 0;
+      }
+      60% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: 1;
+      }
+    }
+  </style>
+
+  <path
+    class="yuler-logo"
+    pathLength="1"
+    transform="translate(-8 -7)"
+    d="M18 30
+       C18 39,18 47,20 50
+       C23 55,28 54,31 49
+       C35 43,40 37,45 29
+       C49 23,52 17,53 13
+       C52 18,51 24,50 31
+       C49 42,49 53,49 64
+       C49 78,49 90,47 98
+       C44 101,40 100,37 95
+       C33 88,31 80,31 72
+       C31 63,35 56,41 50
+       C48 43,56 38,65 36
+       C72 35,76 35,78 38
+       C79 42,78 48,78 53
+       C79 58,82 59,85 54
+       C89 48,90 43,90 39
+       C89 44,89 49,90 53
+       C91 58,95 58,98 55"
+  />
+</svg>

@@ -13,6 +13,7 @@ interface Props {
 const { thought } = Astro.props
 const { Content } = await render(thought)
 
+const TAG_LEADING_HASH = /^#/
 const tags = thought.data.tags ?? []
 ---
 
@@ -29,7 +30,7 @@ const tags = thought.data.tags ?? []
         ? (
             tags.map((tag: string) => (
               <span class="rounded border border-gray-200/90 bg-gray-50/90 px-1.5 py-0.5 text-xs text-gray-700">
-                #{tag.replace(/^#/, '')}
+                #{tag.replace(TAG_LEADING_HASH, '')}
               </span>
             ))
           )
