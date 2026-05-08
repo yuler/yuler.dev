@@ -109,6 +109,21 @@ export function dailyMovingTimeHeatLevel(seconds: number): 0 | 1 | 2 | 3 {
   return 3
 }
 
+/**
+ * Daily heat intensity from how many sessions exist that day (all sessions summed).
+ * Tuned so the heatmap becomes darker as the number of activities increases.
+ */
+export function dailyActivityCountHeatLevel(count: number): 0 | 1 | 2 | 3 {
+  const c = Math.max(0, Math.floor(count))
+  if (c === 0)
+    return 0
+  if (c === 1)
+    return 1
+  if (c === 2)
+    return 2
+  return 3
+}
+
 /** Total weekly moving time for heatmap tooltips */
 export function formatDurationHeatmap(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds))
