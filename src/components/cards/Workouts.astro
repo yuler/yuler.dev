@@ -3,7 +3,7 @@ import type { StoredActivitySummary } from '../../utils/strava-activities'
 import { format } from 'date-fns'
 import { formatDate } from '../../utils/date'
 import { loadAllStoredActivities } from '../../utils/strava-activities'
-import { dailyMovingTimeHeatLevel, effectiveMovingSeconds, formatDurationHeatmap } from '../../utils/workout-display'
+import { dailyActivityCountHeatLevel, effectiveMovingSeconds, formatDurationHeatmap } from '../../utils/workout-display'
 import { getRollingYearContributionColumns, getRollingYearWindowBounds } from '../../utils/workouts-calendar'
 import CornerMarkers from '../CornerMarkers.astro'
 import ArrowRight from '../icons/ArrowRight.astro'
@@ -70,7 +70,7 @@ const columns = rawColumns.map((col, columnIndex) =>
   col.map((day) => {
     const seconds = day.inYear ? (secondsByDate.get(day.date) ?? 0) : 0
     const names = day.inYear ? (namesByDate.get(day.date) ?? []) : []
-    const level = day.inYear ? dailyMovingTimeHeatLevel(seconds) : 0
+    const level = day.inYear ? dailyActivityCountHeatLevel(names.length) : 0
     const isToday = day.date === todayStr
     const isFuture = day.inYear && day.date > todayStr
 
@@ -213,14 +213,14 @@ const columns = rawColumns.map((col, columnIndex) =>
           </a>
         </span>
         <div class="flex gap-1 items-center flex-wrap">
-          <span>Less time</span>
+          <span>Less activities</span>
           <div class="flex gap-0.5">
             <div class="size-1.5 bg-gray-100" />
             <div class="size-1.5 bg-gray-300" />
             <div class="size-1.5 bg-gray-600" />
             <div class="size-1.5 bg-black" />
           </div>
-          <span>More time</span>
+          <span>More activities</span>
         </div>
       </div>
     </div>

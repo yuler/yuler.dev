@@ -4,6 +4,7 @@ import {
   formatDistanceMetersCompact,
   formatMovingDuration,
   formatPaceOrSpeed,
+  dailyActivityCountHeatLevel,
 } from './workout-display'
 
 describe('workout-display', () => {
@@ -25,5 +26,13 @@ describe('workout-display', () => {
     // Rounded total seconds avoids 0'60" when raw pace is just under 1 minute
     const avgSpeed = 1000 / 59.7
     expect(formatPaceOrSpeed('Run', avgSpeed)).toBe(`1'00"/km`)
+  })
+
+  it('computes activity count heat levels', () => {
+    expect(dailyActivityCountHeatLevel(0)).toBe(0)
+    expect(dailyActivityCountHeatLevel(1)).toBe(1)
+    expect(dailyActivityCountHeatLevel(2)).toBe(2)
+    expect(dailyActivityCountHeatLevel(3)).toBe(3)
+    expect(dailyActivityCountHeatLevel(10)).toBe(3)
   })
 })
