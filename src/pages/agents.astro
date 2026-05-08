@@ -1,29 +1,12 @@
 ---
-import { readFile } from 'node:fs/promises'
-import AgentsContent from '../../AGENTS.md'
+import AgentsContent, { frontmatter } from '../../AGENTS.md'
+import rawAgentsMd from '../../AGENTS.md?raw'
 import Switch from '../components/Switch.astro'
 import Layout from '../layouts/Layout.astro'
 
-const rawAgentsMd = await readFile(new URL('../../AGENTS.md', import.meta.url), 'utf-8')
-
-const agentsDescription = (() => {
-  const lines = rawAgentsMd.split('\n')
-  if (lines[0]?.trim() !== '---')
-    return 'at repository root.'
-
-  for (let i = 1; i < lines.length; i += 1) {
-    const line = lines[i]
-    if (line.trim() === '---')
-      break
-
-    if (line.startsWith('description:')) {
-      return line.slice('description:'.length).trim() || 'at repository root.'
-    }
-  }
-
-  return 'at repository root.'
-})()
-
+const agentsDescription = typeof frontmatter?.description === 'string' && frontmatter.description.trim()
+  ? frontmatter.description.trim()
+  : 'at repository root.'
 ---
 
 <Layout title="Agents" description="Rendered AGENTS.md for yuler.dev agent instructions.">
@@ -89,7 +72,6 @@ const agentsDescription = (() => {
 <script>
   const root = document.querySelector<HTMLElement>('[data-render-root]')
   const modeSwitch = document.querySelector<HTMLElement>('#render-mode-switch')
-  const modeLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[data-mode-value]'))
   const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-mode-panel]'))
 
   function setMode(mode: string) {
@@ -108,13 +90,6 @@ const agentsDescription = (() => {
     const nextMode = (event as CustomEvent<{ value?: string }>).detail?.value ?? 'preview'
     setMode(nextMode)
   })
-
-  for (const link of modeLinks) {
-    link.addEventListener('click', () => {
-      const nextMode = link.dataset.modeValue ?? 'preview'
-      setMode(nextMode)
-    })
-  }
 
   setMode('preview')
 </script>

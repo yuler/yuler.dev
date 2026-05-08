@@ -1,20 +1,8 @@
 ---
-import { readFile } from 'node:fs/promises'
-import DesignContent from '../../DESIGN.md'
+import DesignContent, { frontmatter } from '../../DESIGN.md'
+import rawDesignMd from '../../DESIGN.md?raw'
 import Switch from '../components/Switch.astro'
 import Layout from '../layouts/Layout.astro'
-
-const YAML_KEY_VALUE_RE = /^([^:]+):(.*)$/
-const rawDesignMd = await readFile(new URL('../../DESIGN.md', import.meta.url), 'utf-8')
-
-let yamlFrontmatter = ''
-
-if (rawDesignMd.startsWith('---\n')) {
-  const closingFenceIndex = rawDesignMd.indexOf('\n---\n', 4)
-  if (closingFenceIndex !== -1) {
-    yamlFrontmatter = rawDesignMd.slice(4, closingFenceIndex).trim()
-  }
-}
 
 type TokenRow = {
   path: string
@@ -31,57 +19,55 @@ type TokenPreview = {
   lineHeight: string | null
 }
 
-function stripWrappingQuotes(value: string): string {
-  if (
-    (value.startsWith('"') && value.endsWith('"'))
-    || (value.startsWith('\'') && value.endsWith('\''))
-  ) {
-    return value.slice(1, -1)
-  }
-  return value
-}
-
-function parseYamlTokenRows(yaml: string): TokenRow[] {
-  const rows: TokenRow[] = []
-  const stack: string[] = []
-
-  for (const rawLine of yaml.split('\n')) {
-    const line = rawLine.replace(/\t/g, '  ')
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#'))
-      continue
-
-    const indent = line.length - line.trimStart().length
-    const level = Math.floor(indent / 2)
-    const keyValueMatch = trimmed.match(YAML_KEY_VALUE_RE)
-    if (!keyValueMatch)
-      continue
-
-    const key = keyValueMatch[1].trim()
-    const value = keyValueMatch[2].trim()
-
-    stack.length = level
-    stack[level] = key
-
-    if (value) {
-      rows.push({
-        path: stack.join('.'),
-        value,
-      })
-    }
-  }
-
-  return rows
-}
-
-const tokenRows = parseYamlTokenRows(yamlFrontmatter)
 const HEX_COLOR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
 const PX_VALUE_RE = /(\d+(?:\.\d+)?)px/g
 const REM_VALUE_RE = /(\d+(?:\.\d+)?)rem/g
 const FONT_WEIGHT_RE = /^\d{2,3}$/
+const TOKEN_REF_RE = /^\{([^}]+)\}$/
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function stringifyTokenValue(value: unknown): string {
+  if (value === null || value === undefined)
+    return ''
+  if (typeof value === 'string')
+    return value
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value)
+  return JSON.stringify(value)
+}
+
+function flattenTokenObject(input: unknown, parents: string[] = []): TokenRow[] {
+  if (!isPlainObject(input))
+    return []
+
+  const rows: TokenRow[] = []
+  for (const [key, value] of Object.entries(input)) {
+    const path = [...parents, key]
+    if (isPlainObject(value)) {
+      rows.push(...flattenTokenObject(value, path))
+    }
+    else {
+      rows.push({ path: path.join('.'), value: stringifyTokenValue(value) })
+    }
+  }
+  return rows
+}
+
+const designDescription = typeof frontmatter?.description === 'string'
+  ? frontmatter.description
+  : ''
+
+const TOKEN_GROUPS = ['colors', 'typography', 'rounded', 'spacing', 'components'] as const
+const tokenRows: TokenRow[] = TOKEN_GROUPS.flatMap(group =>
+  flattenTokenObject((frontmatter as Record<string, unknown> | undefined)?.[group], [group]),
+)
+const hasTokens = tokenRows.length > 0
 
 function getTokenPreview(tokenPath: string, value: string): TokenPreview {
-  const normalized = stripWrappingQuotes(value.trim())
+  const normalized = value.trim()
   const colorHex = HEX_COLOR_RE.test(normalized) ? normalized : null
 
   const pxValues: number[] = []
@@ -112,18 +98,13 @@ function getTokenPreview(tokenPath: string, value: string): TokenPreview {
   return { colorHex, pxValues, remValues: remValuesForPreview, fontSize, fontFamily, fontWeight, lineHeight }
 }
 
-type TokenRowWithPreview = TokenRow & { preview: TokenPreview }
-
-const TOKEN_REF_RE = /^\{([^}]+)\}$/
-
 const tokenValueByPath = tokenRows.reduce<Record<string, string>>((acc, row) => {
   acc[row.path] = row.value
   return acc
 }, {})
-const designDescription = stripWrappingQuotes(tokenValueByPath.description ?? '')
 
 function resolveTokenValue(rawValue: string, visited = new Set<string>()): string {
-  const normalized = stripWrappingQuotes(rawValue.trim())
+  const normalized = rawValue.trim()
   const refMatch = normalized.match(TOKEN_REF_RE)
   if (!refMatch)
     return normalized
@@ -143,7 +124,7 @@ function resolveTokenValue(rawValue: string, visited = new Set<string>()): strin
   return resolveTokenValue(next, visited)
 }
 
-type TokenRowResolved = TokenRowWithPreview & { resolvedValue: string }
+type TokenRowResolved = TokenRow & { preview: TokenPreview, resolvedValue: string }
 
 const tokenRowsResolved: TokenRowResolved[] = tokenRows.map((row) => {
   const resolvedValue = resolveTokenValue(row.value)
@@ -154,7 +135,6 @@ const tokenRowsResolved: TokenRowResolved[] = tokenRows.map((row) => {
   }
 })
 
-const GROUP_ORDER = ['colors', 'typography', 'rounded', 'spacing', 'components'] as const
 const groupedTokens = tokenRowsResolved.reduce<Record<string, TokenRowResolved[]>>((acc, row) => {
   const group = row.path.split('.')[0] ?? 'other'
   acc[group] ??= []
@@ -196,10 +176,10 @@ const groupedTokens = tokenRowsResolved.reduce<Record<string, TokenRowResolved[]
       <div class="bg-white border border-gray-200 p-6 md:p-8" data-render-root data-mode="preview">
         <section data-mode-panel="preview">
           {
-            yamlFrontmatter && (
+            hasTokens && (
               <section class="mb-8">
                 <h2 class="text-lg font-semibold font-mono text-gray-900 mb-3">Design Tokens (YAML)</h2>
-                {GROUP_ORDER.map((group) => {
+                {TOKEN_GROUPS.map((group) => {
                   const rows = groupedTokens[group] ?? []
                   if (rows.length === 0)
                     return null
@@ -227,7 +207,7 @@ const groupedTokens = tokenRowsResolved.reduce<Record<string, TokenRowResolved[]
                                   <td class="border border-gray-300 p-2 break-all">{row.value}</td>
                                   <td class="border border-gray-300 p-2">
                                     <div class="space-y-2">
-                                      {row.resolvedValue !== stripWrappingQuotes(row.value.trim()) && (
+                                      {row.resolvedValue !== row.value.trim() && (
                                         <div class="font-mono text-[11px] text-gray-400 break-all">
                                           = {row.resolvedValue}
                                         </div>
@@ -366,7 +346,6 @@ const groupedTokens = tokenRowsResolved.reduce<Record<string, TokenRowResolved[]
 <script>
   const root = document.querySelector<HTMLElement>('[data-render-root]')
   const modeSwitch = document.querySelector<HTMLElement>('#render-mode-switch')
-  const modeLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[data-mode-value]'))
   const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-mode-panel]'))
 
   function setMode(mode: string) {
@@ -385,13 +364,6 @@ const groupedTokens = tokenRowsResolved.reduce<Record<string, TokenRowResolved[]
     const nextMode = (event as CustomEvent<{ value?: string }>).detail?.value ?? 'preview'
     setMode(nextMode)
   })
-
-  for (const link of modeLinks) {
-    link.addEventListener('click', () => {
-      const nextMode = link.dataset.modeValue ?? 'preview'
-      setMode(nextMode)
-    })
-  }
 
   setMode('preview')
 </script>
