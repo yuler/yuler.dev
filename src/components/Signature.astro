@@ -61,8 +61,12 @@ const { class: className = '' } = Astro.props
         },
       )
 
-      await animation.finished
-      signaturePath.style.strokeDashoffset = String(to)
+      try {
+        await animation.finished
+        signaturePath.style.strokeDashoffset = String(to)
+      } catch {
+        // Animation was cancelled (e.g. mouseenter), ignore
+      }
     }
 
     function getOffset(): number {
@@ -108,7 +112,7 @@ const { class: className = '' } = Astro.props
 
   @media (prefers-color-scheme: dark) {
     .signature-root {
-      --signature-stroke: #0f172a;
+      --signature-stroke: #f8fafc;
     }
   }
 
