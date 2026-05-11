@@ -30,6 +30,24 @@ function normalizeWheelDeltaY(e: WheelEvent): number {
   return dy
 }
 
+function parseCssPx(raw: string): number {
+  const n = Number.parseFloat(raw)
+  return Number.isFinite(n) ? n : 0
+}
+
+function readCardDragOffsets(card: HTMLElement): { x: number, y: number } {
+  const cs = getComputedStyle(card)
+  return {
+    x: parseCssPx(cs.getPropertyValue('--drag-x')),
+    y: parseCssPx(cs.getPropertyValue('--drag-y')),
+  }
+}
+
+function setCardDragOffsets(card: HTMLElement, x: number, y: number) {
+  card.style.setProperty('--drag-x', `${x}px`)
+  card.style.setProperty('--drag-y', `${y}px`)
+}
+
 export function initThoughtsCanvas(
   viewport: HTMLElement,
   world: HTMLElement,
@@ -51,6 +69,15 @@ export function initThoughtsCanvas(
   let hoverMx = 0
   let hoverMy = 0
   let hasHover = false
+
+  let cardDrag: {
+    card: HTMLElement
+    pointerId: number
+    accX: number
+    accY: number
+    lastX: number
+    lastY: number
+  } | null = null
 
   function flushTransform() {
     world.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`
@@ -212,6 +239,62 @@ export function initThoughtsCanvas(
     flushNow()
   }
 
+  function onWorldPointerDown(e: PointerEvent) {
+    if (e.button !== 0)
+      return
+    const card = (e.target as HTMLElement).closest('.thought-canvas-card')
+    if (!card || !world.contains(card))
+      return
+    const onInteractive = (e.target as HTMLElement).closest(
+      'a, button, input, textarea, select, img, [contenteditable="true"], [data-lightbox="true"]',
+    )
+    if (onInteractive)
+      return
+    e.stopPropagation()
+    const el = card as HTMLElement
+    const { x: accX, y: accY } = readCardDragOffsets(el)
+    cardDrag = {
+      card: el,
+      pointerId: e.pointerId,
+      accX,
+      accY,
+      lastX: e.clientX,
+      lastY: e.clientY,
+    }
+    el.setPointerCapture(e.pointerId)
+    el.classList.add('z-[50]', 'shadow-lg')
+    document.body.classList.add('select-none')
+    el.addEventListener('pointermove', onCardPointerMove)
+    el.addEventListener('pointerup', onCardPointerEnd)
+    el.addEventListener('pointercancel', onCardPointerEnd)
+  }
+
+  function onCardPointerMove(e: PointerEvent) {
+    if (!cardDrag || e.pointerId !== cardDrag.pointerId)
+      return
+    const dx = (e.clientX - cardDrag.lastX) / scale
+    const dy = (e.clientY - cardDrag.lastY) / scale
+    cardDrag.accX += dx
+    cardDrag.accY += dy
+    cardDrag.lastX = e.clientX
+    cardDrag.lastY = e.clientY
+    setCardDragOffsets(cardDrag.card, cardDrag.accX, cardDrag.accY)
+  }
+
+  function onCardPointerEnd(e: PointerEvent) {
+    if (!cardDrag || e.pointerId !== cardDrag.pointerId)
+      return
+    const c = cardDrag.card
+    c.removeEventListener('pointermove', onCardPointerMove)
+    c.removeEventListener('pointerup', onCardPointerEnd)
+    c.removeEventListener('pointercancel', onCardPointerEnd)
+    if (c.hasPointerCapture(e.pointerId))
+      c.releasePointerCapture(e.pointerId)
+    c.classList.remove('z-[50]', 'shadow-lg')
+    document.body.classList.remove('select-none')
+    cardDrag = null
+  }
+
   function onDown(e: PointerEvent) {
     if (e.button !== 0)
       return
@@ -277,6 +360,7 @@ export function initThoughtsCanvas(
 
   viewport.style.touchAction = 'none'
   viewport.addEventListener('wheel', onWheel, { passive: false })
+  world.addEventListener('pointerdown', onWorldPointerDown)
   viewport.addEventListener('pointerdown', onDown)
   viewport.addEventListener('pointermove', onMove)
   viewport.addEventListener('pointerup', onUp)
@@ -302,7 +386,20 @@ export function initThoughtsCanvas(
         cancelAnimationFrame(rafId)
         rafId = 0
       }
+      if (cardDrag) {
+        const c = cardDrag.card
+        const pid = cardDrag.pointerId
+        c.removeEventListener('pointermove', onCardPointerMove)
+        c.removeEventListener('pointerup', onCardPointerEnd)
+        c.removeEventListener('pointercancel', onCardPointerEnd)
+        if (c.hasPointerCapture(pid))
+          c.releasePointerCapture(pid)
+        c.classList.remove('z-[50]', 'shadow-lg')
+        document.body.classList.remove('select-none')
+        cardDrag = null
+      }
       viewport.removeEventListener('wheel', onWheel)
+      world.removeEventListener('pointerdown', onWorldPointerDown)
       viewport.removeEventListener('pointerdown', onDown)
       viewport.removeEventListener('pointermove', onMove)
       viewport.removeEventListener('pointerup', onUp)

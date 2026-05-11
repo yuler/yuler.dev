@@ -32,6 +32,10 @@ const NOTE_W = 300
 const NOTE_MAX_H = 480
 /** Single year band height: must be ≥ NOTE_MAX_H + vertical random margin */
 const BAND_H = NOTE_MAX_H + PAD_Y + 72
+/** Newest note in each year stays close to the visual center. */
+const RECENT_CENTER_SPREAD = 160
+/** ±7° from slug — enough personality without looking too tilted. */
+const ROTATE_RANGE_DEG = 14
 
 /**
  * Same width as `max-w-6xl` + `px-4` content area: 72rem - 2x1rem (1120px when root is 16px).
@@ -49,8 +53,8 @@ function calendarYear(ms: number): number {
 }
 
 /**
- * Band by UTC calendar year; newer years have higher bandIndex.
- * Position within band is deterministically scattered by slug.
+ * Band by UTC calendar year; **newest** year sits in the top band (bandIndex 0).
+ * Within a year, newer posts sit higher; horizontal scatter and tilt stay slug‑deterministic.
  */
 export function layoutStickyNotes(
   inputs: ThoughtLayoutInput[],
@@ -64,32 +68,46 @@ export function layoutStickyNotes(
       byYear.set(y, [])
     byYear.get(y)!.push(t)
   }
-  const yearsAsc = [...byYear.keys()].sort((a, b) => a - b)
+  const yearsDesc = [...byYear.keys()].sort((a, b) => b - a)
   const yearRank = new Map<number, number>()
-  yearsAsc.forEach((y, i) => yearRank.set(y, i))
+  yearsDesc.forEach((y, i) => yearRank.set(y, i))
 
   const rows: ThoughtLayoutRow[] = []
   const containerW = options.containerWidth ?? THOUGHT_LAYOUT_CONTAINER_W
   const xSpread = Math.max(0, containerW - NOTE_W - 2 * PAD_X)
-  for (const t of inputs) {
-    const y = calendarYear(t.dateMs)
-    const bandIndex = yearRank.get(y) ?? 0
-    const bandKey = String(y)
-    const u = unitFloat(t.slug, 'x')
-    const v = unitFloat(t.slug, 'y')
-    const x = PAD_X + u * xSpread
-    const yPx = PAD_Y + bandIndex * BAND_H + v * (BAND_H - NOTE_MAX_H - PAD_Y)
-    /** ±13° from slug — reads like casually placed stickers */
-    const rot = (unitFloat(t.slug, 'rot') - 0.5) * 26
-    rows.push({
-      slug: t.slug,
-      bandIndex,
-      bandKey,
-      x,
-      y: yPx,
-      rotateDeg: rot,
-      tabIndex: 0,
-    })
+  const slotSpan = BAND_H - NOTE_MAX_H - PAD_Y
+
+  for (const year of yearsDesc) {
+    const inYear = [...(byYear.get(year) ?? [])].sort((a, b) => b.dateMs - a.dateMs)
+    const n = inYear.length
+    for (let idx = 0; idx < n; idx++) {
+      const t = inYear[idx]!
+      const bandIndex = yearRank.get(year) ?? 0
+      const bandKey = String(year)
+      const u = unitFloat(t.slug, 'x')
+      const v = unitFloat(t.slug, 'y')
+      const centerX = (containerW - NOTE_W) / 2
+      const newestInYear = idx === 0
+      const recentSpread = Math.min(RECENT_CENTER_SPREAD, xSpread)
+      const x = newestInYear
+        ? centerX + (u - 0.5) * recentSpread
+        : PAD_X + u * xSpread
+      /** Newest in the year at top of band; spread older entries downward with small jitter */
+      const depthFrac = n <= 1 ? 0 : idx / Math.max(n - 1, 1)
+      const verticalBase = depthFrac * slotSpan * 0.88
+      const jitter = (v - 0.5) * Math.min(56, slotSpan * 0.08)
+      const yPx = PAD_Y + bandIndex * BAND_H + verticalBase + jitter
+      const rot = (unitFloat(t.slug, 'rot') - 0.5) * ROTATE_RANGE_DEG
+      rows.push({
+        slug: t.slug,
+        bandIndex,
+        bandKey,
+        x,
+        y: yPx,
+        rotateDeg: rot,
+        tabIndex: 0,
+      })
+    }
   }
 
   const chron = [...inputs].sort((a, b) => a.dateMs - b.dateMs)

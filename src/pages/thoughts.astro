@@ -1,16 +1,16 @@
 ---
 // src/pages/thoughts/index.astro
-import LightBox from '../../components/LightBox.astro'
-import Thought from '../../components/Thought.astro'
-import ThoughtsCanvasBottomToolbar from '../../components/thoughts/ThoughtsCanvasBottomToolbar.astro'
-import Layout from '../../layouts/Layout.astro'
-import { getSortedThoughts } from '../../utils/thoughts'
+import LightBox from '@/components/LightBox.astro'
+import Thought from '@/components/Thought.astro'
+import ThoughtsCanvasBottomToolbar from '@/components/thoughts/ThoughtsCanvasBottomToolbar.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getSortedThoughts } from '@/utils/thoughts'
 import {
   layoutStickyNotes,
   THOUGHT_STICKY_NOTE_MAX_H,
   THOUGHT_STICKY_NOTE_W,
   worldBounds,
-} from '../../utils/thoughts-canvas-layout'
+} from '@/utils/thoughts-canvas-layout'
 
 const thoughts = await getSortedThoughts()
 
@@ -87,8 +87,9 @@ const boardCardShell = [
       backface-visibility: hidden;
     }
     .thought-canvas-card {
-      left: var(--x-mob);
-      top: var(--y-mob);
+      left: calc(var(--x-mob) + var(--drag-x, 0px));
+      top: calc(var(--y-mob) + var(--drag-y, 0px));
+      transform: rotate(var(--rotate-deg, 0deg));
     }
     @media (min-width: 768px) {
       #thoughts-canvas-world {
@@ -96,8 +97,8 @@ const boardCardShell = [
         height: var(--world-h-desk);
       }
       .thought-canvas-card {
-        left: var(--x-desk);
-        top: var(--y-desk);
+        left: calc(var(--x-desk) + var(--drag-x, 0px));
+        top: calc(var(--y-desk) + var(--drag-y, 0px));
       }
     }
   </style>
@@ -137,10 +138,12 @@ const boardCardShell = [
                       '--y-desk': `${deskRow.y}px`,
                       '--x-mob': `${mobRow.x}px`,
                       '--y-mob': `${mobRow.y}px`,
+                      '--rotate-deg': `${deskRow.rotateDeg}deg`,
+                      '--drag-x': '0px',
+                      '--drag-y': '0px',
                       'width': `${THOUGHT_STICKY_NOTE_W}px`,
                       'maxHeight': `${THOUGHT_STICKY_NOTE_MAX_H}px`,
                       'overflowY': 'auto',
-                      'transform': `rotate(${deskRow.rotateDeg}deg)`,
                     }}
                     tabindex={deskRow.tabIndex}
                   >
