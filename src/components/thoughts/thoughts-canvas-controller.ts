@@ -261,7 +261,7 @@ export function initThoughtsCanvas(
       lastY: e.clientY,
     }
     el.setPointerCapture(e.pointerId)
-    el.classList.add('z-[50]', 'shadow-lg')
+    el.classList.add('z-[50]', 'shadow-lg', 'cursor-grabbing')
     document.body.classList.add('select-none')
     el.addEventListener('pointermove', onCardPointerMove)
     el.addEventListener('pointerup', onCardPointerEnd)
@@ -289,9 +289,10 @@ export function initThoughtsCanvas(
     c.removeEventListener('pointercancel', onCardPointerEnd)
     if (c.hasPointerCapture(e.pointerId))
       c.releasePointerCapture(e.pointerId)
-    c.classList.remove('z-[50]', 'shadow-lg')
-    document.body.classList.remove('select-none')
     cardDrag = null
+    c.classList.remove('z-[50]', 'shadow-lg', 'cursor-grabbing')
+    if (!dragging)
+      document.body.classList.remove('select-none')
   }
 
   function onDown(e: PointerEvent) {
@@ -347,13 +348,14 @@ export function initThoughtsCanvas(
   function onUp(e: PointerEvent) {
     pointerDown = false
     if (dragging) {
-      document.body.classList.remove('select-none')
       dragging = false
       viewport.classList.remove('cursor-grabbing')
       flushNow()
       if (viewport.hasPointerCapture(e.pointerId)) {
         viewport.releasePointerCapture(e.pointerId)
       }
+      if (!cardDrag)
+        document.body.classList.remove('select-none')
     }
   }
 
@@ -393,10 +395,12 @@ export function initThoughtsCanvas(
         c.removeEventListener('pointercancel', onCardPointerEnd)
         if (c.hasPointerCapture(pid))
           c.releasePointerCapture(pid)
-        c.classList.remove('z-[50]', 'shadow-lg')
-        document.body.classList.remove('select-none')
+        c.classList.remove('z-[50]', 'shadow-lg', 'cursor-grabbing')
         cardDrag = null
       }
+      dragging = false
+      viewport.classList.remove('cursor-grabbing')
+      document.body.classList.remove('select-none')
       viewport.removeEventListener('wheel', onWheel)
       world.removeEventListener('pointerdown', onWorldPointerDown)
       viewport.removeEventListener('pointerdown', onDown)

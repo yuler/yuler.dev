@@ -1,12 +1,10 @@
 ---
 import DesignContent, { frontmatter } from '../../DESIGN.md'
 import rawDesignMd from '../../DESIGN.md?raw'
-import DesignTokenTable from '../components/DesignTokenTable.astro'
+import DesignTokenTable, { TOKEN_GROUPS } from '../components/DesignTokenTable.astro'
 import MarkdownProse from '../components/MarkdownProse.astro'
 import Switch from '../components/Switch.astro'
 import Layout from '../layouts/Layout.astro'
-
-const TOKEN_GROUPS = ['colors', 'typography', 'rounded', 'spacing', 'components'] as const
 
 const designDescription = typeof frontmatter?.description === 'string'
   ? frontmatter.description

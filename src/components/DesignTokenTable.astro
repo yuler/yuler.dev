@@ -1,5 +1,6 @@
 ---
-type TokenGroup = 'colors' | 'typography' | 'rounded' | 'spacing' | 'components'
+export const TOKEN_GROUPS = ['colors', 'typography', 'rounded', 'spacing', 'components'] as const
+export type TokenGroup = typeof TOKEN_GROUPS[number]
 
 interface Props {
   group: TokenGroup
@@ -30,8 +31,6 @@ const PX_VALUE_RE = /(\d+(?:\.\d+)?)px/g
 const REM_VALUE_RE = /(\d+(?:\.\d+)?)rem/g
 const FONT_WEIGHT_RE = /^\d{2,3}$/
 const TOKEN_REF_RE = /^\{([^}]+)\}$/
-
-const TOKEN_GROUPS: readonly TokenGroup[] = ['colors', 'typography', 'rounded', 'spacing', 'components']
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
