@@ -7,17 +7,17 @@
   aria-label="Thoughts canvas controls"
 >
   <div
-    class="pointer-events-auto flex max-w-[min(42rem,calc(100vw-2rem))] items-center gap-2 rounded-full border border-gray-200/90 bg-white/90 px-2 py-1.5 font-mono text-xs text-gray-800 shadow-sm backdrop-blur-sm supports-[backdrop-filter]:bg-white/80"
+    class="pointer-events-auto flex max-w-[min(42rem,calc(100vw-2rem))] items-center gap-2 rounded-sm border border-gray-200/90 bg-white/90 px-2 py-1.5 font-mono text-xs text-gray-800 shadow-sm backdrop-blur-sm supports-[backdrop-filter]:bg-white/80"
   >
     <div
-      class="flex items-center rounded-full border border-gray-200/80 bg-gray-50/80 p-0.5"
+      class="flex items-center rounded-sm border border-gray-200/80 bg-gray-50/80 p-1"
       role="group"
       aria-label="View mode"
     >
       <button
         type="button"
         id="thoughts-mode-canvas"
-        class="cursor-pointer rounded-full px-2.5 py-1 text-[11px] text-gray-700 hover:bg-white/90 sm:text-xs"
+        class="cursor-pointer rounded-sm px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-white/90 sm:text-xs"
         aria-pressed="false"
       >
         Canvas
@@ -25,7 +25,7 @@
       <button
         type="button"
         id="thoughts-mode-card"
-        class="cursor-pointer rounded-full px-2.5 py-1 text-[11px] text-gray-700 hover:bg-white/90 sm:text-xs"
+        class="cursor-pointer rounded-sm px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-white/90 sm:text-xs"
         aria-pressed="true"
       >
         Card
@@ -36,13 +36,13 @@
 
     <div
       id="thoughts-canvas-zoom-cluster"
-      class="flex items-center gap-0.5 rounded-full border border-gray-200/80 bg-white/80 px-1 py-0.5 tabular-nums"
+      class="flex items-center gap-0.5 rounded-sm border border-gray-200/80 bg-white/80 px-1 py-0.5 tabular-nums"
       aria-label="Canvas zoom"
     >
       <button
         type="button"
         id="thoughts-canvas-zoom-out"
-        class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-base leading-none text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-35"
+        class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-sm text-base leading-none text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-35"
         aria-label="Zoom out"
       >
         −
@@ -51,7 +51,7 @@
       <button
         type="button"
         id="thoughts-canvas-zoom-in"
-        class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-base leading-none text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-35"
+        class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-sm text-base leading-none text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-35"
         aria-label="Zoom in"
       >
         +
@@ -60,7 +60,7 @@
       <button
         type="button"
         id="thoughts-canvas-reset"
-        class="cursor-pointer rounded-full px-2 py-1 text-[11px] text-gray-700 hover:bg-gray-100 sm:text-xs disabled:cursor-not-allowed disabled:opacity-35"
+        class="cursor-pointer rounded-sm px-2 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-100 sm:text-xs disabled:cursor-not-allowed disabled:opacity-35"
         aria-label="Reset canvas view"
       >
         Reset

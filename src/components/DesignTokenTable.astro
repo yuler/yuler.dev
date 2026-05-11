@@ -1,0 +1,261 @@
+---
+export const TOKEN_GROUPS = ['colors', 'typography', 'rounded', 'spacing', 'components'] as const
+export type TokenGroup = typeof TOKEN_GROUPS[number]
+
+interface Props {
+  group: TokenGroup
+  frontmatter: Record<string, unknown>
+}
+
+const { group, frontmatter } = Astro.props
+
+type TokenRow = {
+  path: string
+  value: string
+}
+
+type TokenPreview = {
+  colorHex: string | null
+  pxValues: number[]
+  remValues: number[]
+  fontSize: string | null
+  fontFamily: string | null
+  fontWeight: number | null
+  lineHeight: string | null
+}
+
+type TokenRowResolved = TokenRow & { preview: TokenPreview, resolvedValue: string }
+
+const HEX_COLOR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
+const PX_VALUE_RE = /(\d+(?:\.\d+)?)px/g
+const REM_VALUE_RE = /(\d+(?:\.\d+)?)rem/g
+const FONT_WEIGHT_RE = /^\d{2,3}$/
+const TOKEN_REF_RE = /^\{([^}]+)\}$/
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function stringifyTokenValue(value: unknown): string {
+  if (value === null || value === undefined)
+    return ''
+  if (typeof value === 'string')
+    return value
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value)
+  return JSON.stringify(value)
+}
+
+function flattenTokenObject(input: unknown, parents: string[] = []): TokenRow[] {
+  if (!isPlainObject(input))
+    return []
+
+  const rows: TokenRow[] = []
+  for (const [key, value] of Object.entries(input)) {
+    const path = [...parents, key]
+    if (isPlainObject(value)) {
+      rows.push(...flattenTokenObject(value, path))
+    }
+    else {
+      rows.push({ path: path.join('.'), value: stringifyTokenValue(value) })
+    }
+  }
+  return rows
+}
+
+function getTokenPreview(tokenPath: string, value: string): TokenPreview {
+  const normalized = value.trim()
+  const colorHex = HEX_COLOR_RE.test(normalized) ? normalized : null
+
+  const pxValues: number[] = []
+  for (const match of normalized.matchAll(PX_VALUE_RE)) {
+    const parsed = Number.parseFloat(match[1])
+    if (Number.isFinite(parsed))
+      pxValues.push(parsed)
+  }
+
+  const remValues: number[] = []
+  for (const match of normalized.matchAll(REM_VALUE_RE)) {
+    const parsed = Number.parseFloat(match[1])
+    if (Number.isFinite(parsed))
+      remValues.push(parsed)
+  }
+
+  const leafKey = tokenPath.split('.').at(-1) ?? ''
+  const fontSize = leafKey === 'fontSize' ? normalized : null
+  const remValuesForPreview = leafKey === 'fontSize' ? [] : remValues
+  const fontFamily = leafKey === 'fontFamily' ? normalized : null
+
+  const fontWeight = leafKey === 'fontWeight' && FONT_WEIGHT_RE.test(normalized)
+    ? Number.parseInt(normalized, 10)
+    : null
+
+  const lineHeight = leafKey === 'lineHeight' ? normalized : null
+
+  return { colorHex, pxValues, remValues: remValuesForPreview, fontSize, fontFamily, fontWeight, lineHeight }
+}
+
+const allRows: TokenRow[] = TOKEN_GROUPS.flatMap(g =>
+  flattenTokenObject(frontmatter?.[g], [g]),
+)
+
+const tokenValueByPath = allRows.reduce<Record<string, string>>((acc, row) => {
+  acc[row.path] = row.value
+  return acc
+}, {})
+
+function resolveTokenValue(rawValue: string, visited = new Set<string>()): string {
+  const normalized = rawValue.trim()
+  const refMatch = normalized.match(TOKEN_REF_RE)
+  if (!refMatch)
+    return normalized
+
+  const refPath = refMatch[1].trim()
+  if (!refPath)
+    return normalized
+
+  if (visited.has(refPath))
+    return normalized
+
+  const next = tokenValueByPath[refPath]
+  if (!next)
+    return normalized
+
+  visited.add(refPath)
+  return resolveTokenValue(next, visited)
+}
+
+const groupRows: TokenRow[] = flattenTokenObject(frontmatter?.[group], [group])
+
+const rows: TokenRowResolved[] = groupRows.map((row) => {
+  const resolvedValue = resolveTokenValue(row.value)
+  return {
+    ...row,
+    resolvedValue,
+    preview: getTokenPreview(row.path, resolvedValue),
+  }
+})
+
+const title = group[0].toUpperCase() + group.slice(1)
+---
+
+{rows.length > 0 && (
+  <div class="mb-6">
+    <h3 class="text-base font-semibold font-mono text-gray-900 mb-2">{title}</h3>
+    <div class="overflow-x-auto border border-gray-300 bg-white">
+      <table class="w-full border-collapse text-xs text-gray-800">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border border-gray-300 p-2 text-left font-mono">Token Path</th>
+            <th class="border border-gray-300 p-2 text-left font-mono">Value</th>
+            <th class="border border-gray-300 p-2 text-left font-mono">Preview</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            const preview = row.preview
+            return (
+              <tr>
+                <td class="border border-gray-300 p-2 font-mono">{row.path}</td>
+                <td class="border border-gray-300 p-2 break-all">{row.value}</td>
+                <td class="border border-gray-300 p-2">
+                  <div class="space-y-2">
+                    {row.resolvedValue !== row.value.trim() && (
+                      <div class="font-mono text-[11px] text-gray-400 break-all">
+                        = {row.resolvedValue}
+                      </div>
+                    )}
+                    {preview.fontFamily && (
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="h-5 w-12 border border-gray-300 bg-gray-50 flex items-center justify-center text-[11px] text-gray-900"
+                          style={`font-family: ${preview.fontFamily};`}
+                        >
+                          Aa
+                        </div>
+                        <span class="font-mono text-[11px] text-gray-500">{preview.fontFamily}</span>
+                      </div>
+                    )}
+                    {preview.fontSize && (
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="border border-gray-300 bg-gray-50 px-2 text-gray-900"
+                          style={`font-size: ${preview.fontSize}; line-height: 1;`}
+                        >
+                          {preview.fontSize}
+                        </div>
+                        <span class="font-mono text-[11px] text-gray-500">{preview.fontSize}</span>
+                      </div>
+                    )}
+
+                    {preview.fontWeight !== null && (
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="h-5 w-12 border border-gray-300 bg-gray-50 flex items-center justify-center text-[11px] text-gray-900"
+                          style={`font-weight: ${preview.fontWeight}; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;`}
+                        >
+                          Aa
+                        </div>
+                        <span class="font-mono text-[11px] text-gray-500">{preview.fontWeight}</span>
+                      </div>
+                    )}
+                    {preview.lineHeight && (
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="w-12 border border-gray-300 bg-gray-50 px-1 text-[11px] text-gray-900"
+                          style={`line-height: ${preview.lineHeight}; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;`}
+                        >
+                          A<br />
+                          a
+                        </div>
+                        <span class="font-mono text-[11px] text-gray-500">{preview.lineHeight}</span>
+                      </div>
+                    )}
+                    {preview.colorHex && (
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="h-5 w-12 border border-gray-300"
+                          style={`background-color: ${preview.colorHex};`}
+                        />
+                        <span class="font-mono text-[11px] text-gray-500">{preview.colorHex}</span>
+                      </div>
+                    )}
+                    {preview.pxValues.length > 0 && (
+                      <div class="space-y-1">
+                        {preview.pxValues.map((px) => {
+                          const width = Math.max(2, Math.min(160, px))
+                          return (
+                            <div class="flex items-center gap-2">
+                              <div class="h-1.5 bg-gray-700" style={`width: ${width}px;`} />
+                              <span class="font-mono text-[11px] text-gray-500">{px}px</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                    {preview.remValues.length > 0 && (
+                      <div class="space-y-1">
+                        {preview.remValues.map((rem) => {
+                          const width = Math.max(2, Math.min(160, rem * 16))
+                          return (
+                            <div class="flex items-center gap-2">
+                              <div class="h-1.5 bg-gray-500" style={`width: ${width}px;`} />
+                              <span class="font-mono text-[11px] text-gray-500">{rem}rem</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                    {!preview.colorHex && preview.pxValues.length === 0 && preview.remValues.length === 0 && !preview.fontSize && !preview.fontFamily && preview.fontWeight === null && !preview.lineHeight && (
+                      <span class="font-mono text-[11px] text-gray-400">-</span>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}

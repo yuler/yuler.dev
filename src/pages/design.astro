@@ -1,0 +1,74 @@
+---
+import DesignContent, { frontmatter } from '../../DESIGN.md'
+import rawDesignMd from '../../DESIGN.md?raw'
+import DesignTokenTable, { TOKEN_GROUPS } from '../components/DesignTokenTable.astro'
+import MarkdownProse from '../components/MarkdownProse.astro'
+import Switch from '../components/Switch.astro'
+import Layout from '../layouts/Layout.astro'
+
+const designDescription = typeof frontmatter?.description === 'string'
+  ? frontmatter.description
+  : ''
+---
+
+<Layout title="Design System" description="Rendered DESIGN.md for yuler.dev UI consistency.">
+  <div class="min-h-screen bg-[#f5f5f5] text-gray-900">
+    <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 font-mono">
+        <a href="/" class="hover:text-gray-900 transition-colors">~</a>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-900">design</span>
+      </nav>
+
+      <div class="bg-white border border-gray-200 p-6 md:p-8 mb-6">
+        <div class="mb-2 flex items-center justify-between gap-3">
+          <h1 class="text-2xl md:text-3xl font-bold font-mono text-gray-900">DESIGN.md</h1>
+          <Switch
+            switchId="render-mode-switch"
+            ariaLabel="Render mode"
+            value="preview"
+            eventName="render-mode:change"
+            options={[
+              { label: 'Preview', value: 'preview' },
+              { label: 'Markdown', value: 'markdown' },
+            ]}
+          />
+        </div>
+        <p class="text-sm text-gray-500 font-mono mb-5">
+          {designDescription || 'Rendered from DESIGN.md at repository root.'}
+        </p>
+      </div>
+
+      <div
+        class="bg-white border border-gray-200 p-6 md:p-8"
+        data-render-root
+        data-render-switch="render-mode-switch"
+        data-mode="preview"
+      >
+        <section data-mode-panel="preview">
+          <section class="mb-8">
+            <h2 class="text-lg font-semibold font-mono text-gray-900 mb-3">Design Tokens (YAML)</h2>
+            {TOKEN_GROUPS.map(group => (
+              <DesignTokenTable group={group} frontmatter={frontmatter as Record<string, unknown>} />
+            ))}
+          </section>
+
+          <section>
+            <MarkdownProse>
+              <DesignContent />
+            </MarkdownProse>
+          </section>
+        </section>
+
+        <section id="markdown-text" data-mode-panel="markdown" class="hidden">
+          <pre class="overflow-x-auto border border-gray-300 bg-gray-100 p-4 text-sm text-gray-800 leading-relaxed"><code>{rawDesignMd}</code></pre>
+        </section>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import '../scripts/render-mode'
+</script>

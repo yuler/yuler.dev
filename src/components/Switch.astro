@@ -1,0 +1,120 @@
+---
+interface SwitchOption {
+  label: string
+  value: string
+}
+
+interface Props {
+  value?: string
+  options?: SwitchOption[]
+  ariaLabel?: string
+  eventName?: string
+  switchId?: string
+  activeClassName?: string | string[]
+  inactiveClassName?: string | string[]
+}
+
+const {
+  value = 'preview',
+  options = [
+    { label: 'Preview', value: 'preview' },
+    { label: 'Markdown', value: 'markdown' },
+  ],
+  ariaLabel = 'Switch',
+  eventName = 'switch:change',
+  switchId,
+  activeClassName = ['bg-gray-900', 'text-white'],
+  inactiveClassName = ['text-gray-700', 'hover:text-gray-900'],
+} = Astro.props
+
+function normalizeClassName(className: string | string[]) {
+  return Array.isArray(className) ? className : className.split(/\s+/).filter(Boolean)
+}
+
+const activeClassList = normalizeClassName(activeClassName)
+const inactiveClassList = normalizeClassName(inactiveClassName)
+---
+
+<div
+  id={switchId}
+  class="inline-flex rounded-sm border border-gray-300 p-1 bg-gray-50 font-mono text-xs"
+  role="group"
+  aria-label={ariaLabel}
+  data-switch-root
+  data-switch-value={value}
+  data-switch-event={eventName}
+  data-switch-active-class={activeClassList.join(' ')}
+  data-switch-inactive-class={inactiveClassList.join(' ')}
+>
+  {options.map(option => (
+    <button
+      type="button"
+      data-switch-button
+      data-switch-option-value={option.value}
+      aria-pressed={option.value === value}
+      class:list={[
+        'rounded-sm px-2.5 py-1 transition-colors cursor-pointer',
+        ...(option.value === value ? activeClassList : inactiveClassList),
+      ]}
+    >
+      {option.label}
+    </button>
+  ))}
+</div>
+
+<script>
+  function initSwitches() {
+    const roots = Array.from(document.querySelectorAll<HTMLElement>('[data-switch-root]:not([data-switch-bound])'))
+
+    for (const root of roots) {
+      root.dataset.switchBound = 'true'
+
+      const eventName = root.dataset.switchEvent ?? 'switch:change'
+      const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-switch-button]'))
+      const activeClassName = root.dataset.switchActiveClass?.split(/\s+/).filter(Boolean) ?? []
+      const inactiveClassName = root.dataset.switchInactiveClass?.split(/\s+/).filter(Boolean) ?? []
+
+      function setActive(nextValue: string, shouldEmit = false) {
+        root.dataset.switchValue = nextValue
+
+        for (const button of buttons) {
+          const isActive = button.dataset.switchOptionValue === nextValue
+          button.setAttribute('aria-pressed', String(isActive))
+
+          for (const className of activeClassName)
+            button.classList.toggle(className, isActive)
+
+          for (const className of inactiveClassName)
+            button.classList.toggle(className, !isActive)
+        }
+
+        if (shouldEmit) {
+          root.dispatchEvent(new CustomEvent(eventName, {
+            bubbles: true,
+            detail: { value: nextValue },
+          }))
+        }
+      }
+
+      const initialValue = root.dataset.switchValue ?? buttons[0]?.dataset.switchOptionValue ?? ''
+      if (initialValue)
+        setActive(initialValue)
+
+      for (const button of buttons) {
+        button.addEventListener('click', () => {
+          const nextValue = button.dataset.switchOptionValue ?? ''
+          if (nextValue)
+            setActive(nextValue, true)
+        })
+      }
+    }
+  }
+
+  initSwitches()
+
+  const htmlRoot = document.documentElement
+  if (!htmlRoot.dataset.switchPageLoadBound) {
+    htmlRoot.dataset.switchPageLoadBound = 'true'
+    document.addEventListener('astro:page-load', initSwitches)
+  }
+</script>
