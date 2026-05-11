@@ -63,48 +63,58 @@ const inactiveClassList = normalizeClassName(inactiveClassName)
 </div>
 
 <script>
-  const roots = Array.from(document.querySelectorAll<HTMLElement>('[data-switch-root]:not([data-switch-bound])'))
+  function initSwitches() {
+    const roots = Array.from(document.querySelectorAll<HTMLElement>('[data-switch-root]:not([data-switch-bound])'))
 
-  for (const root of roots) {
-    root.dataset.switchBound = 'true'
+    for (const root of roots) {
+      root.dataset.switchBound = 'true'
 
-    const eventName = root.dataset.switchEvent ?? 'switch:change'
-    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-switch-button]'))
-    const activeClassName = root.dataset.switchActiveClass?.split(/\s+/).filter(Boolean) ?? []
-    const inactiveClassName = root.dataset.switchInactiveClass?.split(/\s+/).filter(Boolean) ?? []
+      const eventName = root.dataset.switchEvent ?? 'switch:change'
+      const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-switch-button]'))
+      const activeClassName = root.dataset.switchActiveClass?.split(/\s+/).filter(Boolean) ?? []
+      const inactiveClassName = root.dataset.switchInactiveClass?.split(/\s+/).filter(Boolean) ?? []
 
-    function setActive(nextValue: string, shouldEmit = false) {
-      root.dataset.switchValue = nextValue
+      function setActive(nextValue: string, shouldEmit = false) {
+        root.dataset.switchValue = nextValue
+
+        for (const button of buttons) {
+          const isActive = button.dataset.switchOptionValue === nextValue
+          button.setAttribute('aria-pressed', String(isActive))
+
+          for (const className of activeClassName)
+            button.classList.toggle(className, isActive)
+
+          for (const className of inactiveClassName)
+            button.classList.toggle(className, !isActive)
+        }
+
+        if (shouldEmit) {
+          root.dispatchEvent(new CustomEvent(eventName, {
+            bubbles: true,
+            detail: { value: nextValue },
+          }))
+        }
+      }
+
+      const initialValue = root.dataset.switchValue ?? buttons[0]?.dataset.switchOptionValue ?? ''
+      if (initialValue)
+        setActive(initialValue)
 
       for (const button of buttons) {
-        const isActive = button.dataset.switchOptionValue === nextValue
-        button.setAttribute('aria-pressed', String(isActive))
-
-        for (const className of activeClassName)
-          button.classList.toggle(className, isActive)
-
-        for (const className of inactiveClassName)
-          button.classList.toggle(className, !isActive)
-      }
-
-      if (shouldEmit) {
-        root.dispatchEvent(new CustomEvent(eventName, {
-          bubbles: true,
-          detail: { value: nextValue },
-        }))
+        button.addEventListener('click', () => {
+          const nextValue = button.dataset.switchOptionValue ?? ''
+          if (nextValue)
+            setActive(nextValue, true)
+        })
       }
     }
+  }
 
-    const initialValue = root.dataset.switchValue ?? buttons[0]?.dataset.switchOptionValue ?? ''
-    if (initialValue)
-      setActive(initialValue)
+  initSwitches()
 
-    for (const button of buttons) {
-      button.addEventListener('click', () => {
-        const nextValue = button.dataset.switchOptionValue ?? ''
-        if (nextValue)
-          setActive(nextValue, true)
-      })
-    }
+  const htmlRoot = document.documentElement
+  if (!htmlRoot.dataset.switchPageLoadBound) {
+    htmlRoot.dataset.switchPageLoadBound = 'true'
+    document.addEventListener('astro:page-load', initSwitches)
   }
 </script>
