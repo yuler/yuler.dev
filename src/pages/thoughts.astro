@@ -87,9 +87,9 @@ const boardCardShell = [
       backface-visibility: hidden;
     }
     .thought-canvas-card {
-      left: calc(var(--x-mob) + var(--drag-x, 0px));
-      top: calc(var(--y-mob) + var(--drag-y, 0px));
-      transform: rotate(var(--rotate-deg, 0deg));
+      left: var(--x-mob);
+      top: var(--y-mob);
+      transform: translate3d(var(--drag-x, 0px), var(--drag-y, 0px), 0) rotate(var(--rotate-deg, 0deg));
     }
     @media (min-width: 768px) {
       #thoughts-canvas-world {
@@ -97,8 +97,8 @@ const boardCardShell = [
         height: var(--world-h-desk);
       }
       .thought-canvas-card {
-        left: calc(var(--x-desk) + var(--drag-x, 0px));
-        top: calc(var(--y-desk) + var(--drag-y, 0px));
+        left: var(--x-desk);
+        top: var(--y-desk);
       }
     }
   </style>

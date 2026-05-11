@@ -36,10 +36,9 @@ function parseCssPx(raw: string): number {
 }
 
 function readCardDragOffsets(card: HTMLElement): { x: number, y: number } {
-  const cs = getComputedStyle(card)
   return {
-    x: parseCssPx(cs.getPropertyValue('--drag-x')),
-    y: parseCssPx(cs.getPropertyValue('--drag-y')),
+    x: parseCssPx(card.style.getPropertyValue('--drag-x')),
+    y: parseCssPx(card.style.getPropertyValue('--drag-y')),
   }
 }
 
