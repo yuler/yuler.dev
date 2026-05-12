@@ -16,7 +16,7 @@ const hasPreviewImages = (latest?.data.images?.length ?? 0) > 0
 ---
 
 {latest && (
-  <div class="relative bg-white border border-gray-200 p-6 h-full flex flex-col transition-all duration-300 hover:border-gray-400">
+  <div class="relative bg-white border border-gray-200 p-6 h-auto flex flex-col transition-all duration-300 hover:border-gray-400">
     <CornerMarkers />
 
     <div class="mb-4 flex items-center justify-between border-b border-gray-100 pb-4">
@@ -26,7 +26,7 @@ const hasPreviewImages = (latest?.data.images?.length ?? 0) > 0
       </span>
     </div>
 
-    <div class="flex-1">
+    <div class="flex-1 mb-4">
       <article class="prose prose-sm max-w-none text-gray-800 leading-relaxed">
         {/* Text content */}
         {Content && <Content />}
