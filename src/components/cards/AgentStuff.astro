@@ -1,0 +1,31 @@
+---
+import CornerMarkers from '../CornerMarkers.astro'
+import Bot from '../icons/Bot.astro'
+import Sparkles from '../icons/Sparkles.astro'
+---
+
+<div class="relative bg-white border border-gray-200 p-6 h-auto transition-all duration-300 hover:border-gray-400">
+  <CornerMarkers />
+
+  <div class="pointer-events-none absolute inset-0 overflow-hidden text-gray-900 opacity-[0.05]">
+    <Sparkles class="absolute left-2 top-2 size-16 -rotate-12" />
+    <Bot class="absolute right-2 bottom-2 size-14 rotate-12" />
+  </div>
+
+  <p class="relative z-10 font-mono text-xs leading-relaxed text-gray-500 break-all">
+    This website follows the
+    <a
+      href="/design"
+      class="underline! decoration-gray-400 underline-offset-4 transition-colors hover:text-gray-900 hover:decoration-gray-900"
+    >
+      design guidelines
+    </a>
+    and provides
+    <a
+      href="/agents"
+      class="underline! decoration-gray-400 underline-offset-4 transition-colors hover:text-gray-900 hover:decoration-gray-900"
+    >
+      agent instructions
+    </a>.
+  </p>
+</div>

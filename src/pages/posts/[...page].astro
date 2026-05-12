@@ -56,9 +56,9 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
               <li>
                 <a
                   href={`/posts/${post.id}`}
-                  class="group flex items-center justify-between p-3 min-h-[3.25rem] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                  class="group flex min-h-13 items-start justify-between gap-3 p-3 transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
                 >
-                  <div>
+                  <div class="min-w-0">
                     <h3 class="font-medium text-gray-900 group-hover:text-gray-700">
                       {post.data.title}
                       {post.data.draft && (
@@ -66,11 +66,21 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
                       )}
                       {post.data.wip && <span class="ml-2 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700">WIP</span>}
                     </h3>
-                    <time class="text-xs text-gray-500 font-mono" datetime={post.data.date.toISOString()}>
-                      {formatDate(post.data.date)}
-                    </time>
+                    <p class="mt-1 line-clamp-2 text-sm leading-snug text-gray-600">
+                      {post.data.description}
+                    </p>
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                      <time class="text-xs text-gray-500 font-mono" datetime={post.data.date.toISOString()}>
+                        {formatDate(post.data.date)}
+                      </time>
+                      {post.data.tags.slice(0, 4).map(tag => (
+                        <span class="border border-gray-200 px-1.5 py-0.5 text-[10px] leading-none text-gray-500">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <ChevronRight class="h-4 w-4 text-gray-400 transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight class="mt-1 h-4 w-4 shrink-0 text-gray-400 transition-transform group-hover:translate-x-0.5" />
                 </a>
               </li>
             ))
@@ -84,7 +94,7 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
 ? (
                 <a
                   href={page.url.prev}
-                  class="inline-flex items-center gap-2 px-4 py-3 min-h-[2.75rem] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
+                  class="inline-flex min-h-11 items-center gap-2 px-4 py-3 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
                 >
                   <span>←</span>
                   <span>Prev</span>
@@ -102,7 +112,7 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
 ? (
                 <a
                   href={page.url.next}
-                  class="inline-flex items-center gap-2 px-4 py-3 min-h-[2.75rem] text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
+                  class="inline-flex min-h-11 items-center gap-2 px-4 py-3 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
                 >
                   <span>Next</span>
                   <span>→</span>

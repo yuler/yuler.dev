@@ -1,7 +1,6 @@
 ---
 title: 'Hi, DeepSeek!'
 description: 'An introduction to the DeepSeek large language model, including its features, use cases, and self-hosting deployment guide.'
-slug: 'deepseek'
 tags: ["DeepSeek", "LLM", "AI", "Ollama"]
 date: 2025-02-18
 ---
@@ -138,10 +137,10 @@ https://github.com/deepseek-ai/DeepSeek-R1?tab=readme-ov-file#2-model-summary
 
 提问：根据附件 `financial_report.xlsx`, 张三的营业额是多少？
 
-- 上传附件 `compony_policy.docx`
+- 上传附件 `company_policy.docx`
 
 提问：根据文档中的描述，请假流程是？带薪休假有多少天？
-提问：根据附件中 `compony_policy.docx`, 生成一句话总结公司政策。
+提问：根据附件中 `company_policy.docx`, 生成一句话总结公司政策。
 
 ### Prompt
 
@@ -229,10 +228,25 @@ async function main(message) {
   console.log(completion.choices[0].message.content)
 }
 
-main('DeepSeek 是什么？做一个简短的介绍，他有那些优势和那些不足？')
+main('DeepSeek 是什么？做一个简短的介绍，它有哪些优势和哪些不足？')
 ```
 
-JSON 示例？
+### JSON 请求示例
+
+如果不使用 SDK，也可以直接向 DeepSeek 的 OpenAI-compatible API 发送 JSON 请求：
+
+```bash
+curl https://api.deepseek.com/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+  -d '{
+    "model": "deepseek-chat",
+    "messages": [
+      { "role": "system", "content": "You are a helpful assistant." },
+      { "role": "user", "content": "DeepSeek 是什么？" }
+    ]
+  }'
+```
 
 ## Ollama 接口调用
 

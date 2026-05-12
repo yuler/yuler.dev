@@ -28,6 +28,14 @@ describe('workout-display', () => {
     expect(formatPaceOrSpeed('Run', avgSpeed)).toBe(`1'00"/km`)
   })
 
+  it('does not show pace for zero-distance indoor activities', () => {
+    expect(formatPaceOrSpeed('Badminton', 1.23, 0)).toBe('Indoor')
+  })
+
+  it('does not invent pace for other zero-distance activities', () => {
+    expect(formatPaceOrSpeed('Run', 1.23, 0)).toBe('No distance')
+  })
+
   it('computes activity count heat levels', () => {
     expect(dailyActivityCountHeatLevel(0)).toBe(0)
     expect(dailyActivityCountHeatLevel(1)).toBe(1)

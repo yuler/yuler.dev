@@ -1,7 +1,6 @@
 ---
 title: 'Setup Mac Mini'
 description: 'WIP'
-slug: 'setup-mac-mini'
 tags: ["mac", "mac mini"]
 date: 2024-12-09
 ---

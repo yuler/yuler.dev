@@ -38,17 +38,17 @@ const {
       >
       </div>
       <div
-        class="pointer-events-none absolute inset-0 bg-gradient-to-t from-white/95 via-white/80 to-white/60 z-[401]"
+        class="pointer-events-none absolute inset-0 bg-linear-to-t from-white/95 via-white/80 to-white/60 z-[401]"
       >
       </div>
     </div>
 
-    <div class="absolute right-0 top-0 opacity-5 z-10">
-      <MapPin class="size-20 sm:size-28 lg:size-32" />
+    <div class="absolute right-2 bottom-2 opacity-5 z-10">
+      <MapPin class="size-12 " />
     </div>
 
-    <div class="relative z-10 flex h-full flex-col p-4">
-      <div class="text-left mt-auto border-t border-gray-100 pt-3">
+    <div class="relative z-10 flex h-full flex-col p-4 pt-8">
+      <div class="text-left mt-auto border-t border-gray-100">
         <h3 class="text-base font-semibold text-gray-900 font-mono">{title}</h3>
         <p class="text-xs text-gray-500 font-mono">{subtitle}</p>
       </div>
@@ -62,7 +62,7 @@ const {
   </a>
 
   <button
-    class="location-provider-btn absolute top-2 left-2 z-[402] flex items-center justify-center bg-white/80 backdrop-blur-sm p-1 rounded-sm border border-gray-200 text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 cursor-pointer"
+    class="location-provider-btn absolute top-2 right-2 z-402 flex items-center justify-center bg-white/80 backdrop-blur-sm p-1 rounded-sm border border-gray-200 text-gray-400 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 cursor-pointer"
     aria-label="Switch map provider"
     title="Switch map provider"
   >

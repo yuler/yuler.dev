@@ -10,6 +10,7 @@ colors:
   surface: "#ffffff"
   border: "#e5e7eb"
   border-muted: "#f3f4f6"
+  muted-ui: "#9ca3af"
   heatmap-low: "#f3f4f6"
   heatmap-mid: "#d1d5db"
   heatmap-high: "#4b5563"
@@ -119,7 +120,7 @@ yuler.dev is a **light, content-first** personal site: soft neutral canvas, whit
 - **Neutral (`#f5f5f5`):** Page background for home, posts, and workouts (`bg-[#f5f5f5]` / same as body background).
 - **Surface (`#ffffff`):** All primary cards and article shells.
 - **Border (`#e5e7eb`) / border-muted (`#f3f4f6`):** Default card and list borders; lighter rules for section dividers (`border-gray-100`).
-- **Muted UI (`#9ca3af`, Tailwind `gray-400`):** Chevron and separator icons; decorative only, not for long text on white (contrast). Not a named YAML token—use Tailwind classes in code.
+- **Muted UI (`#9ca3af`, Tailwind `gray-400`):** Chevron icons, corner markers, decorative separators, and inactive controls. Use for short UI chrome only, not long text on white (contrast).
 - **Heatmap scale (`heatmap-*`):** Workout contribution cells only—from empty light gray through black for intensity; today’s cell may use an inset ring, not a fifth fill color.
 
 ## Typography

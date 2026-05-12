@@ -67,7 +67,11 @@ export function formatDistanceMetersCompact(meters: number): string {
   return `${(meters / 1000).toFixed(2)}km`
 }
 
-export function formatPaceOrSpeed(sportType: string, avgSpeed: number): string {
+const INDOOR_ZERO_DISTANCE_SPORTS = new Set(['Badminton', 'Yoga', 'WeightTraining'])
+
+export function formatPaceOrSpeed(sportType: string, avgSpeed: number, distanceMeters?: number): string {
+  if (distanceMeters !== undefined && distanceMeters <= 0)
+    return INDOOR_ZERO_DISTANCE_SPORTS.has(sportType) ? 'Indoor' : 'No distance'
   if (avgSpeed === 0)
     return '-'
   if (sportType === 'Ride')
