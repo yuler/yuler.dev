@@ -228,7 +228,7 @@ async function main(message) {
   console.log(completion.choices[0].message.content)
 }
 
-main('DeepSeek 是什么？做一个简短的介绍，他有那些优势和那些不足？')
+main('DeepSeek 是什么？做一个简短的介绍，它有哪些优势和哪些不足？')
 ```
 
 ### JSON 请求示例

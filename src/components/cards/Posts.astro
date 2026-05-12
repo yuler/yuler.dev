@@ -63,7 +63,7 @@ const posts = (
               >
                 {formatDate(post.data.date)}
               </time>
-              {post.data.tags.length > 0 && (
+              {post.data.tags && post.data.tags.length > 0 && (
                 <div class="mt-2 flex flex-wrap gap-1.5">
                   {post.data.tags.slice(0, 3).map(tag => (
                     <span class="border border-gray-200 px-1.5 py-0.5 text-[10px] leading-none text-gray-500">
