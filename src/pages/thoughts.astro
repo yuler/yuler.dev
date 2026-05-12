@@ -13,6 +13,7 @@ import {
 } from '@/utils/thoughts-canvas-layout'
 
 const thoughts = await getSortedThoughts()
+const hasPreviewImages = thoughts.some(thought => (thought.data.images?.length ?? 0) > 0)
 
 const thoughtsMapped = thoughts.map(t => ({
   id: t.id,
@@ -220,5 +221,5 @@ const boardCardShell = [
     </div>
   </div>
 
-  <LightBox />
+  {hasPreviewImages && <LightBox />}
 </Layout>

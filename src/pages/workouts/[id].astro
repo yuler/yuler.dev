@@ -33,7 +33,7 @@ const stats = [
   { label: 'Distance', value: formatDistanceMeters(activity.distance) },
   { label: 'Moving Time', value: formatMovingDuration(activity.moving_time, 'detail') },
   { label: 'Elapsed Time', value: formatMovingDuration(activity.elapsed_time, 'detail') },
-  { label: 'Pace / Speed', value: formatPaceOrSpeed(activity.sport_type, activity.average_speed) },
+  { label: 'Pace / Speed', value: formatPaceOrSpeed(activity.sport_type, activity.average_speed, activity.distance) },
   { label: 'Max Speed', value: formatMaxSpeedKmh(activity.max_speed) },
   { label: 'Elevation Gain', value: `${activity.total_elevation_gain}m` },
   ...(activity.has_heartrate

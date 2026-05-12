@@ -18,7 +18,7 @@ Personal site at https://yuler.dev — Astro 6, MDX, Tailwind CSS 4, TypeScript.
 
 ## Icons
 
-Every icons should a simple astro component locate in [`src/components/icons`](./src/components/)
+Every icon should be a simple Astro component located in [`src/components/icons`](./src/components/icons/)
 
 ## Git Commit
 

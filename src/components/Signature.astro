@@ -51,6 +51,11 @@ const { class: className = '' } = Astro.props
      ? cssDuration * 1000
      : DEFAULT_DURATION_MS
 
+   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+     signaturePath.style.strokeDashoffset = '0'
+     return
+   }
+
    async function play(from: number, to: number, duration: number): Promise<void> {
      const animation = signaturePath.animate(
        [{ strokeDashoffset: String(from) }, { strokeDashoffset: String(to) }],

@@ -82,7 +82,7 @@ const showEmptyRangeState = Boolean(serverFilterRange && visibleInServerRange ==
               <li data-date={dateStr} style={hiddenByRange ? 'display: none' : undefined}>
                 <a
                   href={`/workouts/${activity.id}`}
-                  class="group flex items-center justify-between p-3 min-h-[3.25rem] transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                  class="group flex min-h-13 items-center justify-between p-3 transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-200"
                 >
                   <div class="flex items-center gap-3 min-w-0">
                     <span class="text-lg shrink-0" title={activity.sport_type}>
@@ -102,7 +102,7 @@ const showEmptyRangeState = Boolean(serverFilterRange && visibleInServerRange ==
                         </span>
                         <span class="hidden sm:inline text-gray-300 shrink-0">|</span>
                         <span class="hidden sm:inline shrink-0 whitespace-nowrap">
-                          {formatPaceOrSpeed(activity.sport_type, activity.average_speed)}
+                          {formatPaceOrSpeed(activity.sport_type, activity.average_speed, activity.distance)}
                         </span>
                       </div>
                     </div>
