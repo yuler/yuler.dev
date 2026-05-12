@@ -28,3 +28,8 @@ Use the `/git-commit` skill for every commit. Check in this order:
 - Global: `~/.agents/skills/git-commit`
 
 If neither exists, install it from the upstream [skills/git-commit](https://github.com/yuler/skills/tree/main/skills/git-commit)
+
+## Deployment
+
+- This site deploys as static files generated from the Astro build.
+- Deployment is automated by [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml): pushes to `main` run the GitHub Actions workflow, build the site with `withastro/action`, and publish it to GitHub Pages with `actions/deploy-pages`.
