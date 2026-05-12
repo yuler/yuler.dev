@@ -6,6 +6,7 @@ import { formatDate } from '../../utils/date'
 import { getSortedThoughts } from '../../utils/thoughts'
 import CornerMarkers from '../CornerMarkers.astro'
 import ArrowRight from '../icons/ArrowRight.astro'
+import Lightbulb from '../icons/Lightbulb.astro'
 import LightBox from '../LightBox.astro'
 
 const thoughts = await getSortedThoughts()
@@ -19,32 +20,52 @@ const hasPreviewImages = (latest?.data.images?.length ?? 0) > 0
   <div class="relative bg-white border border-gray-200 p-6 h-auto flex flex-col transition-all duration-300 hover:border-gray-400">
     <CornerMarkers />
 
+    <span class="pointer-events-none absolute right-4 bottom-4 -rotate-10 transform-origin-top-center z-10 border border-gray-300/40 bg-transparent px-3 py-1 font-mono text-xs uppercase tracking-widest text-gray-500/70">
+      Latest
+    </span>
+
+    <div class="pointer-events-none absolute inset-0 overflow-hidden text-gray-900 opacity-[0.05]">
+      <Lightbulb class="absolute top-2 left-2 size-20 rotate-20" />
+    </div>
+
     <div class="mb-4 flex items-center justify-between border-b border-gray-100 pb-4">
-      <h2 class="text-lg font-semibold text-gray-900 font-mono">Thoughts</h2>
-      <span class="px-2 py-0.5 text-sm bg-gray-100 text-gray-600 font-mono">
-        {thoughts.length}
-      </span>
+      <h2 class="text-lg font-semibold text-gray-900 font-mono">Thoughts
+        <span class="px-2 py-0.5 text-sm bg-gray-100 text-gray-600 font-mono">
+          {thoughts.length}
+        </span>
+      </h2>
+      <div class="flex items-center gap-3">
+        <a
+          href="/thoughts"
+          class="inline-flex items-center gap-1 text-xs text-gray-400 font-mono transition-colors hover:text-gray-600 underline underline-offset-2 decoration-gray-200 hover:decoration-gray-400"
+        >
+          View all
+          <ArrowRight class="h-3 w-3" />
+        </a>
+      </div>
     </div>
 
     <div class="flex-1 mb-4">
-      <article class="prose prose-sm max-w-none text-gray-800 leading-relaxed">
-        {/* Text content */}
-        {Content && <Content />}
+      <div class="relative">
+        <article class="prose prose-sm prose-a:underline! max-w-none text-gray-800 leading-relaxed">
+          {/* Text content */}
+          {Content && <Content />}
 
-        {/* Images grid */}
-        {latest.data.images && latest.data.images.length > 0 && (
-          <div class="mt-3 grid gap-2 grid-cols-3">
-            {latest.data.images.map((img: any, index: number) => (
-              <Image
-                src={img}
-                alt={`Thought image ${index + 1}`}
-                class="border border-gray-200 w-full aspect-square object-cover m-0! cursor-zoom-in transition-all duration-300 hover:border-gray-400 hover:shadow-sm"
-                data-lightbox="true"
-              />
-            ))}
-          </div>
-        )}
-      </article>
+          {/* Images grid */}
+          {latest.data.images && latest.data.images.length > 0 && (
+            <div class="mt-3 grid gap-2 grid-cols-3">
+              {latest.data.images.map((img: any, index: number) => (
+                <Image
+                  src={img}
+                  alt={`Thought image ${index + 1}`}
+                  class="border border-gray-200 w-full aspect-square object-cover m-0! cursor-zoom-in transition-all duration-300 hover:border-gray-400 hover:shadow-sm"
+                  data-lightbox="true"
+                />
+              ))}
+            </div>
+          )}
+        </article>
+      </div>
 
       {/* Time & tags below content */}
       <div class="mt-3 flex items-center justify-between">
@@ -59,16 +80,6 @@ const hasPreviewImages = (latest?.data.images?.length ?? 0) > 0
           </div>
         )}
       </div>
-    </div>
-
-    <div class="mt-auto flex justify-center pt-4 border-t border-gray-100">
-      <a
-        href="/thoughts"
-        class="inline-flex min-h-11 items-center gap-2 px-4 py-3 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-mono"
-      >
-        View more
-        <ArrowRight class="h-3 w-3" />
-      </a>
     </div>
   </div>
 )}
