@@ -5,4 +5,4 @@
 - [ ] Add use page
 - [ ] Add about page
 - [ ] Update the thoughts page UI Add "Pin" UI style
-- [ ] Post claude/cursor/gemini I most use AI coding tool for settings to auto approve run shell, skills, etc.
+- [ ] Create a drag mode for custom saved thoughts position in canvas mode
