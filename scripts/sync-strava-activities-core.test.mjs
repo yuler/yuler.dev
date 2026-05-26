@@ -68,4 +68,31 @@ describe('syncActivities', () => {
       detail: true,
     })
   })
+
+  it('repairs the index when activity details already exist locally', async () => {
+    const activitiesDir = makeActivitiesDir()
+    writeJson(path.join(activitiesDir, '_index.json'), [])
+    writeJson(path.join(activitiesDir, '100.json'), {
+      id: 100,
+      start_date: '2023-01-01T00:00:00Z',
+    })
+
+    let detailFetches = 0
+
+    await syncActivities({
+      activitiesDir,
+      getStravaActivities: async () => [{
+        id: 100,
+        start_date: '2023-01-01T00:00:00Z',
+      }],
+      getStravaActivityById: async (id) => {
+        detailFetches++
+        return { id }
+      },
+      logger: { log() {} },
+    })
+
+    expect(detailFetches).toBe(0)
+    expect(readJson(path.join(activitiesDir, '_index.json'))).toEqual([100])
+  })
 })

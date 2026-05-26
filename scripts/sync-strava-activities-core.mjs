@@ -87,6 +87,8 @@ export async function syncActivities({
   const missingIds = freshIds.filter(id => !hasDetail(activitiesDir, id))
 
   if (missingIds.length === 0) {
+    for (const id of freshIds) knownSet.add(id)
+    writeJson(path.join(activitiesDir, IDS_FILE), [...knownSet])
     const latestTimestamp = getLatestActivityTimestamp(activities)
     writeJson(path.join(activitiesDir, META_FILE), { ...meta, lastSync: latestTimestamp })
     logger.log('✅ All activities up to date')
