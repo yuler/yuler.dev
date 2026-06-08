@@ -29,7 +29,7 @@ const deskRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', ov
 const deskBySlug = new Map(deskRows.map(r => [r.slug, r]))
 const deskBounds = worldBounds(deskRows)
 
-const mobRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', containerWidth: 375, overrides: savedLayout })
+const mobRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', containerWidth: 375 })
 const mobBySlug = new Map(mobRows.map(r => [r.slug, r]))
 const mobBounds = worldBounds(mobRows, 375)
 
@@ -151,7 +151,7 @@ const boardCardShell = [
                 return (
                   <article
                     id={`thought-canvas-${thought.id}`}
-                    class={`thought-stick-rot thought-canvas-card absolute z-[1] ${boardCardShell} origin-top-left`}
+                    class={`thought-stick-rot thought-canvas-card absolute z-[1] ${boardCardShell} origin-center`}
                     data-slug={thought.id}
                     data-x={deskRow.x}
                     data-y={deskRow.y}
