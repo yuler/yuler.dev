@@ -38,4 +38,29 @@ describe('layoutStickyNotes', () => {
     expect(newest?.x).toBeDefined()
     expect(Math.abs((newest?.x ?? 0) - centerX)).toBeLessThanOrEqual(80)
   })
+
+  it('uses saved position and rotation overrides by slug', () => {
+    const [row] = layoutStickyNotes(
+      [
+        {
+          id: 'saved',
+          slug: 'saved-card',
+          dateMs: Date.parse('2026-01-01T00:00:00Z'),
+        },
+      ],
+      {
+        overrides: {
+          'saved-card': {
+            x: 123,
+            y: 456,
+            rotateDeg: -3.5,
+          },
+        },
+      },
+    )
+
+    expect(row?.x).toBe(123)
+    expect(row?.y).toBe(456)
+    expect(row?.rotateDeg).toBe(-3.5)
+  })
 })

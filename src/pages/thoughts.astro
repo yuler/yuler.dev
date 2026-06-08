@@ -1,8 +1,10 @@
 ---
 // src/pages/thoughts/index.astro
+import RotateCw from '@/components/icons/RotateCw.astro'
 import LightBox from '@/components/LightBox.astro'
 import Thought from '@/components/Thought.astro'
 import ThoughtsCanvasBottomToolbar from '@/components/thoughts/ThoughtsCanvasBottomToolbar.astro'
+import thoughtsCanvasLayout from '@/data/thoughts-canvas-layout.json'
 import Layout from '@/layouts/Layout.astro'
 import { getSortedThoughts } from '@/utils/thoughts'
 import {
@@ -21,11 +23,13 @@ const thoughtsMapped = thoughts.map(t => ({
   dateMs: t.data.date.getTime(),
 }))
 
-const deskRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first' })
+const savedLayout = thoughtsCanvasLayout.cards
+
+const deskRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', overrides: savedLayout })
 const deskBySlug = new Map(deskRows.map(r => [r.slug, r]))
 const deskBounds = worldBounds(deskRows)
 
-const mobRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', containerWidth: 375 })
+const mobRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', containerWidth: 375, overrides: savedLayout })
 const mobBySlug = new Map(mobRows.map(r => [r.slug, r]))
 const mobBounds = worldBounds(mobRows, 375)
 
@@ -88,9 +92,9 @@ const boardCardShell = [
       backface-visibility: hidden;
     }
     .thought-canvas-card {
-      left: var(--x-mob);
-      top: var(--y-mob);
-      transform: translate3d(var(--drag-x, 0px), var(--drag-y, 0px), 0) rotate(var(--rotate-deg, 0deg));
+      left: var(--edit-x, var(--x-mob));
+      top: var(--edit-y, var(--y-mob));
+      transform: rotate(var(--rotate-deg, 0deg));
     }
     @media (min-width: 768px) {
       #thoughts-canvas-world {
@@ -98,9 +102,23 @@ const boardCardShell = [
         height: var(--world-h-desk);
       }
       .thought-canvas-card {
-        left: var(--x-desk);
-        top: var(--y-desk);
+        left: var(--edit-x, var(--x-desk));
+        top: var(--edit-y, var(--y-desk));
       }
+    }
+    #thoughts-root[data-edit-mode='true'] .thought-canvas-card {
+      cursor: grab;
+    }
+    #thoughts-root[data-edit-mode='true'] .thought-canvas-card[data-selected='true'] {
+      z-index: 60;
+      outline: 2px solid rgba(17, 24, 39, 0.72);
+      outline-offset: 3px;
+    }
+    .thought-canvas-rotate-handle {
+      display: none;
+    }
+    #thoughts-root[data-edit-mode='true'] .thought-canvas-card[data-selected='true'] .thought-canvas-rotate-handle {
+      display: flex;
     }
   </style>
 
@@ -108,7 +126,7 @@ const boardCardShell = [
     <div id="thoughts-root" class="relative min-h-dvh">
       <section
         id="thoughts-canvas-view"
-        class="motion-reduce:hidden fixed inset-0 z-0 hidden bg-[#f5f5f5] md:motion-safe:block"
+        class="motion-reduce:hidden fixed inset-0 z-0 hidden bg-[#f5f5f5] motion-safe:block"
         aria-label="Thoughts canvas"
       >
         <div
@@ -134,20 +152,29 @@ const boardCardShell = [
                   <article
                     id={`thought-canvas-${thought.id}`}
                     class={`thought-stick-rot thought-canvas-card absolute z-[1] ${boardCardShell} origin-top-left`}
+                    data-slug={thought.id}
+                    data-x={deskRow.x}
+                    data-y={deskRow.y}
+                    data-rotate={deskRow.rotateDeg}
                     style={{
                       '--x-desk': `${deskRow.x}px`,
                       '--y-desk': `${deskRow.y}px`,
                       '--x-mob': `${mobRow.x}px`,
                       '--y-mob': `${mobRow.y}px`,
                       '--rotate-deg': `${deskRow.rotateDeg}deg`,
-                      '--drag-x': '0px',
-                      '--drag-y': '0px',
                       'width': `${THOUGHT_STICKY_NOTE_W}px`,
                       'maxHeight': `${THOUGHT_STICKY_NOTE_MAX_H}px`,
                       'overflowY': 'auto',
                     }}
                     tabindex={deskRow.tabIndex}
                   >
+                    <button
+                      type="button"
+                      class="thought-canvas-rotate-handle absolute right-2 top-2 z-[70] size-8 cursor-grab items-center justify-center rounded-sm border border-gray-300 bg-white text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
+                      aria-label="Rotate card"
+                    >
+                      <RotateCw class="size-4" />
+                    </button>
                     <Thought thought={thought} />
                   </article>
                 )
@@ -217,7 +244,7 @@ const boardCardShell = [
         }
       </section>
 
-      <ThoughtsCanvasBottomToolbar />
+      <ThoughtsCanvasBottomToolbar isDev={import.meta.env.DEV} />
     </div>
   </div>
 

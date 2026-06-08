@@ -18,6 +18,12 @@ export interface ThoughtsCanvasChromeOptions {
   zoomInBtn?: HTMLButtonElement | null
   zoomLevelEl?: HTMLElement | null
   resetBtn?: HTMLButtonElement | null
+  editBtn?: HTMLButtonElement | null
+  rotateLeftBtn?: HTMLButtonElement | null
+  rotateRightBtn?: HTMLButtonElement | null
+  saveBtn?: HTMLButtonElement | null
+  editStatusEl?: HTMLElement | null
+  enableEditing?: boolean
   initialScale?: number
 }
 
@@ -35,16 +41,34 @@ function parseCssPx(raw: string): number {
   return Number.isFinite(n) ? n : 0
 }
 
-function readCardDragOffsets(card: HTMLElement): { x: number, y: number } {
-  return {
-    x: parseCssPx(card.style.getPropertyValue('--drag-x')),
-    y: parseCssPx(card.style.getPropertyValue('--drag-y')),
-  }
+function readCardX(card: HTMLElement): number {
+  const raw = card.style.getPropertyValue('--edit-x')
+  if (raw)
+    return parseCssPx(raw)
+  return parseCssPx(getComputedStyle(card).left)
 }
 
-function setCardDragOffsets(card: HTMLElement, x: number, y: number) {
-  card.style.setProperty('--drag-x', `${x}px`)
-  card.style.setProperty('--drag-y', `${y}px`)
+function readCardY(card: HTMLElement): number {
+  const raw = card.style.getPropertyValue('--edit-y')
+  if (raw)
+    return parseCssPx(raw)
+  return parseCssPx(getComputedStyle(card).top)
+}
+
+function readCardRotate(card: HTMLElement): number {
+  return Number.parseFloat(card.dataset.rotate ?? '') || 0
+}
+
+function setCardPosition(card: HTMLElement, x: number, y: number) {
+  card.dataset.x = String(x)
+  card.dataset.y = String(y)
+  card.style.setProperty('--edit-x', `${x}px`)
+  card.style.setProperty('--edit-y', `${y}px`)
+}
+
+function setCardRotate(card: HTMLElement, rotateDeg: number) {
+  card.dataset.rotate = String(rotateDeg)
+  card.style.setProperty('--rotate-deg', `${rotateDeg}deg`)
 }
 
 export function initThoughtsCanvas(
@@ -68,14 +92,23 @@ export function initThoughtsCanvas(
   let hoverMx = 0
   let hoverMy = 0
   let hasHover = false
+  let editMode = false
+  let selectedCard: HTMLElement | null = null
+  let saveState: 'idle' | 'dirty' | 'saving' | 'saved' | 'error' = 'idle'
 
   let cardDrag: {
     card: HTMLElement
     pointerId: number
-    accX: number
-    accY: number
+    x: number
+    y: number
     lastX: number
     lastY: number
+  } | null = null
+  let cardRotateDrag: {
+    card: HTMLElement
+    pointerId: number
+    startPointerAngle: number
+    startRotate: number
   } | null = null
 
   function flushTransform() {
@@ -139,6 +172,27 @@ export function initThoughtsCanvas(
       c.zoomInBtn.disabled = scale >= THOUGHTS_CANVAS_SCALE_MAX - 0.002
     if (c.resetBtn)
       c.resetBtn.disabled = isDefaultView()
+    if (c.editBtn) {
+      c.editBtn.setAttribute('aria-pressed', editMode ? 'true' : 'false')
+      c.editBtn.classList.toggle('bg-gray-900', editMode)
+      c.editBtn.classList.toggle('text-white', editMode)
+    }
+    const editActionLocked = !editMode || !selectedCard
+    if (c.rotateLeftBtn)
+      c.rotateLeftBtn.disabled = editActionLocked
+    if (c.rotateRightBtn)
+      c.rotateRightBtn.disabled = editActionLocked
+    if (c.saveBtn)
+      c.saveBtn.disabled = !editMode || saveState === 'saving' || saveState === 'idle' || saveState === 'saved'
+    if (c.editStatusEl) {
+      c.editStatusEl.textContent = {
+        idle: '',
+        dirty: 'Unsaved',
+        saving: 'Saving',
+        saved: 'Saved',
+        error: 'Save failed',
+      }[saveState]
+    }
   }
 
   function flushNow() {
@@ -238,25 +292,158 @@ export function initThoughtsCanvas(
     flushNow()
   }
 
+  function selectCard(card: HTMLElement | null) {
+    if (selectedCard === card)
+      return
+    selectedCard?.removeAttribute('data-selected')
+    selectedCard = card
+    selectedCard?.setAttribute('data-selected', 'true')
+    syncChrome()
+  }
+
+  function setEditMode(next: boolean) {
+    editMode = next
+    viewport.closest<HTMLElement>('#thoughts-root')?.setAttribute('data-edit-mode', editMode ? 'true' : 'false')
+    if (editMode) {
+      selectCard(selectedCard ?? world.querySelector<HTMLElement>('.thought-canvas-card[data-slug]'))
+    }
+    else {
+      selectCard(null)
+    }
+    syncChrome()
+  }
+
+  function readLayoutPayload() {
+    const cards: Record<string, { x: number, y: number, rotateDeg: number }> = {}
+    for (const card of world.querySelectorAll<HTMLElement>('.thought-canvas-card[data-slug]')) {
+      const slug = card.dataset.slug
+      if (!slug)
+        continue
+      cards[slug] = {
+        x: readCardX(card),
+        y: readCardY(card),
+        rotateDeg: readCardRotate(card),
+      }
+    }
+    return { version: 1, cards }
+  }
+
+  async function saveLayout() {
+    if (!chrome?.enableEditing)
+      return
+    saveState = 'saving'
+    syncChrome()
+    try {
+      const res = await fetch('/__thoughts-canvas-layout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(readLayoutPayload()),
+      })
+      if (!res.ok)
+        throw new Error(`Save failed: ${res.status}`)
+      const saved = await res.json()
+      if (saved?.layout?.cards) {
+        for (const card of world.querySelectorAll<HTMLElement>('.thought-canvas-card[data-slug]')) {
+          const slug = card.dataset.slug
+          const row = slug ? saved.layout.cards[slug] : undefined
+          if (!row)
+            continue
+          setCardPosition(card, row.x, row.y)
+          setCardRotate(card, row.rotateDeg)
+        }
+      }
+      saveState = 'saved'
+    }
+    catch {
+      saveState = 'error'
+    }
+    syncChrome()
+  }
+
+  function markDirty() {
+    if (!chrome?.enableEditing)
+      return
+    saveState = 'dirty'
+    syncChrome()
+  }
+
+  function rotateSelected(delta: number) {
+    if (!editMode || !selectedCard)
+      return
+    setCardRotate(selectedCard, roundedRotate(readCardRotate(selectedCard) + delta))
+    markDirty()
+  }
+
+  function clampRotate(rotateDeg: number): number {
+    return Math.max(-18, Math.min(18, rotateDeg))
+  }
+
+  function roundedRotate(rotateDeg: number): number {
+    return Math.round(clampRotate(rotateDeg) * 100) / 100
+  }
+
+  function cardPointerAngle(card: HTMLElement, e: PointerEvent): number {
+    const rect = card.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
+    return Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI
+  }
+
+  function onEditClick() {
+    setEditMode(!editMode)
+  }
+
+  function onRotateLeftClick() {
+    rotateSelected(-1)
+  }
+
+  function onRotateRightClick() {
+    rotateSelected(1)
+  }
+
+  function onSaveClick() {
+    void saveLayout()
+  }
+
   function onWorldPointerDown(e: PointerEvent) {
+    if (!editMode)
+      return
     if (e.button !== 0)
       return
+    const rotateHandle = (e.target as HTMLElement).closest<HTMLElement>('.thought-canvas-rotate-handle')
+    if (rotateHandle) {
+      const card = rotateHandle.closest('.thought-canvas-card')
+      if (!card || !world.contains(card))
+        return
+      e.preventDefault()
+      e.stopPropagation()
+      const el = card as HTMLElement
+      selectCard(el)
+      cardRotateDrag = {
+        card: el,
+        pointerId: e.pointerId,
+        startPointerAngle: cardPointerAngle(el, e),
+        startRotate: readCardRotate(el),
+      }
+      rotateHandle.setPointerCapture(e.pointerId)
+      rotateHandle.classList.add('cursor-grabbing')
+      document.body.classList.add('select-none')
+      rotateHandle.addEventListener('pointermove', onCardRotatePointerMove)
+      rotateHandle.addEventListener('pointerup', onCardRotatePointerEnd)
+      rotateHandle.addEventListener('pointercancel', onCardRotatePointerEnd)
+      return
+    }
     const card = (e.target as HTMLElement).closest('.thought-canvas-card')
     if (!card || !world.contains(card))
       return
-    const onInteractive = (e.target as HTMLElement).closest(
-      'a, button, input, textarea, select, img, [contenteditable="true"], [data-lightbox="true"]',
-    )
-    if (onInteractive)
-      return
     e.stopPropagation()
     const el = card as HTMLElement
-    const { x: accX, y: accY } = readCardDragOffsets(el)
+    selectCard(el)
     cardDrag = {
       card: el,
       pointerId: e.pointerId,
-      accX,
-      accY,
+      x: readCardX(el),
+      y: readCardY(el),
       lastX: e.clientX,
       lastY: e.clientY,
     }
@@ -273,11 +460,11 @@ export function initThoughtsCanvas(
       return
     const dx = (e.clientX - cardDrag.lastX) / scale
     const dy = (e.clientY - cardDrag.lastY) / scale
-    cardDrag.accX += dx
-    cardDrag.accY += dy
+    cardDrag.x += dx
+    cardDrag.y += dy
     cardDrag.lastX = e.clientX
     cardDrag.lastY = e.clientY
-    setCardDragOffsets(cardDrag.card, cardDrag.accX, cardDrag.accY)
+    setCardPosition(cardDrag.card, cardDrag.x, cardDrag.y)
   }
 
   function onCardPointerEnd(e: PointerEvent) {
@@ -293,6 +480,32 @@ export function initThoughtsCanvas(
     c.classList.remove('z-[50]', 'shadow-lg', 'cursor-grabbing')
     if (!dragging)
       document.body.classList.remove('select-none')
+    markDirty()
+  }
+
+  function onCardRotatePointerMove(e: PointerEvent) {
+    if (!cardRotateDrag || e.pointerId !== cardRotateDrag.pointerId)
+      return
+    const next = cardRotateDrag.startRotate + cardPointerAngle(cardRotateDrag.card, e) - cardRotateDrag.startPointerAngle
+    setCardRotate(cardRotateDrag.card, roundedRotate(next))
+  }
+
+  function onCardRotatePointerEnd(e: PointerEvent) {
+    if (!cardRotateDrag || e.pointerId !== cardRotateDrag.pointerId)
+      return
+    const handle = e.currentTarget instanceof HTMLElement ? e.currentTarget : null
+    if (handle) {
+      handle.removeEventListener('pointermove', onCardRotatePointerMove)
+      handle.removeEventListener('pointerup', onCardRotatePointerEnd)
+      handle.removeEventListener('pointercancel', onCardRotatePointerEnd)
+      if (handle.hasPointerCapture(e.pointerId))
+        handle.releasePointerCapture(e.pointerId)
+      handle.classList.remove('cursor-grabbing')
+    }
+    cardRotateDrag = null
+    if (!dragging && !cardDrag)
+      document.body.classList.remove('select-none')
+    markDirty()
   }
 
   function onDown(e: PointerEvent) {
@@ -300,6 +513,9 @@ export function initThoughtsCanvas(
       return
 
     const target = e.target as HTMLElement
+    if (editMode && target.closest('.thought-canvas-card'))
+      return
+
     const onInteractive = target.closest(
       'a, button, input, textarea, select, img, [contenteditable="true"], [data-lightbox="true"]',
     )
@@ -371,6 +587,10 @@ export function initThoughtsCanvas(
   chrome?.zoomOutBtn?.addEventListener('click', onZoomOutClick)
   chrome?.zoomInBtn?.addEventListener('click', onZoomInClick)
   chrome?.resetBtn?.addEventListener('click', onResetClick)
+  chrome?.editBtn?.addEventListener('click', onEditClick)
+  chrome?.rotateLeftBtn?.addEventListener('click', onRotateLeftClick)
+  chrome?.rotateRightBtn?.addEventListener('click', onRotateRightClick)
+  chrome?.saveBtn?.addEventListener('click', onSaveClick)
 
   recenterContentInViewport()
   {
@@ -398,7 +618,19 @@ export function initThoughtsCanvas(
         c.classList.remove('z-[50]', 'shadow-lg', 'cursor-grabbing')
         cardDrag = null
       }
+      if (cardRotateDrag) {
+        const handle = cardRotateDrag.card.querySelector<HTMLElement>('.thought-canvas-rotate-handle')
+        const pid = cardRotateDrag.pointerId
+        handle?.removeEventListener('pointermove', onCardRotatePointerMove)
+        handle?.removeEventListener('pointerup', onCardRotatePointerEnd)
+        handle?.removeEventListener('pointercancel', onCardRotatePointerEnd)
+        if (handle?.hasPointerCapture(pid))
+          handle.releasePointerCapture(pid)
+        handle?.classList.remove('cursor-grabbing')
+        cardRotateDrag = null
+      }
       dragging = false
+      setEditMode(false)
       viewport.classList.remove('cursor-grabbing')
       document.body.classList.remove('select-none')
       viewport.removeEventListener('wheel', onWheel)
@@ -411,6 +643,10 @@ export function initThoughtsCanvas(
       chrome?.zoomOutBtn?.removeEventListener('click', onZoomOutClick)
       chrome?.zoomInBtn?.removeEventListener('click', onZoomInClick)
       chrome?.resetBtn?.removeEventListener('click', onResetClick)
+      chrome?.editBtn?.removeEventListener('click', onEditClick)
+      chrome?.rotateLeftBtn?.removeEventListener('click', onRotateLeftClick)
+      chrome?.rotateRightBtn?.removeEventListener('click', onRotateRightClick)
+      chrome?.saveBtn?.removeEventListener('click', onSaveClick)
       viewport.style.touchAction = ''
       delete (viewport as HTMLElement & { [viewportKey]?: Cleanup })[viewportKey]
       world.style.transform = ''
