@@ -16,11 +16,23 @@ export interface ThoughtLayoutRow {
   tabIndex: number
 }
 
+export interface ThoughtLayoutOverride {
+  x?: number
+  y?: number
+  rotateDeg?: number
+}
+
+export interface ThoughtLayoutOverridesFile {
+  version: 1
+  cards: Record<string, ThoughtLayoutOverride | undefined>
+}
+
 export interface LayoutOptions {
   /** Tab order: new to old (design 3.1) */
   focusOrder?: 'new-first' | 'old-first'
   /** Optional container width for responsive layout */
   containerWidth?: number
+  overrides?: Record<string, ThoughtLayoutOverride | undefined>
 }
 
 /** Matches top bar / list `px-4` (1rem, 16px when root font size is 16px) */
@@ -36,6 +48,10 @@ const BAND_H = NOTE_MAX_H + PAD_Y + 72
 const RECENT_CENTER_SPREAD = 160
 /** ±7° from slug — enough personality without looking too tilted. */
 const ROTATE_RANGE_DEG = 14
+
+function finiteOr(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
 
 /**
  * Same width as `max-w-6xl` + `px-4` content area: 72rem - 2x1rem (1120px when root is 16px).
@@ -98,13 +114,14 @@ export function layoutStickyNotes(
       const jitter = (v - 0.5) * Math.min(56, slotSpan * 0.08)
       const yPx = PAD_Y + bandIndex * BAND_H + verticalBase + jitter
       const rot = (unitFloat(t.slug, 'rot') - 0.5) * ROTATE_RANGE_DEG
+      const override = options.overrides?.[t.slug]
       rows.push({
         slug: t.slug,
         bandIndex,
         bandKey,
-        x,
-        y: yPx,
-        rotateDeg: rot,
+        x: finiteOr(override?.x, x),
+        y: finiteOr(override?.y, yPx),
+        rotateDeg: finiteOr(override?.rotateDeg, rot),
         tabIndex: 0,
       })
     }
