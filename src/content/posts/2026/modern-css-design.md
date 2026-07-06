@@ -7,7 +7,7 @@ date: 2026-07-06
 
 今天重新阅读一些 basecamp 的这篇文章 [modern-css-patterns-and-techniques-in-campfire](https://dev.37signals.com/modern-css-patterns-and-techniques-in-campfire/)
 
-做个简单的总结, 看看是否可以提取一下共用的 css 或者 design.md 方便后续项目直接使用
+做个简单的总结，看看是否可以提取一下共用的 css 或者 design.md 方便后续项目直接使用
 
 ## oklch
 
@@ -25,7 +25,7 @@ date: 2026-07-06
 }
 ```
 
-带来的好处是，更方便人类的阅读和使用, 我们可以通过调整 lightness 来改变颜色的深浅，而不改变颜色的色相，这在 RGB 模式很难做到
+带来的好处是，更方便人类的阅读和使用，我们可以通过调整 lightness 来改变颜色的深浅，而不改变颜色的色相，这在 RGB 模式很难做到
 
 先定义纯 lch 的颜色值，然后通过定义抽象的自定义属性通过 oklch 方法
 
@@ -43,7 +43,7 @@ date: 2026-07-06
 
 ## Custom Properties
 
-** Declared vs. Fallback values**
+**Declared vs. Fallback values**
 
 ```css
 /* Declared */
@@ -83,6 +83,7 @@ date: 2026-07-06
 通过 fallback 模式，这样可以让我们的代码看起来更紧凑的同时也能通过自定义属性暴露出变量
 
 我们该如何决定何时使用自定义属性呢？
+
 1. 每当我们需要在多个地方使用相同的值时（遵循 DRY 原则）
 2. 当我们知道某个值将会被更改时
 
@@ -150,11 +151,11 @@ Example 1
 
 只需将任何内容放入 `.btn` 里，剩下的就交给它处理吧。不再需要像以前一样的 `.btn--circle-icon` 或 `.btn--icon-and-text` 这样的实用类
 
-文章中还列举了一些其他例子， 总的来说，以前需要配合服务端或者 js 来做的，现在 CSS 就直接能处理了，而且使用 has 就能直接完成了
+文章中还列举了一些其他例子，总的来说，以前需要配合服务端或者 js 来做的，现在 CSS 就直接能处理了，而且使用 has 就能直接完成了
 
 ## Responsive design
 
-在 Campfire 中，零个基于 viewport 像素判定「移动端」的断点，布局随内容与字体缩放自适应。不是通过 @media 查询 viewports 比多少小就断言他是移动端设备, 他只有一个断点
+在 Campfire 中，零个基于 viewport 像素判定「移动端」的断点，布局随内容与字体缩放自适应。不是通过 @media 查询 viewports 比多少小就断言他是移动端设备，他只有一个断点
 
 ```css
 /* narrower than 100 characters */
@@ -163,13 +164,13 @@ Example 1
 }
 ```
 
-在 CSS 中，ch 是一个相对单位，1ch 等于当前字体中数字 “0” 的宽度。因此，100ch 粗略地可以理解为“100 个字符的宽度”。
+在 CSS 中，ch 是一个相对单位，1ch 等于当前字体中数字“0”的宽度。因此，100ch 粗略地可以理解为“100 个字符的宽度”。
 
-这种方式替换了传统的 `min-width: 768px` 这样的断点, 不仅架构简单，而且更符合基于内容排版的思想
+这种方式替换了传统的 `min-width: 768px` 这样的断点，不仅架构简单，而且更符合基于内容排版的思想
 
 ## any-hover
 
-文章还提到 any-hover 来检测是否支持 hover 属性，举了一个 iPad 的例子， 如果 iPad 连接上 Magic Keyboard 的话就会匹配 hover 相关样式
+文章还提到 any-hover 来检测是否支持 hover 属性，举了一个 iPad 的例子，如果 iPad 连接上 Magic Keyboard 的话就会匹配 hover 相关样式
 
 ```css
 @media (any-hover: hover) {
