@@ -1,7 +1,8 @@
 ---
-title: '现代 CSS 设计模式笔记'
+title: 'Modern CSS Design'
+slug: 'modern-css-design'
 description: '重读 37signals Campfire CSS 文章的笔记，涵盖 OKLCH 配色、自定义属性模式、:has()、基于 ch 的响应式断点与 any-hover 等实践。'
-tags: ["CSS", "OKLCH", "Campfire"]
+tags: ["CSS", "OKLCH", "Design"]
 date: 2026-07-06
 ---
 
