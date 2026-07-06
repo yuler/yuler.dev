@@ -22,6 +22,7 @@ date: 2026-07-06
   --lch-gray: 96% 0.005 96;
   --lch-gray-dark: 92% 0.005 96;
   --lch-gray-darker: 75% 0.005 96;
+  --lch-blue: 54% 0.23 255;
 }
 ```
 
@@ -70,8 +71,8 @@ date: 2026-07-06
 .btn {
   align-items: center;
   background-color: var(--btn-background, var(--color-text-reversed));
-  border-radius: var(--btn-border-radius);
-  border: var(--btn-border-size, 2em) solid var(--btn-border-color, var(--color-border));
+  border-radius: var(--btn-border-radius, 2em);
+  border: var(--btn-border-size, 1px) solid var(--btn-border-color, var(--color-border));
   color: var(--btn-color, var(--color-text));
   display: inline-flex;
   gap: 0.5em;
@@ -155,7 +156,7 @@ Example 1
 
 ## Responsive design
 
-在 Campfire 中，零个基于 viewport 像素判定「移动端」的断点，布局随内容与字体缩放自适应。不是通过 @media 查询 viewports 比多少小就断言他是移动端设备，他只有一个断点
+在 Campfire 中，没有基于 viewport 像素判定「移动端」的断点，布局随内容与字体缩放自适应。不是通过 @media 查询 viewport 宽度小于多少就断言它是移动端设备，它只有一个断点：
 
 ```css
 /* narrower than 100 characters */
