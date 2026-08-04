@@ -367,17 +367,6 @@ function isQrCanvasDrawn(canvas: HTMLCanvasElement): boolean {
   return false
 }
 
-function offsetIn(container: HTMLElement, el: Element): { x: number, y: number, w: number, h: number } {
-  const c = container.getBoundingClientRect()
-  const r = el.getBoundingClientRect()
-  return {
-    x: r.left - c.left,
-    y: r.top - c.top,
-    w: r.width,
-    h: r.height,
-  }
-}
-
 function drawPosterRoute(
   ctx: CanvasRenderingContext2D,
   map: L.Map,
@@ -455,7 +444,11 @@ async function rasterizePosterMap(map: L.Map, latlngs: L.LatLng[]): Promise<stri
   ctx.globalAlpha = 0.5
   let drawnTiles = 0
   for (const domImg of tileImgs) {
-    const { x, y, w, h } = offsetIn(mapEl, domImg)
+    // Use layout coords relative to map container; bounding rect can drift on mobile WebKit.
+    const x = domImg.offsetLeft
+    const y = domImg.offsetTop
+    const w = domImg.width
+    const h = domImg.height
     if (w <= 1 || h <= 1)
       continue
     // Skip tiles fully outside the visible map box.
