@@ -137,7 +137,7 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
                   Scan to view activity
                 </p>
               </div>
-              <div class="shrink-0 rounded-sm bg-white p-1 shadow-sm">
+              <div class="shrink-0 overflow-hidden bg-white p-1">
                 <canvas id={qrCodeId} width="60" height="60" class="block" style="image-rendering: pixelated;">
                 </canvas>
               </div>
@@ -161,6 +161,7 @@ const coreStats = stats.slice(0, POSTER_STATS_COUNT)
 
         <button
           data-copy-id={posterWrapperId}
+          data-activity-name={activityName}
           class="copy-poster-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-mono text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
           aria-label="Copy poster to clipboard"
         >
@@ -178,7 +179,6 @@ import QRCode from 'qrcode'
 import {
   addLightBasemapTiles,
   LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
-  LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION,
   nudgeZoomOutAfterFit,
   resolveBasemapProvider,
   toMapCoords,
@@ -189,6 +189,11 @@ const htmlToImagePromise = import('html-to-image')
 
 const dialogFocusStack: HTMLElement[] = []
 const leafletMaps = new Map<string, L.Map>()
+/** Resolves when QR + map tiles are ready for a reliable capture. */
+const posterReady = new Map<string, Promise<void>>()
+
+const POSTER_TILE_WAIT_MS = 4000
+const POSTER_CAPTURE_SETTLE_MS = 80
 
 // ── Dialog open / close / destroy ─────────────────────────────────────────
 
@@ -217,7 +222,7 @@ function openDialog(dialogId: string, templateId?: string) {
 
   const wrapper = dialog.querySelector('.poster-wrapper') as HTMLElement | null
   if (wrapper)
-    initPoster(wrapper)
+    posterReady.set(wrapper.id, initPoster(wrapper))
 
   requestAnimationFrame(() => {
     dialog.querySelector<HTMLButtonElement>(
@@ -234,6 +239,8 @@ function destroyDialog(dialogId: string) {
   // Tear down Leaflet map to free tiles / event listeners
   const wrapper = dialog.querySelector('.poster-wrapper') as HTMLElement | null
   const mapId = wrapper?.dataset.mapId
+  if (wrapper)
+    posterReady.delete(wrapper.id)
   if (mapId) {
     leafletMaps.get(mapId)?.remove()
     leafletMaps.delete(mapId)
@@ -284,7 +291,37 @@ window.addEventListener('resize', () => {
 
 // ── Poster initializer ─────────────────────────────────────────────────────
 
-async function initPoster(wrapper: HTMLElement) {
+function waitForTileLayer(layer: L.TileLayer, timeoutMs: number): Promise<void> {
+  return new Promise((resolve) => {
+    let settled = false
+    const done = () => {
+      if (settled)
+        return
+      settled = true
+      clearTimeout(timer)
+      layer.off('load', done)
+      resolve()
+    }
+    const timer = window.setTimeout(done, timeoutMs)
+    layer.once('load', done)
+    // If fitBounds didn't start a new fetch (tiles already cached), resolve now.
+    const loading = (layer as L.TileLayer & { _loading?: boolean })._loading
+    if (!loading)
+      done()
+  })
+}
+
+function settleFrames(ms = POSTER_CAPTURE_SETTLE_MS): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.setTimeout(resolve, ms)
+      })
+    })
+  })
+}
+
+async function initPoster(wrapper: HTMLElement): Promise<void> {
   await resolveBasemapProvider()
 
   const mapId = wrapper.dataset.mapId!
@@ -292,29 +329,31 @@ async function initPoster(wrapper: HTMLElement) {
   const pageUrl = wrapper.dataset.pageUrl!
   const pointsRaw = wrapper.dataset.points!
 
-  // 1. QR Code
+  // 1. QR Code — opaque light modules so capture never shows map bleed-through
   const qrCanvas = document.getElementById(qrId) as HTMLCanvasElement | null
-  if (qrCanvas) {
-    QRCode.toCanvas(qrCanvas, pageUrl, {
-      width: 60,
-      margin: 1,
-      color: { light: '#00000000', dark: '#111827ff' },
-      errorCorrectionLevel: 'M',
-    }).catch((err) => {
-      console.error('Failed to generate QR code:', err)
-      const ctx = qrCanvas.getContext('2d')
-      if (ctx) {
-        ctx.fillStyle = '#ef4444'
-        ctx.font = '8px monospace'
-        ctx.fillText('QR error', 2, 32)
-      }
-    })
-  }
+  const qrReady = qrCanvas
+    ? QRCode.toCanvas(qrCanvas, pageUrl, {
+        width: 60,
+        margin: 1,
+        color: { light: '#ffffffff', dark: '#111827ff' },
+        errorCorrectionLevel: 'M',
+      }).catch((err) => {
+        console.error('Failed to generate QR code:', err)
+        const ctx = qrCanvas.getContext('2d')
+        if (ctx) {
+          ctx.fillStyle = '#ef4444'
+          ctx.font = '8px monospace'
+          ctx.fillText('QR error', 2, 32)
+        }
+      })
+    : Promise.resolve()
 
-  // 2. Route map (no controls, static display)
+  // 2. Route map (no controls, static display; canvas paths capture more reliably)
   const mapEl = document.getElementById(mapId)
-  if (!mapEl)
+  if (!mapEl) {
+    await qrReady
     return
+  }
 
   let points: number[][] = []
   try {
@@ -322,10 +361,13 @@ async function initPoster(wrapper: HTMLElement) {
   }
   catch (e) {
     console.error('Failed to parse points data for poster map:', e)
+    await qrReady
     return
   }
-  if (points.length === 0)
+  if (points.length === 0) {
+    await qrReady
     return
+  }
 
   const map = L.map(mapId, {
     zoomControl: false,
@@ -335,11 +377,17 @@ async function initPoster(wrapper: HTMLElement) {
     scrollWheelZoom: false,
     doubleClickZoom: false,
     keyboard: false,
+    preferCanvas: true,
+    fadeAnimation: false,
     ...LEAFLET_MAP_OPTIONS_FRACTIONAL_ZOOM,
-    ...LEAFLET_MAP_OPTIONS_ZOOM_ANIMATION,
+    zoomAnimation: false,
+    markerZoomAnimation: false,
   })
 
-  addLightBasemapTiles(map, { labels: false })
+  // Layout after clone into dialog — without this, tiles/vectors can be blank on first paint.
+  map.invalidateSize({ animate: false })
+
+  const tileLayer = addLightBasemapTiles(map, { labels: false })
 
   const latlngs = points.map((p: number[]) => {
     const [lat, lng] = toMapCoords(p[0], p[1])
@@ -385,21 +433,103 @@ async function initPoster(wrapper: HTMLElement) {
     animate: false,
   })
   nudgeZoomOutAfterFit(map, 0.4)
+  map.invalidateSize({ animate: false })
 
   leafletMaps.set(mapId, map)
+
+  // Wait for the post-fitBounds tile set (not the initial default-view load).
+  await Promise.all([qrReady, waitForTileLayer(tileLayer, POSTER_TILE_WAIT_MS)])
+  await settleFrames()
 }
 
 // ── Shared: capture poster as Blob ────────────────────────────────────────
+
+async function waitUntilPosterReady(wrapperId: string): Promise<void> {
+  const ready = posterReady.get(wrapperId)
+  if (ready)
+    await ready
+  // Extra paint settle in case the user tapped immediately after open.
+  await settleFrames()
+}
 
 async function capturePosterBlob(wrapperId: string): Promise<Blob> {
   const wrapper = document.getElementById(wrapperId)
   if (!wrapper)
     throw new Error('Poster wrapper not found')
+
+  await waitUntilPosterReady(wrapperId)
+
+  const mapId = wrapper.dataset.mapId
+  if (mapId)
+    leafletMaps.get(mapId)?.invalidateSize({ animate: false })
+
   const { toBlob } = await htmlToImagePromise
-  const blob = await toBlob(wrapper, { cacheBust: true, pixelRatio: 2, skipFonts: false })
+  // cacheBust:false — re-fetching Leaflet tiles with a bust query often blanks them on mobile.
+  const blob = await toBlob(wrapper, {
+    cacheBust: false,
+    pixelRatio: 2,
+    skipFonts: false,
+  })
   if (!blob)
     throw new Error('Failed to generate image blob')
   return blob
+}
+
+/**
+ * Safari drops user-activation if we `await` blob generation before `clipboard.write`.
+ * Pass a Promise into ClipboardItem so write() is invoked synchronously in the click path.
+ * Falls back to Web Share / download when image clipboard write is blocked.
+ */
+async function copyPosterBlob(wrapperId: string, activityName: string): Promise<'copied' | 'shared' | 'downloaded'> {
+  const filename = `workout-${activityName.replace(/\s+/g, '-').toLowerCase()}.png`
+  const blobPromise = capturePosterBlob(wrapperId)
+
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': blobPromise }),
+    ])
+    return 'copied'
+  }
+  catch (clipboardErr) {
+    console.warn('Clipboard image write failed, trying share/download fallback:', clipboardErr)
+  }
+
+  const blob = await blobPromise
+  const file = new File([blob], filename, { type: 'image/png' })
+
+  if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: activityName })
+      return 'shared'
+    }
+    catch (shareErr) {
+      // User dismissed the share sheet — treat as cancel, not a hard failure.
+      if (shareErr instanceof Error && shareErr.name === 'AbortError')
+        throw shareErr
+      console.warn('Web Share failed, falling back to download:', shareErr)
+    }
+  }
+
+  triggerBlobDownload(blob, filename)
+  return 'downloaded'
+}
+
+function triggerBlobDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.download = filename
+  link.href = url
+  link.rel = 'noopener'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
+
+async function downloadPosterBlob(wrapperId: string, activityName: string): Promise<void> {
+  const blob = await capturePosterBlob(wrapperId)
+  const filename = `workout-${activityName.replace(/\s+/g, '-').toLowerCase()}.png`
+  triggerBlobDownload(blob, filename)
 }
 
 // ── Poster actions (download / copy) — single delegated listener ─────────────
@@ -415,6 +545,7 @@ document.addEventListener('click', async (e) => {
   const btn = (downloadBtn || copyBtn)!
   const isCopy = !!copyBtn
   const wrapperId = isCopy ? btn.dataset.copyId! : btn.dataset.wrapperId!
+  const activityName = btn.dataset.activityName || 'workout'
   const label = btn.querySelector(isCopy ? '.copy-label' : '.btn-label')
   const originalText = label?.textContent ?? (isCopy ? 'Copy' : 'Download')
 
@@ -423,20 +554,18 @@ document.addEventListener('click', async (e) => {
     label.textContent = isCopy ? 'Copying…' : 'Generating…'
 
   try {
-    const blob = await capturePosterBlob(wrapperId)
     if (isCopy) {
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-      if (label)
-        label.textContent = 'Copied!'
+      const result = await copyPosterBlob(wrapperId, activityName)
+      if (label) {
+        label.textContent = result === 'copied'
+          ? 'Copied!'
+          : result === 'shared'
+            ? 'Shared!'
+            : 'Saved!'
+      }
     }
     else {
-      const activityName = btn.dataset.activityName || 'workout'
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.download = `workout-${activityName.replace(/\s+/g, '-').toLowerCase()}.png`
-      link.href = url
-      link.click()
-      URL.revokeObjectURL(url)
+      await downloadPosterBlob(wrapperId, activityName)
     }
 
     setTimeout(() => {
@@ -445,6 +574,12 @@ document.addEventListener('click', async (e) => {
     }, 2000)
   }
   catch (err) {
+    // Share sheet dismissed — restore label quietly.
+    if (err instanceof Error && err.name === 'AbortError') {
+      if (label)
+        label.textContent = originalText
+      return
+    }
     console.error(`Failed to ${isCopy ? 'copy' : 'download'} poster:`, err)
     if (label) {
       label.textContent = 'Failed'
