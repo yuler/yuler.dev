@@ -367,6 +367,17 @@ function isQrCanvasDrawn(canvas: HTMLCanvasElement): boolean {
   return false
 }
 
+function offsetIn(container: HTMLElement, el: Element): { x: number, y: number, w: number, h: number } {
+  const c = container.getBoundingClientRect()
+  const r = el.getBoundingClientRect()
+  return {
+    x: r.left - c.left,
+    y: r.top - c.top,
+    w: r.width,
+    h: r.height,
+  }
+}
+
 function drawPosterRoute(
   ctx: CanvasRenderingContext2D,
   map: L.Map,
@@ -426,7 +437,7 @@ async function rasterizePosterMap(map: L.Map, latlngs: L.LatLng[]): Promise<stri
   if (width < 2 || height < 2)
     throw new Error('Poster map has no size')
 
-  const dpr = Math.min(window.devicePixelRatio || 1, 2)
+  const dpr = posterPixelRatio()
   const canvas = document.createElement('canvas')
   canvas.width = Math.max(1, Math.round(width * dpr))
   canvas.height = Math.max(1, Math.round(height * dpr))
@@ -444,11 +455,8 @@ async function rasterizePosterMap(map: L.Map, latlngs: L.LatLng[]): Promise<stri
   ctx.globalAlpha = 0.5
   let drawnTiles = 0
   for (const domImg of tileImgs) {
-    // Use layout coords relative to map container; bounding rect can drift on mobile WebKit.
-    const x = domImg.offsetLeft
-    const y = domImg.offsetTop
-    const w = domImg.width
-    const h = domImg.height
+    // Leaflet positions tiles via transforms; layout offsets are always 0.
+    const { x, y, w, h } = offsetIn(mapEl, domImg)
     if (w <= 1 || h <= 1)
       continue
     // Skip tiles fully outside the visible map box.
@@ -472,23 +480,22 @@ async function rasterizePosterMap(map: L.Map, latlngs: L.LatLng[]): Promise<stri
   return canvas.toDataURL('image/png')
 }
 
-interface FrozenPoster {
-  mapDataUrl: string
-  captureNode: HTMLElement
-  cleanup: () => void
+function posterPixelRatio(): number {
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches
+  return isCoarsePointer
+    ? Math.min(2, window.devicePixelRatio || 1)
+    : 2
 }
 
 /**
- * Build an offscreen content-only clone behind the dialog. The visible preview
- * is never mutated, so capture cannot flash while map and QR layers are prepared.
+ * Rasterize the map separately. html-to-image captures only the content layer.
  */
-async function freezePosterForCapture(wrapper: HTMLElement): Promise<FrozenPoster> {
+async function preparePosterMap(wrapper: HTMLElement): Promise<string> {
   const qrId = wrapper.dataset.qrId
   const qrCanvas = qrId ? document.getElementById(qrId) as HTMLCanvasElement | null : null
   if (!qrCanvas || !isQrCanvasDrawn(qrCanvas))
     throw new Error('QR code is not ready')
-  const qrDataUrl = qrCanvas.toDataURL('image/png')
-  if (qrDataUrl === 'data:,')
+  if (qrCanvas.toDataURL('image/png') === 'data:,')
     throw new Error('QR code canvas is empty')
 
   const mapId = wrapper.dataset.mapId
@@ -500,48 +507,7 @@ async function freezePosterForCapture(wrapper: HTMLElement): Promise<FrozenPoste
   if (!areBasemapTilesReady(mapEl))
     throw new Error('Basemap tiles are still loading')
 
-  const mapDataUrl = await rasterizePosterMap(map, latlngs)
-
-  const rect = wrapper.getBoundingClientRect()
-  const dialog = wrapper.closest('[role="dialog"]')
-  const host = document.createElement('div')
-  host.setAttribute('aria-hidden', 'true')
-  // Same screen box as the poster, stacked behind the dialog — invisible, no flash.
-  host.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;z-index:9998;pointer-events:none;visibility:hidden;overflow:hidden;`
-
-  const captureNode = wrapper.cloneNode(true) as HTMLElement
-  captureNode.removeAttribute('id')
-  captureNode.querySelector('.poster-map-container')?.remove()
-  captureNode.style.width = `${rect.width}px`
-  captureNode.style.height = `${rect.height}px`
-  captureNode.style.aspectRatio = 'auto'
-  captureNode.style.backgroundColor = 'transparent'
-
-  const clonedQr = captureNode.querySelector<HTMLCanvasElement>('canvas')
-  if (!clonedQr)
-    throw new Error('Cloned QR code is missing')
-  const qrImg = document.createElement('img')
-  qrImg.src = qrDataUrl
-  qrImg.width = qrCanvas.width
-  qrImg.height = qrCanvas.height
-  qrImg.alt = ''
-  qrImg.className = clonedQr.className
-  qrImg.style.cssText = clonedQr.style.cssText || 'display:block;image-rendering:pixelated;'
-  clonedQr.replaceWith(qrImg)
-
-  host.appendChild(captureNode)
-  if (dialog?.parentNode)
-    dialog.parentNode.insertBefore(host, dialog)
-  else
-    document.body.appendChild(host)
-  await qrImg.decode()
-
-  await settleFrames()
-  return {
-    mapDataUrl,
-    captureNode,
-    cleanup: () => host.remove(),
-  }
+  return await rasterizePosterMap(map, latlngs)
 }
 
 async function imageFromSource(src: string): Promise<HTMLImageElement> {
@@ -741,26 +707,24 @@ async function capturePosterBlob(wrapperId: string): Promise<Blob> {
   if (qrCanvas && !isQrCanvasDrawn(qrCanvas))
     throw new Error('QR code is not ready')
 
-  const frozen = await freezePosterForCapture(wrapper)
-  try {
-    const { toBlob } = await htmlToImagePromise
-    // Lower DPR on phones to avoid silent canvas failures from memory pressure.
-    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches
-    const pixelRatio = isCoarsePointer
-      ? Math.min(2, window.devicePixelRatio || 1)
-      : 2
-    const contentBlob = await toBlob(frozen.captureNode, {
-      cacheBust: false,
-      pixelRatio,
-      skipFonts: false,
-    })
-    if (!contentBlob)
-      throw new Error('Failed to generate image blob')
-    return await composePosterBlob(frozen.mapDataUrl, contentBlob)
-  }
-  finally {
-    frozen.cleanup()
-  }
+  const mapDataUrl = await preparePosterMap(wrapper)
+  const { toBlob } = await htmlToImagePromise
+  const pixelRatio = posterPixelRatio()
+  // html-to-image clones internally — filter drops the map from the clone only.
+  const contentBlob = await toBlob(wrapper, {
+    cacheBust: false,
+    pixelRatio,
+    skipFonts: false,
+    backgroundColor: 'transparent',
+    filter: (node) => {
+      if (!(node instanceof HTMLElement))
+        return true
+      return !node.classList.contains('poster-map-container')
+    },
+  })
+  if (!contentBlob)
+    throw new Error('Failed to generate image blob')
+  return await composePosterBlob(mapDataUrl, contentBlob)
 }
 
 /**
