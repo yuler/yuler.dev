@@ -213,15 +213,23 @@ export function nudgeZoomOutAfterFit(map: Map, delta = 0.45): void {
  */
 export function addLightBasemapTiles(
   map: Map,
-  options: { labels: boolean, attribution?: string, provider?: BasemapProvider },
+  options: {
+    labels: boolean
+    attribution?: string
+    provider?: BasemapProvider
+    /** Enable when the map will be rasterized (html-to-image); both Carto and Amap send ACAO *. */
+    crossOrigin?: boolean | '' | 'anonymous' | 'use-credentials'
+  },
 ): L.TileLayer {
   const provider = options.provider ?? _provider
+  const crossOrigin = options.crossOrigin
 
   if (provider === 'carto') {
     const url = options.labels ? CARTO_LIGHT_ALL : CARTO_LIGHT_NOLABELS
     return L.tileLayer(url, {
       attribution: options.attribution ?? CARTO_ATTRIBUTION,
       ...TILE_OPTIONS_CARTO,
+      ...(crossOrigin !== undefined ? { crossOrigin } : {}),
     }).addTo(map)
   }
 
@@ -229,6 +237,7 @@ export function addLightBasemapTiles(
   return L.tileLayer(url, {
     attribution: options.attribution ?? AMAP_ATTRIBUTION,
     ...TILE_OPTIONS_AMAP,
+    ...(crossOrigin !== undefined ? { crossOrigin } : {}),
   }).addTo(map)
 }
 
