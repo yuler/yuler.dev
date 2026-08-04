@@ -472,15 +472,23 @@ async function rasterizePosterMap(map: L.Map, latlngs: L.LatLng[]): Promise<stri
   return canvas.toDataURL('image/png')
 }
 
+interface FrozenPoster {
+  mapDataUrl: string
+  captureNode: HTMLElement
+  cleanup: () => void
+}
+
 /**
- * Rasterize the map separately. html-to-image will capture only the content layer.
+ * Build an offscreen content-only clone behind the dialog. The visible preview
+ * is never mutated, so capture cannot flash while map and QR layers are prepared.
  */
-async function preparePosterMap(wrapper: HTMLElement): Promise<string> {
+async function freezePosterForCapture(wrapper: HTMLElement): Promise<FrozenPoster> {
   const qrId = wrapper.dataset.qrId
   const qrCanvas = qrId ? document.getElementById(qrId) as HTMLCanvasElement | null : null
   if (!qrCanvas || !isQrCanvasDrawn(qrCanvas))
     throw new Error('QR code is not ready')
-  if (qrCanvas.toDataURL('image/png') === 'data:,')
+  const qrDataUrl = qrCanvas.toDataURL('image/png')
+  if (qrDataUrl === 'data:,')
     throw new Error('QR code canvas is empty')
 
   const mapId = wrapper.dataset.mapId
@@ -492,7 +500,48 @@ async function preparePosterMap(wrapper: HTMLElement): Promise<string> {
   if (!areBasemapTilesReady(mapEl))
     throw new Error('Basemap tiles are still loading')
 
-  return await rasterizePosterMap(map, latlngs)
+  const mapDataUrl = await rasterizePosterMap(map, latlngs)
+
+  const rect = wrapper.getBoundingClientRect()
+  const dialog = wrapper.closest('[role="dialog"]')
+  const host = document.createElement('div')
+  host.setAttribute('aria-hidden', 'true')
+  // Same screen box as the poster, stacked behind the dialog — invisible, no flash.
+  host.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;z-index:9998;pointer-events:none;visibility:hidden;overflow:hidden;`
+
+  const captureNode = wrapper.cloneNode(true) as HTMLElement
+  captureNode.removeAttribute('id')
+  captureNode.querySelector('.poster-map-container')?.remove()
+  captureNode.style.width = `${rect.width}px`
+  captureNode.style.height = `${rect.height}px`
+  captureNode.style.aspectRatio = 'auto'
+  captureNode.style.backgroundColor = 'transparent'
+
+  const clonedQr = captureNode.querySelector<HTMLCanvasElement>('canvas')
+  if (!clonedQr)
+    throw new Error('Cloned QR code is missing')
+  const qrImg = document.createElement('img')
+  qrImg.src = qrDataUrl
+  qrImg.width = qrCanvas.width
+  qrImg.height = qrCanvas.height
+  qrImg.alt = ''
+  qrImg.className = clonedQr.className
+  qrImg.style.cssText = clonedQr.style.cssText || 'display:block;image-rendering:pixelated;'
+  clonedQr.replaceWith(qrImg)
+
+  host.appendChild(captureNode)
+  if (dialog?.parentNode)
+    dialog.parentNode.insertBefore(host, dialog)
+  else
+    document.body.appendChild(host)
+  await qrImg.decode()
+
+  await settleFrames()
+  return {
+    mapDataUrl,
+    captureNode,
+    cleanup: () => host.remove(),
+  }
 }
 
 async function imageFromSource(src: string): Promise<HTMLImageElement> {
@@ -692,31 +741,26 @@ async function capturePosterBlob(wrapperId: string): Promise<Blob> {
   if (qrCanvas && !isQrCanvasDrawn(qrCanvas))
     throw new Error('QR code is not ready')
 
-  const mapDataUrl = await preparePosterMap(wrapper)
-  const { toBlob } = await htmlToImagePromise
-  // Lower DPR on phones to avoid silent canvas failures from memory pressure.
-  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches
-  const pixelRatio = isCoarsePointer
-    ? Math.min(2, window.devicePixelRatio || 1)
-    : 2
-  // Keep the live map visible; removing only its covered white background avoids flashing.
-  const hadWhiteBackground = wrapper.classList.contains('bg-white')
-  wrapper.classList.remove('bg-white')
-  let contentBlob: Blob | null
+  const frozen = await freezePosterForCapture(wrapper)
   try {
-    contentBlob = await toBlob(wrapper, {
+    const { toBlob } = await htmlToImagePromise
+    // Lower DPR on phones to avoid silent canvas failures from memory pressure.
+    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches
+    const pixelRatio = isCoarsePointer
+      ? Math.min(2, window.devicePixelRatio || 1)
+      : 2
+    const contentBlob = await toBlob(frozen.captureNode, {
       cacheBust: false,
       pixelRatio,
       skipFonts: false,
     })
+    if (!contentBlob)
+      throw new Error('Failed to generate image blob')
+    return await composePosterBlob(frozen.mapDataUrl, contentBlob)
   }
   finally {
-    if (hadWhiteBackground)
-      wrapper.classList.add('bg-white')
+    frozen.cleanup()
   }
-  if (!contentBlob)
-    throw new Error('Failed to generate image blob')
-  return await composePosterBlob(mapDataUrl, contentBlob)
 }
 
 /**
