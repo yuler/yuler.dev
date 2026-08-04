@@ -225,17 +225,9 @@ function openDialog(dialogId: string, templateId?: string) {
 
   document.body.classList.add('overflow-hidden')
 
-  // Keep labels as Download / Copy; only disable until map+QR are ready.
-  setPosterActionsDisabled(dialog, true)
-
   const wrapper = dialog.querySelector('.poster-wrapper') as HTMLElement | null
-  if (wrapper) {
-    const ready = initPoster(wrapper).finally(() => {
-      if (document.getElementById(dialogId))
-        setPosterActionsDisabled(dialog, false)
-    })
-    posterReady.set(wrapper.id, ready)
-  }
+  if (wrapper)
+    posterReady.set(wrapper.id, initPoster(wrapper))
 
   requestAnimationFrame(() => {
     dialog.querySelector<HTMLButtonElement>(
@@ -265,26 +257,6 @@ function destroyDialog(dialogId: string) {
 
   const prev = dialogFocusStack.pop()
   prev?.focus()
-}
-
-/** Disable/enable Copy+Download without changing their labels. */
-function setPosterActionsDisabled(dialog: HTMLElement, disabled: boolean) {
-  const downloadBtn = dialog.querySelector<HTMLButtonElement>('[data-wrapper-id]')
-  const copyBtn = dialog.querySelector<HTMLButtonElement>('.copy-poster-btn')
-  for (const btn of [downloadBtn, copyBtn]) {
-    if (!btn)
-      continue
-    btn.disabled = disabled
-  }
-}
-
-function resetPosterActionLabels(dialog: HTMLElement) {
-  const downloadLabel = dialog.querySelector('[data-wrapper-id] .btn-label')
-  const copyLabel = dialog.querySelector('.copy-poster-btn .copy-label')
-  if (downloadLabel)
-    downloadLabel.textContent = 'Download'
-  if (copyLabel)
-    copyLabel.textContent = 'Copy'
 }
 
 // Wire triggers & close buttons — single delegated listener
@@ -360,9 +332,19 @@ async function waitForMapTilesReady(mapEl: HTMLElement, timeoutMs: number): Prom
 
 function settleFrames(ms = POSTER_CAPTURE_SETTLE_MS): Promise<void> {
   return new Promise((resolve) => {
+    let settled = false
+    const finish = () => {
+      if (settled)
+        return
+      settled = true
+      clearTimeout(fallback)
+      resolve()
+    }
+    // Mobile WebKit/background tabs can pause rAF indefinitely.
+    const fallback = window.setTimeout(finish, ms + 250)
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        window.setTimeout(resolve, ms)
+        window.setTimeout(finish, ms)
       })
     })
   })
@@ -394,31 +376,6 @@ function offsetIn(container: HTMLElement, el: Element): { x: number, y: number, 
     w: r.width,
     h: r.height,
   }
-}
-
-/** Fetch tile pixels in a CORS-safe way. DOM drawImage is flaky on mobile WebKit. */
-async function loadTileBitmap(src: string): Promise<ImageBitmap | HTMLImageElement> {
-  if (src.startsWith('data:')) {
-    const img = new Image()
-    img.src = src
-    await img.decode()
-    return img
-  }
-
-  const res = await fetch(src, { mode: 'cors', credentials: 'omit', cache: 'force-cache' })
-  if (!res.ok)
-    throw new Error(`Tile fetch failed: ${res.status}`)
-  const blob = await res.blob()
-
-  if (typeof createImageBitmap === 'function')
-    return await createImageBitmap(blob)
-
-  const url = URL.createObjectURL(blob)
-  const img = new Image()
-  img.src = url
-  await img.decode()
-  // Keep the object URL alive until GC; revoking before drawImage breaks some mobile browsers.
-  return img
 }
 
 function drawPosterRoute(
@@ -469,8 +426,8 @@ function drawPosterRoute(
 
 /**
  * Flatten the live Leaflet map into one PNG data URL.
- * Re-fetches tile bitmaps (CORS) and redraws the route from LatLngs — DOM drawImage
- * of in-page tile <img>s is unreliable on mobile Safari/Chrome.
+ * Draws already-decoded CORS tile images and redraws the route from LatLngs.
+ * No second network request is made during Copy/Download.
  */
 async function rasterizePosterMap(map: L.Map, latlngs: L.LatLng[]): Promise<string> {
   const mapEl = map.getContainer()
@@ -493,43 +450,23 @@ async function rasterizePosterMap(map: L.Map, latlngs: L.LatLng[]): Promise<stri
   ctx.fillRect(0, 0, width, height)
 
   const tileImgs = getLoadedTileImages(mapEl)
-  const prepared = await Promise.all(tileImgs.map(async (domImg) => {
-    const { x, y, w, h } = offsetIn(mapEl, domImg)
-    if (w <= 1 || h <= 1)
-      return null
-    // Skip tiles fully outside the visible map box.
-    if (x + w < 0 || y + h < 0 || x > width || y > height)
-      return null
-    const src = domImg.currentSrc || domImg.src
-    if (!src)
-      return null
-    try {
-      const bitmap = await loadTileBitmap(src)
-      return { bitmap, x, y, w, h }
-    }
-    catch (err) {
-      console.warn('Poster tile bitmap load failed:', src, err)
-      return null
-    }
-  }))
-
   ctx.save()
   // Match .poster-map-container .leaflet-tile-pane { opacity: 0.5 }
   ctx.globalAlpha = 0.5
   let drawnTiles = 0
-  for (const tile of prepared) {
-    if (!tile)
+  for (const domImg of tileImgs) {
+    const { x, y, w, h } = offsetIn(mapEl, domImg)
+    if (w <= 1 || h <= 1)
+      continue
+    // Skip tiles fully outside the visible map box.
+    if (x + w < 0 || y + h < 0 || x > width || y > height)
       continue
     try {
-      ctx.drawImage(tile.bitmap, tile.x, tile.y, tile.w, tile.h)
+      ctx.drawImage(domImg, x, y, w, h)
       drawnTiles++
     }
     catch (err) {
       console.warn('Poster tile draw failed:', err)
-    }
-    finally {
-      if (typeof ImageBitmap !== 'undefined' && tile.bitmap instanceof ImageBitmap)
-        tile.bitmap.close()
     }
   }
   ctx.restore()
@@ -542,43 +479,16 @@ async function rasterizePosterMap(map: L.Map, latlngs: L.LatLng[]): Promise<stri
   return canvas.toDataURL('image/png')
 }
 
-interface FrozenPoster {
-  mapDataUrl: string
-  restore: () => void
-}
-
 /**
- * Freeze QR for html-to-image, but keep the map out of its SVG foreignObject.
- * Mobile WebKit can render the QR yet silently omit a large embedded map image.
+ * Rasterize the map separately. html-to-image will capture only the content layer.
  */
-async function freezePosterForCapture(wrapper: HTMLElement): Promise<FrozenPoster> {
-  const restorers: Array<() => void> = []
-
+async function preparePosterMap(wrapper: HTMLElement): Promise<string> {
   const qrId = wrapper.dataset.qrId
   const qrCanvas = qrId ? document.getElementById(qrId) as HTMLCanvasElement | null : null
-  if (qrCanvas) {
-    if (!isQrCanvasDrawn(qrCanvas))
-      throw new Error('QR code is not ready')
-    const dataUrl = qrCanvas.toDataURL('image/png')
-    if (dataUrl === 'data:,')
-      throw new Error('QR code canvas is empty')
-
-    const img = document.createElement('img')
-    img.src = dataUrl
-    img.width = qrCanvas.width
-    img.height = qrCanvas.height
-    img.alt = ''
-    img.className = qrCanvas.className
-    img.style.cssText = qrCanvas.style.cssText || 'display:block;image-rendering:pixelated;'
-    const parent = qrCanvas.parentNode
-    if (!parent)
-      throw new Error('QR code parent missing')
-    parent.replaceChild(img, qrCanvas)
-    restorers.push(() => {
-      if (img.parentNode)
-        img.parentNode.replaceChild(qrCanvas, img)
-    })
-  }
+  if (!qrCanvas || !isQrCanvasDrawn(qrCanvas))
+    throw new Error('QR code is not ready')
+  if (qrCanvas.toDataURL('image/png') === 'data:,')
+    throw new Error('QR code canvas is empty')
 
   const mapId = wrapper.dataset.mapId
   const map = mapId ? leafletMaps.get(mapId) : undefined
@@ -589,26 +499,7 @@ async function freezePosterForCapture(wrapper: HTMLElement): Promise<FrozenPoste
   if (!areBasemapTilesReady(mapEl))
     throw new Error('Basemap tiles are still loading')
 
-  const mapDataUrl = await rasterizePosterMap(map, latlngs)
-
-  const prevMapVisibility = mapEl.style.visibility
-  const prevBackgroundColor = wrapper.style.backgroundColor
-  mapEl.style.visibility = 'hidden'
-  // The content layer must remain transparent so the map can be composed below it.
-  wrapper.style.backgroundColor = 'transparent'
-  restorers.push(() => {
-    mapEl.style.visibility = prevMapVisibility
-    wrapper.style.backgroundColor = prevBackgroundColor
-  })
-
-  await settleFrames()
-  return {
-    mapDataUrl,
-    restore: () => {
-      for (const restore of restorers.reverse())
-        restore()
-    },
-  }
+  return await rasterizePosterMap(map, latlngs)
 }
 
 async function imageFromSource(src: string): Promise<HTMLImageElement> {
@@ -808,26 +699,31 @@ async function capturePosterBlob(wrapperId: string): Promise<Blob> {
   if (qrCanvas && !isQrCanvasDrawn(qrCanvas))
     throw new Error('QR code is not ready')
 
-  const frozen = await freezePosterForCapture(wrapper)
+  const mapDataUrl = await preparePosterMap(wrapper)
+  const { toBlob } = await htmlToImagePromise
+  // Lower DPR on phones to avoid silent canvas failures from memory pressure.
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches
+  const pixelRatio = isCoarsePointer
+    ? Math.min(2, window.devicePixelRatio || 1)
+    : 2
+  // Keep the live map visible; removing only its covered white background avoids flashing.
+  const hadWhiteBackground = wrapper.classList.contains('bg-white')
+  wrapper.classList.remove('bg-white')
+  let contentBlob: Blob | null
   try {
-    const { toBlob } = await htmlToImagePromise
-    // Lower DPR on phones to avoid silent canvas failures from memory pressure.
-    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches
-    const pixelRatio = isCoarsePointer
-      ? Math.min(2, window.devicePixelRatio || 1)
-      : 2
-    const contentBlob = await toBlob(wrapper, {
+    contentBlob = await toBlob(wrapper, {
       cacheBust: false,
       pixelRatio,
       skipFonts: false,
     })
-    if (!contentBlob)
-      throw new Error('Failed to generate image blob')
-    return await composePosterBlob(frozen.mapDataUrl, contentBlob)
   }
   finally {
-    frozen.restore()
+    if (hadWhiteBackground)
+      wrapper.classList.add('bg-white')
   }
+  if (!contentBlob)
+    throw new Error('Failed to generate image blob')
+  return await composePosterBlob(mapDataUrl, contentBlob)
 }
 
 /**
@@ -905,25 +801,14 @@ document.addEventListener('click', async (e) => {
   const wrapperId = isCopy ? btn.dataset.copyId! : btn.dataset.wrapperId!
   const activityName = btn.dataset.activityName || 'workout'
   const label = btn.querySelector(isCopy ? '.copy-label' : '.btn-label')
-  const dialog = btn.closest<HTMLElement>('[role="dialog"]')
 
-  const restoreActions = () => {
-    if (dialog) {
-      setPosterActionsDisabled(dialog, false)
-      resetPosterActionLabels(dialog)
-    }
-    else {
-      btn.disabled = false
-      if (label)
-        label.textContent = isCopy ? 'Copy' : 'Download'
-    }
+  const resetAction = () => {
+    if (label)
+      label.textContent = isCopy ? 'Copy' : 'Download'
   }
 
-  // Disable both; active button shows Copying… / Downloading…
-  if (dialog)
-    setPosterActionsDisabled(dialog, true)
-  else
-    btn.disabled = true
+  // Each action owns only its own pending state.
+  btn.disabled = true
   if (label)
     label.textContent = isCopy ? 'Copying…' : 'Downloading…'
 
@@ -944,18 +829,22 @@ document.addEventListener('click', async (e) => {
         label.textContent = 'Downloaded!'
     }
 
-    window.setTimeout(restoreActions, 2000)
+    // Completion immediately restores clickability; the success label remains briefly.
+    btn.disabled = false
+    window.setTimeout(resetAction, 2000)
   }
   catch (err) {
     // Share sheet dismissed — restore quietly.
     if (err instanceof Error && err.name === 'AbortError') {
-      restoreActions()
+      btn.disabled = false
+      resetAction()
       return
     }
     console.error(`Failed to ${isCopy ? 'copy' : 'download'} poster:`, err)
     if (label)
       label.textContent = 'Failed'
-    window.setTimeout(restoreActions, 2000)
+    btn.disabled = false
+    window.setTimeout(resetAction, 2000)
   }
 })
 </script>
