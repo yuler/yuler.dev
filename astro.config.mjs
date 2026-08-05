@@ -48,15 +48,8 @@ export default defineConfig({
       rollupOptions: {
         output: {
           manualChunks(id) {
-            // Create vendor chunks for large dependencies
-            if (id.includes('node_modules')) {
-              // Mermaid and its dependencies
-              const mermaidVendors = ['mermaid', 'cytoscape', 'dagre', 'khroma', 'dayjs', 'uuid', 'lodash', 'd3']
-              if (mermaidVendors.some(v => id.includes(v))) {
-                return 'vendor-mermaid'
-              }
-              // Other vendors can be grouped here if needed
-            }
+            if (/node_modules\/(?:@mermaid-js\/|mermaid(?:\/|$))/.test(id))
+              return 'mermaid'
           },
         },
       },
