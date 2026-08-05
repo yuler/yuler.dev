@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "cards": {
+    "20260417-publish-more-thoughts": {
+      "x": 571.86,
+      "y": -471.41,
+      "rotateDeg": 2.6
+    },
+    "20260511-agents-stuff": {
+      "x": 582.5,
+      "y": -9.81,
+      "rotateDeg": 2.65
+    },
+    "20260518-agentic-yolo": {
+      "x": 228.41,
+      "y": 285.16,
+      "rotateDeg": -2
+    }
+  }
+}
