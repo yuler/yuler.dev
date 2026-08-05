@@ -51,14 +51,8 @@ export default defineConfig({
             // Create vendor chunks for large dependencies
             if (id.includes('node_modules')) {
               // Mermaid and its dependencies
-              if (id.includes('mermaid')
-                || id.includes('cytoscape')
-                || id.includes('dagre')
-                || id.includes('khroma')
-                || id.includes('dayjs')
-                || id.includes('uuid')
-                || id.includes('lodash')
-                || id.includes('d3-')) {
+              const mermaidVendors = ['mermaid', 'cytoscape', 'dagre', 'khroma', 'dayjs', 'uuid', 'lodash', 'd3']
+              if (mermaidVendors.some(v => id.includes(v))) {
                 return 'vendor-mermaid'
               }
               // Other vendors can be grouped here if needed
