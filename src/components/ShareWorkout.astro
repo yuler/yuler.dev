@@ -333,6 +333,7 @@ async function waitForMapTilesReady(mapEl: HTMLElement, timeoutMs: number): Prom
 function settleFrames(ms = POSTER_CAPTURE_SETTLE_MS): Promise<void> {
   return new Promise((resolve) => {
     let settled = false
+    let fallback: ReturnType<typeof setTimeout>
     const finish = () => {
       if (settled)
         return
@@ -341,7 +342,7 @@ function settleFrames(ms = POSTER_CAPTURE_SETTLE_MS): Promise<void> {
       resolve()
     }
     // Mobile WebKit/background tabs can pause rAF indefinitely.
-    const fallback = window.setTimeout(finish, ms + 250)
+    fallback = setTimeout(finish, ms + 250)
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         window.setTimeout(finish, ms)

@@ -1,7 +1,6 @@
-
-onlyBuiltDependencies:
-  - esbuild
-  - sharp
 shellEmulator: true
 
 trustPolicy: no-downgrade
+onlyBuiltDependencies:
+  - esbuild
+  - sharp

@@ -10,4 +10,3 @@ Exec=wechat-devtools --force-device-scale-factor=0.85 %U
 ```
 
 现在的工作方式已经完全变了：有什么不懂，先问 AI。感觉自己解决问题的能力也变强了。
-
