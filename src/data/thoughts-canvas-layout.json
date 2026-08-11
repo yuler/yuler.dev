@@ -1,20 +1,55 @@
 {
   "version": 1,
+  "view": {
+    "cx": -123.61,
+    "cy": -4010.7
+  },
   "cards": {
     "20260417-publish-more-thoughts": {
-      "x": 571.86,
-      "y": -471.41,
-      "rotateDeg": 2.6
+      "x": -692.98,
+      "y": -5543.59,
+      "rotateDeg": -0.63,
+      "zIndex": 106,
+      "width": 443,
+      "height": 120,
+      "pin": "⭐",
+      "pinX": 382,
+      "pinY": 54
     },
     "20260511-agents-stuff": {
-      "x": 582.5,
-      "y": -9.81,
-      "rotateDeg": 2.65
+      "x": -146.52,
+      "y": -4969.44,
+      "rotateDeg": 2.65,
+      "zIndex": 105,
+      "width": 378,
+      "height": 240
     },
     "20260518-agentic-yolo": {
-      "x": 228.41,
-      "y": 285.16,
-      "rotateDeg": -2
+      "x": -128.94,
+      "y": -4970.08,
+      "rotateDeg": -2,
+      "zIndex": 102,
+      "width": 403,
+      "height": 345,
+      "pin": "📌",
+      "pinX": 375,
+      "pinY": 0
+    },
+    "20260730-wechat-devtools-linux-scale": {
+      "x": -628.93,
+      "y": -4289.6,
+      "rotateDeg": -13.15,
+      "zIndex": 104,
+      "width": 372,
+      "height": 312
+    },
+    "20260811-fcitx-idle-english": {
+      "x": -718.57,
+      "y": -4304.63,
+      "rotateDeg": -6.69,
+      "zIndex": 107,
+      "width": 466,
+      "height": 228
     }
   }
 }

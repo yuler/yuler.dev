@@ -9,6 +9,31 @@ import { defineConfig } from 'astro/config'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const thoughtsCanvasLayoutPath = path.resolve(__dirname, 'src/data/thoughts-canvas-layout.json')
 
+function normalizeView(view) {
+  if (
+    typeof view !== 'object'
+    || view === null
+    || !Number.isFinite(view.cx)
+    || !Number.isFinite(view.cy)
+  ) {
+    return null
+  }
+  return {
+    cx: Math.round(view.cx * 100) / 100,
+    cy: Math.round(view.cy * 100) / 100,
+  }
+}
+
+async function readStoredView() {
+  try {
+    const raw = await fs.readFile(thoughtsCanvasLayoutPath, 'utf8')
+    return normalizeView(JSON.parse(raw).view)
+  }
+  catch {
+    return null
+  }
+}
+
 function thoughtsCanvasLayoutDevPlugin() {
   return {
     name: 'thoughts-canvas-layout-dev',
@@ -43,22 +68,33 @@ function thoughtsCanvasLayoutDevPlugin() {
               x: Math.round(card.x * 100) / 100,
               y: Math.round(card.y * 100) / 100,
               rotateDeg: Math.round(card.rotateDeg * 100) / 100,
+              zIndex: Number.isFinite(card.zIndex) ? Math.round(card.zIndex) : 1,
+              width: Number.isFinite(card.width) ? Math.round(card.width) : 300,
+              height: Number.isFinite(card.height) ? Math.round(card.height) : 480,
+            }
+            if (typeof card.pin === 'string' && card.pin) {
+              cards[slug].pin = card.pin
+              cards[slug].pinX = Number.isFinite(card.pinX) ? Math.round(card.pinX) : 8
+              cards[slug].pinY = Number.isFinite(card.pinY) ? Math.round(card.pinY) : 8
             }
           }
 
           const sortedCards = Object.fromEntries(Object.entries(cards).sort(([a], [b]) => a.localeCompare(b)))
-          await fs.writeFile(
-            thoughtsCanvasLayoutPath,
-            `${JSON.stringify({ version: 1, cards: sortedCards }, null, 2)}\n`,
-            'utf8',
-          )
+
+          // The authored starting view travels with the layout, so every visitor
+          // opens on the same framing. A payload without one keeps the stored view
+          // rather than clearing it.
+          const view = normalizeView(payload.view) ?? (await readStoredView())
+
+          const layout = { version: 1, ...(view ? { view } : {}), cards: sortedCards }
+          await fs.writeFile(thoughtsCanvasLayoutPath, `${JSON.stringify(layout, null, 2)}\n`, 'utf8')
 
           const layoutModules = server.moduleGraph.getModulesByFile(thoughtsCanvasLayoutPath)
           layoutModules?.forEach(mod => server.moduleGraph.invalidateModule(mod))
 
           res.statusCode = 200
           res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ ok: true, layout: { version: 1, cards: sortedCards } }))
+          res.end(JSON.stringify({ ok: true, layout }))
         }
         catch (err) {
           res.statusCode = 400

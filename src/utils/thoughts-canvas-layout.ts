@@ -13,6 +13,13 @@ export interface ThoughtLayoutRow {
   x: number
   y: number
   rotateDeg: number
+  zIndex: number
+  width: number
+  height: number
+  pinEmoji?: string
+  /** Pin offset from the card's top-left corner. */
+  pinX: number
+  pinY: number
   tabIndex: number
 }
 
@@ -20,10 +27,28 @@ export interface ThoughtLayoutOverride {
   x?: number
   y?: number
   rotateDeg?: number
+  zIndex?: number
+  width?: number
+  height?: number
+  /** Pin emoji on the card; click pin in view mode to focus the card */
+  pin?: string
+  pinX?: number
+  pinY?: number
+}
+
+/**
+ * Authored starting view for the canvas: the canvas point to put in the middle of
+ * the viewport, plus zoom. Stored as a point rather than a translate so it restores
+ * correctly at any window size.
+ */
+export interface ThoughtsCanvasView {
+  cx: number
+  cy: number
 }
 
 export interface ThoughtLayoutOverridesFile {
   version: 1
+  view?: ThoughtsCanvasView
   cards: Record<string, ThoughtLayoutOverride | undefined>
 }
 
@@ -48,6 +73,9 @@ const BAND_H = NOTE_MAX_H + PAD_Y + 72
 const RECENT_CENTER_SPREAD = 160
 /** ±7° from slug — enough personality without looking too tilted. */
 const ROTATE_RANGE_DEG = 14
+/** Pin starts in the card's top-left corner and can be dragged from there. */
+export const THOUGHT_PIN_DEFAULT_OFFSET = 8
+export const THOUGHT_PIN_SIZE = 28
 
 function finiteOr(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
@@ -122,6 +150,12 @@ export function layoutStickyNotes(
         x: finiteOr(override?.x, x),
         y: finiteOr(override?.y, yPx),
         rotateDeg: finiteOr(override?.rotateDeg, rot),
+        zIndex: finiteOr(override?.zIndex, 0),
+        width: finiteOr(override?.width, NOTE_W),
+        height: finiteOr(override?.height, NOTE_MAX_H),
+        pinEmoji: typeof override?.pin === 'string' ? override.pin : undefined,
+        pinX: finiteOr(override?.pinX, THOUGHT_PIN_DEFAULT_OFFSET),
+        pinY: finiteOr(override?.pinY, THOUGHT_PIN_DEFAULT_OFFSET),
         tabIndex: 0,
       })
     }
@@ -132,8 +166,11 @@ export function layoutStickyNotes(
   const rowMap = new Map(rows.map(r => [r.slug, r]))
   order.forEach((t, i) => {
     const row = rowMap.get(t.slug)
-    if (row)
-      row.tabIndex = 10 + i
+    if (!row)
+      return
+    row.tabIndex = 10 + i
+    if (!row.zIndex)
+      row.zIndex = order.length - i
   })
 
   return rows
@@ -141,22 +178,13 @@ export function layoutStickyNotes(
 
 export const THOUGHT_STICKY_NOTE_W = NOTE_W
 export const THOUGHT_STICKY_NOTE_MAX_H = NOTE_MAX_H
+export const THOUGHT_CARD_MIN_W = 200
+export const THOUGHT_CARD_MIN_H = 120
+export const THOUGHT_CARD_MAX_W = 560
+export const THOUGHT_CARD_MAX_H = 720
 
-export function worldBounds(rows: ThoughtLayoutRow[], containerWidth = THOUGHT_LAYOUT_CONTAINER_W): { width: number, height: number } {
-  if (rows.length === 0)
-    return { width: containerWidth, height: PAD_Y * 2 + BAND_H }
-  let maxX = 0
-  let maxY = 0
-  let maxBand = 0
-  for (const r of rows) {
-    maxX = Math.max(maxX, r.x + NOTE_W)
-    maxY = Math.max(maxY, r.y + NOTE_MAX_H)
-    maxBand = Math.max(maxBand, r.bandIndex)
-  }
-  /** Vertically cover at least all year bands */
-  const minH = PAD_Y + (maxBand + 1) * BAND_H + PAD_Y
-  return {
-    width: Math.max(containerWidth, maxX + PAD_X),
-    height: Math.max(minH, maxY + PAD_Y),
-  }
-}
+/**
+ * The canvas is unbounded: card coordinates are used verbatim as CSS `left`/`top`
+ * (negatives included), so a saved layout is pixel-identical to the edited one.
+ * Viewport centering is derived from the rendered cards instead of a world box.
+ */

@@ -39,7 +39,7 @@ describe('layoutStickyNotes', () => {
     expect(Math.abs((newest?.x ?? 0) - centerX)).toBeLessThanOrEqual(80)
   })
 
-  it('uses saved position and rotation overrides by slug', () => {
+  it('uses saved position, size, z-index and rotation overrides by slug', () => {
     const [row] = layoutStickyNotes(
       [
         {
@@ -54,6 +54,9 @@ describe('layoutStickyNotes', () => {
             x: 123,
             y: 456,
             rotateDeg: -3.5,
+            zIndex: 42,
+            width: 360,
+            height: 520,
           },
         },
       },
@@ -62,5 +65,33 @@ describe('layoutStickyNotes', () => {
     expect(row?.x).toBe(123)
     expect(row?.y).toBe(456)
     expect(row?.rotateDeg).toBe(-3.5)
+    expect(row?.zIndex).toBe(42)
+    expect(row?.width).toBe(360)
+    expect(row?.height).toBe(520)
+  })
+
+  it('assigns default z-index from focus order when not overridden', () => {
+    const rows = layoutStickyNotes([
+      { id: 'a', slug: 'a', dateMs: 1 },
+      { id: 'b', slug: 'b', dateMs: 2 },
+    ])
+    const a = rows.find(r => r.slug === 'a')
+    const b = rows.find(r => r.slug === 'b')
+    expect(a?.zIndex).toBe(1)
+    expect(b?.zIndex).toBe(2)
+  })
+
+  it('keeps overridden coordinates verbatim, negatives included', () => {
+    const rows = layoutStickyNotes(
+      [{ id: 'up', slug: 'up', dateMs: Date.parse('2026-01-01T00:00:00Z') }],
+      { overrides: { up: { x: -100.5, y: -800, width: 320, height: 200, pin: '📌' } } },
+    )
+    expect(rows[0]).toMatchObject({
+      x: -100.5,
+      y: -800,
+      width: 320,
+      height: 200,
+      pinEmoji: '📌',
+    })
   })
 })

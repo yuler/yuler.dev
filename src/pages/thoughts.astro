@@ -1,4 +1,5 @@
 ---
+import type { ThoughtLayoutOverridesFile } from '@/utils/thoughts-canvas-layout'
 // src/pages/thoughts/index.astro
 import RotateCw from '@/components/icons/RotateCw.astro'
 import LightBox from '@/components/LightBox.astro'
@@ -7,12 +8,7 @@ import ThoughtsCanvasBottomToolbar from '@/components/thoughts/ThoughtsCanvasBot
 import thoughtsCanvasLayout from '@/data/thoughts-canvas-layout.json'
 import Layout from '@/layouts/Layout.astro'
 import { getSortedThoughts } from '@/utils/thoughts'
-import {
-  layoutStickyNotes,
-  THOUGHT_STICKY_NOTE_MAX_H,
-  THOUGHT_STICKY_NOTE_W,
-  worldBounds,
-} from '@/utils/thoughts-canvas-layout'
+import { layoutStickyNotes, THOUGHT_STICKY_NOTE_MAX_H } from '@/utils/thoughts-canvas-layout'
 
 const thoughts = await getSortedThoughts()
 const hasPreviewImages = thoughts.some(thought => (thought.data.images?.length ?? 0) > 0)
@@ -23,20 +19,31 @@ const thoughtsMapped = thoughts.map(t => ({
   dateMs: t.data.date.getTime(),
 }))
 
-const savedLayout = thoughtsCanvasLayout.cards
+const canvasLayout = thoughtsCanvasLayout as ThoughtLayoutOverridesFile
+const savedLayout = canvasLayout.cards
 
 const deskRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', overrides: savedLayout })
 const deskBySlug = new Map(deskRows.map(r => [r.slug, r]))
-const deskBounds = worldBounds(deskRows)
 
 const mobRows = layoutStickyNotes(thoughtsMapped, { focusOrder: 'new-first', containerWidth: 375 })
 const mobBySlug = new Map(mobRows.map(r => [r.slug, r]))
-const mobBounds = worldBounds(mobRows, 375)
+
+// The authored framing lives in the layout file. Without one, the canvas opens on
+// the newest thought — cards can sit thousands of pixels apart, so fitting the whole
+// spread would leave the newest one off-screen.
+const savedView = canvasLayout.view
+const focusSlug = thoughtsMapped.reduce(
+  (newest, t) => (t.dateMs > newest.dateMs ? t : newest),
+  thoughtsMapped[0]!,
+)?.slug
 
 const boardCardShell = [
-  'thought-board-card relative rounded-lg border border-gray-200/80 bg-white p-4',
+  'thought-board-card thought-card-scroll relative rounded-lg border border-gray-200/80 bg-white p-4',
   'outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5f5f5]',
 ].join(' ')
+
+// Layout editing (drag / rotate / resize / pin) is a dev-only authoring tool.
+const isDev = import.meta.env.DEV
 ---
 
 <Layout title="Thoughts — Yu Le">
@@ -79,28 +86,98 @@ const boardCardShell = [
         display: block !important;
         pointer-events: auto !important;
       }
+      /*
+        The canvas is a fullscreen overlay, so the page behind it must not scroll:
+        the footer would otherwise leave a scrollbar on an infinite canvas, and its
+        width would skew the viewport measurement the initial framing depends on.
+      */
+      html:has(#thoughts-root[data-view-mode='canvas']) {
+        overflow: hidden;
+      }
     }
     @media (prefers-reduced-motion: reduce) {
       #thoughts-root .thought-stick-rot {
         transform: none !important;
       }
     }
-    /* Canvas layer: reduce compositing jitter during scale/pan */
+    /*
+     * Canvas layer: the world is an unbounded plane, so it has no intrinsic size.
+     * Card `left`/`top` are the stored coordinates verbatim (negatives allowed),
+     * which keeps saved values identical to what is rendered.
+     */
     #thoughts-canvas-world {
-      width: var(--world-w-mob);
-      height: var(--world-h-mob);
       backface-visibility: hidden;
     }
     .thought-canvas-card {
-      left: var(--x-mob);
-      top: var(--y-mob);
+      left: var(--edit-x, var(--x-mob));
+      top: var(--edit-y, var(--y-mob));
+      width: var(--edit-w, var(--w-desk, 300px));
+      height: var(--edit-h, var(--h-desk, 480px));
+      max-height: var(--edit-h, var(--h-desk, 480px));
       transform: rotate(var(--rotate-deg, 0deg));
     }
-    @media (min-width: 768px) {
-      #thoughts-canvas-world {
-        width: var(--world-w-desk);
-        height: var(--world-h-desk);
+    /* Infinite canvas: cards never scroll, so handles/pins stay put. */
+    #thoughts-canvas-world .thought-canvas-card {
+      overflow: hidden;
+    }
+    /* The pin floats over the content: its position is authored, so it is placed
+       out of the way by hand rather than by reserving space for it. */
+    .thought-card-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    /*
+      No scrollbars anywhere on this page — the page itself, the cards, and anything
+      inside them (code blocks, tables) all still scroll, just without chrome.
+    */
+    html:has(#thoughts-root),
+    .thought-board-card,
+    .thought-board-card * {
+      scrollbar-width: none; /* Firefox */
+    }
+    html:has(#thoughts-root)::-webkit-scrollbar,
+    .thought-board-card::-webkit-scrollbar,
+    .thought-board-card *::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+    .thought-canvas-pin {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    /* The unpinned placeholder is only an edit affordance for the selected card. */
+    .thought-canvas-pin[data-empty='true'] {
+      display: none;
+    }
+    #thoughts-root[data-edit-mode='true']
+      .thought-canvas-card[data-selected='true']
+      .thought-canvas-pin[data-empty='true'] {
+      display: block;
+      opacity: 0.35;
+    }
+    /* While editing the selected card, the pin is draggable. */
+    #thoughts-root[data-edit-mode='true'] .thought-canvas-card[data-selected='true'] .thought-canvas-pin {
+      cursor: grab;
+      border-radius: 0.25rem;
+      outline: 1px dashed rgba(17, 24, 39, 0.35);
+      outline-offset: 2px;
+      touch-action: none;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .thought-canvas-card[data-pin-focus='true'] {
+        animation: thought-pin-pop 0.55s ease;
       }
+      @keyframes thought-pin-pop {
+        0%,
+        100% {
+          filter: none;
+        }
+        35% {
+          filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.16));
+        }
+      }
+    }
+    @media (min-width: 768px) {
       .thought-canvas-card {
         left: var(--edit-x, var(--x-desk));
         top: var(--edit-y, var(--y-desk));
@@ -109,21 +186,37 @@ const boardCardShell = [
     #thoughts-root[data-edit-mode='true'] .thought-canvas-card {
       cursor: grab;
     }
+    /* Flush with the card edge so the ring is not mistaken for a position offset. */
     #thoughts-root[data-edit-mode='true'] .thought-canvas-card[data-selected='true'] {
-      z-index: 60;
       outline: 2px solid rgba(17, 24, 39, 0.72);
-      outline-offset: 3px;
+      outline-offset: 0;
     }
-    .thought-canvas-rotate-handle {
+    .thought-canvas-rotate-handle,
+    .thought-canvas-resize-handle {
       display: none;
     }
-    #thoughts-root[data-edit-mode='true'] .thought-canvas-card[data-selected='true'] .thought-canvas-rotate-handle {
+    #thoughts-root[data-edit-mode='true'] .thought-canvas-card[data-selected='true'] .thought-canvas-rotate-handle,
+    #thoughts-root[data-edit-mode='true'] .thought-canvas-card[data-selected='true'] .thought-canvas-resize-handle {
       display: flex;
     }
   </style>
 
   <div class="bg-[#f5f5f5] text-gray-900">
-    <div id="thoughts-root" class="relative min-h-dvh">
+    {/*
+      Mobile defaults to card mode (no canvas toolbar). Desktop upgrades to canvas
+      in the inline script below before paint when motion is allowed.
+    */}
+    <div id="thoughts-root" class="relative min-h-dvh" data-view-mode="card">
+      <script is:inline>
+        ;(function () {
+          const root = document.getElementById('thoughts-root')
+          if (!root)
+            return
+          const motionOk = window.matchMedia('(prefers-reduced-motion: no-preference)').matches
+          const desktop = window.matchMedia('(min-width: 768px)').matches
+          root.dataset.viewMode = motionOk && desktop ? 'canvas' : 'card'
+        })()
+      </script>
       <section
         id="thoughts-canvas-view"
         class="motion-reduce:hidden fixed inset-0 z-0 hidden bg-[#f5f5f5] motion-safe:block"
@@ -140,7 +233,8 @@ const boardCardShell = [
           <div
             id="thoughts-canvas-world"
             class="absolute left-0 top-0 z-[1] origin-top-left will-change-transform"
-            style={`--world-w-mob:${mobBounds.width}px;--world-h-mob:${mobBounds.height}px;--world-w-desk:${deskBounds.width}px;--world-h-desk:${deskBounds.height}px;`}
+            data-view-cx={savedView?.cx}
+            data-view-cy={savedView?.cy}
           >
             {
               thoughts.map((thought) => {
@@ -151,58 +245,111 @@ const boardCardShell = [
                 return (
                   <article
                     id={`thought-canvas-${thought.id}`}
-                    class={`thought-stick-rot thought-canvas-card absolute z-[1] ${boardCardShell} origin-center`}
+                    class={`thought-stick-rot thought-canvas-card absolute ${boardCardShell} origin-center`}
                     data-slug={thought.id}
                     data-x={deskRow.x}
                     data-y={deskRow.y}
                     data-rotate={deskRow.rotateDeg}
+                    data-z-index={deskRow.zIndex}
+                    data-width={deskRow.width}
+                    data-height={deskRow.height}
+                    data-pin-x={deskRow.pinX}
+                    data-pin-y={deskRow.pinY}
+                    {...(thought.id === focusSlug ? { 'data-canvas-focus': 'true' } : {})}
+                    {...(deskRow.pinEmoji ? { 'data-pin-emoji': deskRow.pinEmoji } : {})}
                     style={{
                       '--x-desk': `${deskRow.x}px`,
                       '--y-desk': `${deskRow.y}px`,
                       '--x-mob': `${mobRow.x}px`,
                       '--y-mob': `${mobRow.y}px`,
+                      '--w-desk': `${deskRow.width}px`,
+                      '--h-desk': `${deskRow.height}px`,
                       '--rotate-deg': `${deskRow.rotateDeg}deg`,
-                      'width': `${THOUGHT_STICKY_NOTE_W}px`,
-                      'maxHeight': `${THOUGHT_STICKY_NOTE_MAX_H}px`,
-                      'overflowY': 'auto',
+                      'zIndex': deskRow.zIndex,
                     }}
                     tabindex={deskRow.tabIndex}
                   >
-                    <button
-                      type="button"
-                      class="thought-canvas-rotate-handle absolute right-2 top-2 z-[70] size-8 cursor-grab items-center justify-center rounded-sm border border-gray-300 bg-white text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
-                      aria-label="Rotate card"
-                    >
-                      <RotateCw class="size-4" />
-                    </button>
+                    {(deskRow.pinEmoji || isDev) && (
+                      <button
+                        type="button"
+                        class="thought-canvas-pin absolute z-[80] select-none text-2xl leading-none drop-shadow-sm"
+                        style={{ left: `${deskRow.pinX}px`, top: `${deskRow.pinY}px` }}
+                        data-empty={deskRow.pinEmoji ? 'false' : 'true'}
+                        aria-label={deskRow.pinEmoji ? 'Pinned thought' : 'Pin this thought'}
+                      >
+                        {deskRow.pinEmoji ?? '📌'}
+                      </button>
+                    )}
+                    {isDev && (
+                      <>
+                        <button
+                          type="button"
+                          class="thought-canvas-rotate-handle absolute right-2 top-2 z-[70] size-8 cursor-grab items-center justify-center rounded-sm border border-gray-300 bg-white text-gray-800 shadow-sm transition-colors hover:bg-gray-50"
+                          aria-label="Rotate card"
+                        >
+                          <RotateCw class="size-4" />
+                        </button>
+                        <button
+                          type="button"
+                          class="thought-canvas-resize-handle absolute bottom-1 right-1 z-[70] size-6 cursor-nwse-resize items-center justify-center rounded-sm border border-gray-300 bg-white text-[10px] text-gray-600 shadow-sm transition-colors hover:bg-gray-50"
+                          aria-label="Resize card"
+                        >
+                          ⤡
+                        </button>
+                      </>
+                    )}
                     <Thought thought={thought} />
                   </article>
                 )
               })
             }
           </div>
-          <script is:inline>
-  (function () {
-    const V = document.getElementById('thoughts-canvas-viewport')
-    const W = document.getElementById('thoughts-canvas-world')
-    if (V && W && V.clientWidth > 0) {
-      const scale = window.innerWidth < 1024 ? 0.75 : 1
-      const wDesk = Number.parseFloat(W.style.getPropertyValue('--world-w-desk'))
-      const wMob = Number.parseFloat(W.style.getPropertyValue('--world-w-mob')) || wDesk
-      const hDesk = Number.parseFloat(W.style.getPropertyValue('--world-h-desk'))
-      const hMob = Number.parseFloat(W.style.getPropertyValue('--world-h-mob')) || hDesk
-
-      const w = window.innerWidth >= 768 ? wDesk : wMob
-      const h = window.innerWidth >= 768 ? hDesk : hMob
-
-      const tx = (V.clientWidth - w * scale) / 2
-      const ty = (V.clientHeight - h * scale) / 2
-      W.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`
-    }
-  })()
-  </script>
         </div>
       </section>
+
+      {/*
+        Paint the canvas already framed, using the same inputs the controller uses so
+        there is no jump when it takes over. This is a flash-avoidance measure only —
+        the controller recomputes rather than trusting this transform.
+      */}
+      <script is:inline>
+        ;(function () {
+          const viewport = document.getElementById('thoughts-canvas-viewport')
+          const world = document.getElementById('thoughts-canvas-world')
+          if (!viewport || !world)
+            return
+          const width = viewport.clientWidth
+          const height = viewport.clientHeight
+          if (!width || !height)
+            return
+
+          const saved = {
+            cx: Number.parseFloat(world.dataset.viewCx ?? ''),
+            cy: Number.parseFloat(world.dataset.viewCy ?? ''),
+          }
+          let center = null
+          const scale = window.innerWidth < 1024 ? 0.75 : 1
+          if ([saved.cx, saved.cy].every(Number.isFinite)) {
+            center = { x: saved.cx, y: saved.cy }
+          }
+          else {
+            const focus = document.querySelector('.thought-canvas-card[data-canvas-focus]')
+            if (!focus)
+              return
+            const style = getComputedStyle(focus)
+            center = {
+              x: Number.parseFloat(style.left) + Number.parseFloat(style.width) / 2,
+              y: Number.parseFloat(style.top) + Number.parseFloat(style.height) / 2,
+            }
+          }
+          if (!Number.isFinite(center.x) || !Number.isFinite(center.y))
+            return
+
+          const tx = width / 2 - center.x * scale
+          const ty = height / 2 - center.y * scale
+          world.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`
+        })()
+      </script>
 
       <header
         class="pointer-events-none fixed inset-x-0 top-0 z-20"
@@ -221,7 +368,7 @@ const boardCardShell = [
 
       <section
         id="thoughts-list-view"
-        class="relative z-10 mx-auto block max-w-6xl columns-1 sm:columns-2 md:columns-3 gap-4 px-4 pb-[calc(6.25rem+env(safe-area-inset-bottom))] pt-[calc(5.75rem+env(safe-area-inset-top))] motion-reduce:block md:gap-6 md:motion-safe:hidden sm:pt-[calc(6rem+env(safe-area-inset-top))]"
+        class="relative z-10 mx-auto block max-w-6xl columns-1 sm:columns-2 md:columns-3 gap-4 px-4 pb-[calc(1.75rem+env(safe-area-inset-bottom))] pt-[calc(5.75rem+env(safe-area-inset-top))] motion-reduce:block md:gap-6 md:pb-[calc(6.25rem+env(safe-area-inset-bottom))] md:motion-safe:hidden sm:pt-[calc(6rem+env(safe-area-inset-top))]"
         aria-label="Thoughts list"
       >
         {
@@ -233,7 +380,6 @@ const boardCardShell = [
                 class={`thought-stick-rot mb-4 break-inside-avoid md:mb-6 ${boardCardShell} origin-top-left`}
                 style={{
                   maxHeight: `${THOUGHT_STICKY_NOTE_MAX_H}px`,
-                  overflowY: 'auto',
                 }}
                 tabindex={row?.tabIndex ?? 0}
               >
