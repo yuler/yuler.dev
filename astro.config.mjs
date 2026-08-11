@@ -17,9 +17,10 @@ function thoughtsCanvasLayoutDevPlugin() {
           return next()
 
         try {
-          let body = ''
+          const chunks = []
           for await (const chunk of req)
-            body += chunk
+            chunks.push(chunk)
+          const body = Buffer.concat(chunks).toString('utf8')
 
           const payload = JSON.parse(body)
           if (payload?.version !== 1 || typeof payload.cards !== 'object' || payload.cards === null)
