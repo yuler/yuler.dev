@@ -110,5 +110,16 @@ export default defineConfig({
         '@': path.resolve(__dirname, 'src'),
       },
     },
+    build: {
+      chunkSizeWarningLimit: 3000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (/node_modules\/(?:@mermaid-js\/|mermaid(?:\/|$))/.test(id))
+              return 'mermaid'
+          },
+        },
+      },
+    },
   },
 })

@@ -1,0 +1,431 @@
+{
+  "resource_state": 3,
+  "athlete": {
+    "id": 1596917895,
+    "id_str": "1596917895",
+    "resource_state": 1
+  },
+  "name": "Evening Ride",
+  "distance": 8469.1,
+  "moving_time": 2186,
+  "elapsed_time": 2582,
+  "total_elevation_gain": 13.9,
+  "type": "Ride",
+  "sport_type": "Ride",
+  "workout_type": null,
+  "device_name": "Apple Watch Series 7",
+  "id": 19321321220,
+  "id_str": "19321321220",
+  "start_date": "2026-07-15T10:11:11Z",
+  "start_date_local": "2026-07-15T18:11:11Z",
+  "timezone": "(GMT+08:00) Asia/Shanghai",
+  "utc_offset": 28800,
+  "location_city": null,
+  "location_state": null,
+  "location_country": null,
+  "achievement_count": 0,
+  "kudos_count": 0,
+  "comment_count": 0,
+  "athlete_count": 1,
+  "photo_count": 0,
+  "map": {
+    "id": "a19321321220",
+    "polyline": "qd|rF}fieUCKCDGCAKDGHANDXGR@ZId@Bd@?TBDd@C|@DfCCh@Dj@A\\BjAAPKFJN@FCJDPB@?b@Eh@BPERBPAD@A@DDCBDTJJAJDFE@B`@@VCd@BTAd@Er@?n@EP?BABIDE@IFADBBCH_@l@ATB`AOL@EEXCp@LNILCF?NDl@ITFf@Ef@Bf@E~@JXAD@ADDIP@PCCf@B?EBCNBJ?v@DZ?`@EPB@?HBFDDCHBh@AB@b@CJGtABVAb@BTApADFABDb@f@d@FCx@FZAXEhABZBl@CL?`@Ct@AFAVANBVADCR@DBp@GPB^@d@Cb@BNKHADBJCJ@b@Ln@?h@EBQb@TfAK\\AjAITBT?z@D\\HhAXVLLBz@d@NBr@FlABNAbA?^ETMh@g@RMLC\\CrA@\\EJGd@w@FQTy@TYPIpCZrCRdBRR?fALV@NElCCj@LLDR@HDv@Hj@LnE^p@CLHTFJCbAHdCGxBQH@n@CZ@zAEVCFMFA|@?b@G^@RCFIb@AZBlBIf@?j@IZ?TEzAKVDPALB\\C`ASr@ETEFBLGj@GT@NEh@?`@IfAKN?~@Mv@@ZERBVEZRn@Vt@FPDf@@b@FL?b@DXBHFZCNBNAh@Br@A^@HCf@CN@`AGFB^CNGlAUr@IHDZ@`A@ZCTEd@?TEV?^Ep@@La@\\JHFdA@ZCN@NAd@?tAKj@?BBDEHATBRGRAj@Bv@GNEHHrAAT@BVJUj@CNIF?JEFDLQHAh@Bb@Ep@?RJDRCxBBfBEN?HFHEr@BTAFBRCPB^AR@hACP@NJZ@JARDRA`@Df@Cj@@d@CFG@?LBNBj@Cj@RvD?`AATBfAAFB^B?ACB?J?HBFAGNHJJD~@ClABVCfBAPERDtBGh@?D@rAEGGd@RR?ZATBd@CZKVEdBCTCN@NCnA@^CEEx@Ej@Ph@DvCGV?t@EXALD?CNAHJH@?CR?\\O\\CZ@b@E`@H`@?p@K\\@l@Cb@Jz@MjA@f@Al@@PEIB~@EF@RAT@\\EJDv@Ij@?TCLBf@AV@\\ER@j@CHCJ@j@EXBNDDJLKF@LDLLHGZAL@BF?CHEdAK@@^GNHXB|@A|@Db@Gh@CZATBVA|@IDDD?d@Ab@Dl@Il@A\\DZA`ABPCBBh@KLD^Ej@ABGVHf@AlA?b@CPCDC^@RAR@fAEP@NCFBRDp@At@A?Mn@L`@AJEXANL`@A@A?EDL",
+    "resource_state": 3,
+    "summary_polyline": "qd|rF}fieUCKCDGCAG@@?GBEHANDXGR@ZIjABTBDd@C|@DfCCh@Dj@A\\BjAAPKFJN@FCJDPB@?b@Eh@BPERBPAD@A@DDCBDTJJAJDFE@B`@@VCd@Bz@Gr@?`AEBABIDE@IFADBBCH_@bA@`AOL@EEXCp@LNILCF?NDl@ITFf@Ef@Bf@E~@JXAD@ADDIP@PCCf@B?EBCNBJ?v@DZ?`@EPB@?HBFDDCHBh@AB@b@CJGtABVAb@BTApADFABDb@f@d@FCx@FZAXEhABZBzCKVANBVADCR@DBp@GPB^@d@Cb@BNKHADBVAb@Ln@?h@EBQb@TfAKhBKTBT?z@D\\HhAXVLLBz@d@NBr@FlABNAbA?^ETMh@g@RMLC\\CrA@\\EJGd@w@FQTy@TYPIpCZrCR`E`@V@NElCCj@LLDR@HDv@Hj@LnE^p@CLHTFJCbAHdCGxBQH@n@CZ@zAEVCFMFA|@?b@G^@RCFIb@AZBlBIf@?j@IZ?TEzAKVDPALB\\C`ASr@ETEFBLGj@GT@NEh@?`@IfAKN?~@Mv@@ZERBVEZRn@Vt@FPDf@@b@Fp@DXBHFZCNBlC@HCf@CN@`AGFB^CNGlAUr@IHDZ@`A@dDUp@@La@\\JHFdA@ZCN@t@AtAKj@?BBDEHATBRGRAj@Bv@GNEHHrAAT@BVJUj@CNIF?JEFDLQHAh@Bb@Ep@?RJDRCxBBfBEN?HFHEr@BTAFBRCPB^AR@hACP@NJZ@JARDRA`@Df@Cj@@d@CFG@?LBNBj@Cj@RvD?`AATBfAAFB^B?ACB?J?HBFAGNHJJD~@ClABVCfBAPERDtBGh@?D@rAEGGd@Rn@ATBd@CZKVEdBCTCN@NCnA@^CEEx@Ej@Ph@DnDGt@EXALD?CNAHJH@?CR?\\O\\CZ@b@E`@H`@?p@K\\@l@Cb@Jz@MjA@f@Al@@PEIB~@EF@RAT@\\EJDv@Ij@?TCLBf@AV@\\ER@j@CHCJ@j@EXBNDDJLKF@LDLLHGZAL@BF?CHEdAK@@^GNHXB|@A|@DlAKZATBVA|@IDDD?d@Ab@Dl@Il@A\\DZA`ABPCBBh@KLD^Ej@ABGVHf@AlA?b@CPCDCfA@fAEP@NCFBRDp@At@A?Mn@L`@AJEXANL`@A@A?EDL"
+  },
+  "trainer": false,
+  "commute": false,
+  "manual": false,
+  "private": false,
+  "visibility": "everyone",
+  "flagged": false,
+  "gear_id": null,
+  "start_latlng": [
+    39.962498,
+    116.378871
+  ],
+  "end_latlng": [
+    39.898969,
+    116.367752
+  ],
+  "average_speed": 3.874,
+  "max_speed": 9.133,
+  "has_heartrate": true,
+  "average_heartrate": 124.9,
+  "max_heartrate": 149,
+  "heartrate_opt_out": false,
+  "display_hide_heartrate_option": true,
+  "elev_high": 56.3,
+  "elev_low": 50.7,
+  "upload_id": 20440118515,
+  "upload_id_str": "20440118515",
+  "external_id": "CF8D073E-F1C6-4314-8369-62B7A668C9B9-activity.fit",
+  "from_accepted_tag": false,
+  "pr_count": 0,
+  "total_photo_count": 0,
+  "has_kudoed": false,
+  "suffer_score": 10,
+  "description": null,
+  "calories": 0,
+  "perceived_exertion": null,
+  "prefer_perceived_exertion": null,
+  "segment_efforts": [
+    {
+      "id": 3512427872786866700,
+      "resource_state": 2,
+      "name": "回家前再挣扎一下",
+      "activity": {
+        "id": 19321321220,
+        "id_str": "19321321220",
+        "visibility": "everyone",
+        "resource_state": 1
+      },
+      "athlete": {
+        "id": 1596917895,
+        "id_str": "1596917895",
+        "resource_state": 1
+      },
+      "elapsed_time": 72,
+      "moving_time": 72,
+      "start_date": "2026-07-15T10:50:52Z",
+      "start_date_local": "2026-07-15T18:50:52Z",
+      "distance": 308.5,
+      "start_index": 1884,
+      "end_index": 1953,
+      "device_watts": false,
+      "average_heartrate": 118.7,
+      "max_heartrate": 122,
+      "segment": {
+        "id": 28535704,
+        "resource_state": 2,
+        "name": "回家前再挣扎一下",
+        "activity_type": "Ride",
+        "distance": 308.5,
+        "average_grade": -0.8,
+        "maximum_grade": 0.4,
+        "elevation_high": 54.3,
+        "elevation_low": 51.9,
+        "start_latlng": [
+          39.90547,
+          116.36769
+        ],
+        "end_latlng": [
+          39.90271,
+          116.36774
+        ],
+        "elevation_profile": null,
+        "elevation_profiles": null,
+        "climb_category": 0,
+        "city": "Xicheng Qu",
+        "state": "Beijing Shi",
+        "country": "China",
+        "private": false,
+        "hazardous": false,
+        "starred": false
+      },
+      "pr_rank": null,
+      "achievements": [],
+      "visibility": "everyone",
+      "kom_rank": null,
+      "hidden": false
+    },
+    {
+      "id": 3512427872786573000,
+      "resource_state": 2,
+      "name": "谁捏刹车谁是狗",
+      "activity": {
+        "id": 19321321220,
+        "id_str": "19321321220",
+        "visibility": "everyone",
+        "resource_state": 1
+      },
+      "athlete": {
+        "id": 1596917895,
+        "id_str": "1596917895",
+        "resource_state": 1
+      },
+      "elapsed_time": 129,
+      "moving_time": 128,
+      "start_date": "2026-07-15T10:51:03Z",
+      "start_date_local": "2026-07-15T18:51:03Z",
+      "distance": 502,
+      "start_index": 1895,
+      "end_index": 2018,
+      "device_watts": false,
+      "average_heartrate": 117.6,
+      "max_heartrate": 122,
+      "segment": {
+        "id": 28791892,
+        "resource_state": 2,
+        "name": "谁捏刹车谁是狗",
+        "activity_type": "Ride",
+        "distance": 502,
+        "average_grade": -0.5,
+        "maximum_grade": 0.5,
+        "elevation_high": 53.5,
+        "elevation_low": 50.9,
+        "start_latlng": [
+          39.90508,
+          116.36776
+        ],
+        "end_latlng": [
+          39.90058,
+          116.3679
+        ],
+        "elevation_profile": null,
+        "elevation_profiles": null,
+        "climb_category": 0,
+        "city": "Xicheng Qu",
+        "state": "Beijing Shi",
+        "country": "China",
+        "private": false,
+        "hazardous": false,
+        "starred": false
+      },
+      "pr_rank": null,
+      "achievements": [],
+      "visibility": "everyone",
+      "kom_rank": null,
+      "hidden": false
+    }
+  ],
+  "splits_metric": [
+    {
+      "distance": 1003,
+      "elapsed_time": 322,
+      "elevation_difference": 0.8,
+      "moving_time": 318,
+      "split": 1,
+      "average_speed": 3.15,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 114.72696245733789,
+      "pace_zone": 0
+    },
+    {
+      "distance": 999,
+      "elapsed_time": 282,
+      "elevation_difference": -2.6,
+      "moving_time": 271,
+      "split": 2,
+      "average_speed": 3.69,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 120.23106060606061,
+      "pace_zone": 0
+    },
+    {
+      "distance": 1000.6,
+      "elapsed_time": 218,
+      "elevation_difference": 2.5,
+      "moving_time": 218,
+      "split": 3,
+      "average_speed": 4.59,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 127.04587155963303,
+      "pace_zone": 0
+    },
+    {
+      "distance": 997.8,
+      "elapsed_time": 239,
+      "elevation_difference": 0.3,
+      "moving_time": 239,
+      "split": 4,
+      "average_speed": 4.17,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 132.84937238493723,
+      "pace_zone": 0
+    },
+    {
+      "distance": 1002.7,
+      "elapsed_time": 238,
+      "elevation_difference": -1.2,
+      "moving_time": 238,
+      "split": 5,
+      "average_speed": 4.21,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 126.90598290598291,
+      "pace_zone": 0
+    },
+    {
+      "distance": 997.8,
+      "elapsed_time": 312,
+      "elevation_difference": 3,
+      "moving_time": 248,
+      "split": 6,
+      "average_speed": 4.02,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 137.10638297872342,
+      "pace_zone": 0
+    },
+    {
+      "distance": 1002.5,
+      "elapsed_time": 332,
+      "elevation_difference": -2.4,
+      "moving_time": 262,
+      "split": 7,
+      "average_speed": 3.83,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 126.4156378600823,
+      "pace_zone": 0
+    },
+    {
+      "distance": 1000.9,
+      "elapsed_time": 503,
+      "elevation_difference": -0.8,
+      "moving_time": 254,
+      "split": 8,
+      "average_speed": 3.94,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 122.46666666666667,
+      "pace_zone": 0
+    },
+    {
+      "distance": 467,
+      "elapsed_time": 137,
+      "elevation_difference": -1.9,
+      "moving_time": 137,
+      "split": 9,
+      "average_speed": 3.41,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 116.19259259259259,
+      "pace_zone": 0
+    }
+  ],
+  "splits_standard": [
+    {
+      "distance": 1610,
+      "elapsed_time": 524,
+      "elevation_difference": 1.1,
+      "moving_time": 509,
+      "split": 1,
+      "average_speed": 3.16,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 116.57023060796645,
+      "pace_zone": 0
+    },
+    {
+      "distance": 1610.2,
+      "elapsed_time": 355,
+      "elevation_difference": 0.6,
+      "moving_time": 355,
+      "split": 2,
+      "average_speed": 4.54,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 126.86478873239436,
+      "pace_zone": 0
+    },
+    {
+      "distance": 1609.3,
+      "elapsed_time": 383,
+      "elevation_difference": -1.7,
+      "moving_time": 383,
+      "split": 3,
+      "average_speed": 4.2,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 129.45910290237467,
+      "pace_zone": 0
+    },
+    {
+      "distance": 1614.2,
+      "elapsed_time": 449,
+      "elevation_difference": 1.1,
+      "moving_time": 385,
+      "split": 4,
+      "average_speed": 4.19,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 133.5779569892473,
+      "pace_zone": 0
+    },
+    {
+      "distance": 1619.9,
+      "elapsed_time": 748,
+      "elevation_difference": -1.7,
+      "moving_time": 429,
+      "split": 5,
+      "average_speed": 3.78,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 123.70379746835442,
+      "pace_zone": 0
+    },
+    {
+      "distance": 407.7,
+      "elapsed_time": 124,
+      "elevation_difference": -1.7,
+      "moving_time": 124,
+      "split": 6,
+      "average_speed": 3.29,
+      "average_grade_adjusted_speed": null,
+      "average_heartrate": 115.90243902439025,
+      "pace_zone": 0
+    }
+  ],
+  "laps": [
+    {
+      "id": 69035123358,
+      "resource_state": 2,
+      "name": "Lap 1",
+      "activity": {
+        "id": 19321321220,
+        "id_str": "19321321220",
+        "visibility": "everyone",
+        "resource_state": 1
+      },
+      "athlete": {
+        "id": 1596917895,
+        "id_str": "1596917895",
+        "resource_state": 1
+      },
+      "elapsed_time": 2586,
+      "moving_time": 2186,
+      "start_date": "2026-07-15T10:11:11Z",
+      "start_date_local": "2026-07-15T18:11:11Z",
+      "distance": 8471.27,
+      "average_speed": 3.88,
+      "max_speed": 9.133,
+      "lap_index": 1,
+      "split": 1,
+      "start_index": 0,
+      "end_index": 2077,
+      "total_elevation_gain": 13.9,
+      "device_watts": false,
+      "average_heartrate": 124.9,
+      "max_heartrate": 149
+    }
+  ],
+  "photos": {
+    "primary": null,
+    "count": 0
+  },
+  "stats_visibility": [
+    {
+      "type": "heart_rate",
+      "visibility": "everyone"
+    },
+    {
+      "type": "pace",
+      "visibility": "everyone"
+    },
+    {
+      "type": "power",
+      "visibility": "everyone"
+    },
+    {
+      "type": "speed",
+      "visibility": "everyone"
+    },
+    {
+      "type": "calories",
+      "visibility": "everyone"
+    },
+    {
+      "type": "weight_lifted",
+      "visibility": "everyone"
+    }
+  ],
+  "hide_from_home": false,
+  "sport_image_visibility": "everyone",
+  "embed_token": "63f4be6be4ed561cbec532ab3123ad9cf251b536",
+  "available_zones": [
+    "heartrate"
+  ]
+}
