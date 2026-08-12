@@ -1,9 +1,20 @@
 ---
+interface Props {
+  isDev?: boolean
+}
+
+const { isDev = false } = Astro.props
 ---
 
 <div
   id="thoughts-canvas-bottom-toolbar"
-  class="motion-reduce:hidden pointer-events-none fixed inset-x-0 bottom-[max(1.75rem,calc(env(safe-area-inset-bottom)+0.75rem))] z-40 hidden justify-center px-4 max-md:flex md:motion-safe:flex"
+  data-editable={isDev ? 'true' : 'false'}
+  class:list={[
+    'motion-reduce:hidden pointer-events-none fixed inset-x-0 z-40 hidden justify-center px-4 md:motion-safe:flex',
+    isDev
+      ? 'bottom-[max(4.75rem,calc(env(safe-area-inset-bottom)+4rem))]'
+      : 'bottom-[max(1.75rem,calc(env(safe-area-inset-bottom)+0.75rem))]',
+  ]}
   aria-label="Thoughts canvas controls"
 >
   <div
@@ -34,6 +45,46 @@
 
     <div class="mx-0.5 hidden h-5 w-px bg-gray-200/90 sm:block" aria-hidden="true"></div>
 
+    {
+      isDev && (
+        <>
+          <div
+            class="flex items-center gap-0.5 rounded-sm border border-gray-200/80 bg-white/80 px-1 py-0.5"
+            aria-label="Canvas edit"
+          >
+            <div
+              id="thoughts-canvas-edit-slot"
+              class="relative h-7 min-w-[4.25rem] shrink-0"
+              aria-live="polite"
+            >
+              <button
+                type="button"
+                id="thoughts-canvas-edit"
+                class="absolute inset-0 cursor-pointer rounded-sm px-2 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-100 sm:text-xs"
+                aria-pressed="false"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                id="thoughts-canvas-save"
+                class="absolute inset-0 hidden cursor-pointer rounded-sm px-2 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-35 sm:text-xs"
+                disabled
+              >
+                Save
+              </button>
+              <span
+                id="thoughts-canvas-edit-status"
+                class="absolute inset-0 hidden select-none items-center justify-center px-2 text-[11px] text-gray-500 sm:text-xs"
+              ></span>
+            </div>
+          </div>
+
+          <div class="mx-0.5 hidden h-5 w-px bg-gray-200/90 sm:block" aria-hidden="true"></div>
+        </>
+      )
+    }
+
     <div
       id="thoughts-canvas-zoom-cluster"
       class="flex items-center gap-0.5 rounded-sm border border-gray-200/80 bg-white/80 px-1 py-0.5 tabular-nums"
@@ -47,7 +98,15 @@
       >
         −
       </button>
-      <span id="thoughts-canvas-zoom-level" class="min-w-[3.25rem] select-none px-1 text-center">100%</span>
+      <button
+        type="button"
+        id="thoughts-canvas-zoom-level-reset"
+        class="min-w-[3.25rem] cursor-pointer select-none px-1 text-center text-[11px] text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-35"
+        aria-label="Reset zoom to 100%"
+        disabled
+      >
+        100%
+      </button>
       <button
         type="button"
         id="thoughts-canvas-zoom-in"
@@ -57,14 +116,6 @@
         +
       </button>
       <div class="mx-0.5 h-4 w-px bg-gray-200/90" aria-hidden="true"></div>
-      <button
-        type="button"
-        id="thoughts-canvas-reset"
-        class="cursor-pointer rounded-sm px-2 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-100 sm:text-xs disabled:cursor-not-allowed disabled:opacity-35"
-        aria-label="Reset canvas view"
-      >
-        Reset
-      </button>
     </div>
   </div>
 </div>
@@ -77,16 +128,6 @@ function qs<T extends HTMLElement>(sel: string) {
   return document.querySelector<T>(sel)
 }
 
-function chromeOpts(): ThoughtsCanvasChromeOptions {
-  return {
-    zoomOutBtn: qs<HTMLButtonElement>('#thoughts-canvas-zoom-out'),
-    zoomInBtn: qs<HTMLButtonElement>('#thoughts-canvas-zoom-in'),
-    zoomLevelEl: qs<HTMLElement>('#thoughts-canvas-zoom-level'),
-    resetBtn: qs<HTMLButtonElement>('#thoughts-canvas-reset'),
-    initialScale: window.innerWidth < 1024 ? 0.75 : 1,
-  }
-}
-
 const root = qs<HTMLElement>('#thoughts-root')
 const toolbar = qs<HTMLElement>('#thoughts-canvas-bottom-toolbar')
 const cardBtn = qs<HTMLButtonElement>('#thoughts-mode-card')
@@ -96,14 +137,34 @@ const world = qs<HTMLElement>('#thoughts-canvas-world')
 const zoomCluster = qs<HTMLElement>('#thoughts-canvas-zoom-cluster')
 const zoomOutEl = qs<HTMLButtonElement>('#thoughts-canvas-zoom-out')
 const zoomInEl = qs<HTMLButtonElement>('#thoughts-canvas-zoom-in')
-const zoomLevelEl = qs<HTMLElement>('#thoughts-canvas-zoom-level')
-const resetBtn = qs<HTMLButtonElement>('#thoughts-canvas-reset')
+const zoomLevelEl = qs<HTMLButtonElement>('#thoughts-canvas-zoom-level-reset')
+const resetBtn = zoomLevelEl
 
-if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster && zoomOutEl && zoomInEl && zoomLevelEl && resetBtn) {
+function chromeOpts(): ThoughtsCanvasChromeOptions {
+  return {
+    zoomOutBtn: qs<HTMLButtonElement>('#thoughts-canvas-zoom-out'),
+    zoomInBtn: qs<HTMLButtonElement>('#thoughts-canvas-zoom-in'),
+    zoomLevelEl,
+    resetBtn,
+    editBtn: qs<HTMLButtonElement>('#thoughts-canvas-edit'),
+    saveBtn: qs<HTMLButtonElement>('#thoughts-canvas-save'),
+    editStatusEl: qs<HTMLElement>('#thoughts-canvas-edit-status'),
+    enableEditing: toolbar?.dataset.editable === 'true',
+    initialScale: window.innerWidth < 1024 ? 0.75 : 1,
+  }
+}
+
+if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster && zoomOutEl && zoomInEl && zoomLevelEl) {
   let activeCanvas: ReturnType<typeof initThoughtsCanvas> | null = null
 
-  const mqDesktopCanvas = window.matchMedia('(min-width: 768px) and (prefers-reduced-motion: no-preference)')
-  let currentMode: 'canvas' | 'card' = mqDesktopCanvas.matches ? 'canvas' : 'card'
+  const mqCanvasAllowed = window.matchMedia('(prefers-reduced-motion: no-preference)')
+  const mqDesktop = window.matchMedia('(min-width: 768px)')
+
+  function preferredMode(): 'canvas' | 'card' {
+    return mqCanvasAllowed.matches && mqDesktop.matches ? 'canvas' : 'card'
+  }
+
+  let currentMode: 'canvas' | 'card' = preferredMode()
 
   function setModeUi(mode: 'card' | 'canvas') {
     const onCanvas = mode === 'canvas'
@@ -129,8 +190,8 @@ if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster 
     }
   }
 
-  function setViewMode(mode: 'card' | 'canvas') {
-    if (mode === currentMode)
+  function setViewMode(mode: 'card' | 'canvas', force = false) {
+    if (!force && mode === currentMode)
       return
     currentMode = mode
 
@@ -151,14 +212,13 @@ if (root && toolbar && cardBtn && canvasBtn && viewport && world && zoomCluster 
   cardBtn!.addEventListener('click', () => setViewMode('card'))
   canvasBtn!.addEventListener('click', () => setViewMode('canvas'))
 
-  mqDesktopCanvas.addEventListener('change', (e) => {
-    setViewMode(e.matches ? 'canvas' : 'card')
-  })
-
-  if (currentMode === 'canvas') {
-    if (!activeCanvas)
-      activeCanvas = initThoughtsCanvas(viewport!, world!, chromeOpts())
+  function onViewportPreferenceChange() {
+    setViewMode(preferredMode())
   }
-  setModeUi(currentMode)
+
+  mqCanvasAllowed.addEventListener('change', onViewportPreferenceChange)
+  mqDesktop.addEventListener('change', onViewportPreferenceChange)
+
+  setViewMode(currentMode, true)
 }
 </script>
