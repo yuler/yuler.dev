@@ -24,33 +24,33 @@
     "up": "npx taze -I"
   },
   "dependencies": {
-    "@astrojs/mdx": "^5.0.3",
-    "@fontsource/inter": "^5.2.8",
-    "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.2.2",
+    "@astrojs/mdx": "^5.0.6",
+    "@fontsource/inter": "^5.3.0",
+    "@tailwindcss/typography": "^0.5.20",
+    "@tailwindcss/vite": "^4.3.3",
     "@yuler/utils": "^0.3.1",
-    "astro": "^6.1.8",
-    "date-fns": "^4.1.0",
+    "astro": "^6.4.8",
+    "date-fns": "^4.4.0",
     "html-to-image": "^1.11.13",
     "leaflet": "^1.9.4",
-    "mermaid": "^11.14.0",
+    "mermaid": "^11.16.1",
     "qrcode": "^1.5.4",
     "sharp": "^0.34.5",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^8.2.0",
-    "@astrojs/check": "^0.9.8",
-    "@types/leaflet": "^1.9.21",
+    "@antfu/eslint-config": "^8.3.0",
+    "@astrojs/check": "^0.9.10",
+    "@types/leaflet": "^1.9.22",
     "@types/qrcode": "^1.5.6",
     "autocorrect-node": "^2.14.0",
-    "eslint": "^10.2.1",
+    "eslint": "^10.8.1",
     "eslint-plugin-astro": "^1.7.0",
     "eslint-plugin-format": "^2.0.1",
-    "playwright": "^1.59.1",
-    "tsx": "^4.21.0",
+    "playwright": "^1.62.1",
+    "tsx": "^4.23.12",
     "vite": "7.3.1",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.10"
   }
 }
