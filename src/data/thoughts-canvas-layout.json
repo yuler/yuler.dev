@@ -1,20 +1,20 @@
 {
   "version": 1,
   "view": {
-    "cx": -123.61,
-    "cy": -4010.7
+    "cx": -212.82,
+    "cy": -3782.16
   },
   "cards": {
     "20260417-publish-more-thoughts": {
-      "x": -692.98,
-      "y": -5543.59,
+      "x": -752.78,
+      "y": -5644.85,
       "rotateDeg": -0.63,
-      "zIndex": 106,
+      "zIndex": 113,
       "width": 443,
       "height": 120,
       "pin": "⭐",
-      "pinX": 382,
-      "pinY": 54
+      "pinX": 144,
+      "pinY": 7
     },
     "20260511-agents-stuff": {
       "x": -146.52,
@@ -28,12 +28,9 @@
       "x": -128.94,
       "y": -4970.08,
       "rotateDeg": -2,
-      "zIndex": 102,
+      "zIndex": 114,
       "width": 403,
-      "height": 345,
-      "pin": "📌",
-      "pinX": 375,
-      "pinY": 0
+      "height": 345
     },
     "20260730-wechat-devtools-linux-scale": {
       "x": -628.93,
@@ -44,12 +41,23 @@
       "height": 312
     },
     "20260811-fcitx-idle-english": {
-      "x": -718.57,
-      "y": -4304.63,
+      "x": -805.03,
+      "y": -4325.14,
       "rotateDeg": -6.69,
-      "zIndex": 107,
+      "zIndex": 111,
       "width": 466,
       "height": 228
+    },
+    "20260818-tmux-fcitx-ctrl-space-conflict": {
+      "x": -453.32,
+      "y": -4044.51,
+      "rotateDeg": -3.03,
+      "zIndex": 115,
+      "width": 409,
+      "height": 398,
+      "pin": "📌",
+      "pinX": 8,
+      "pinY": 8
     }
   }
 }
