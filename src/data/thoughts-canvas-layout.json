@@ -1,8 +1,8 @@
 {
   "version": 1,
   "view": {
-    "cx": -212.82,
-    "cy": -3782.16
+    "cx": -168.26,
+    "cy": -3524.05
   },
   "cards": {
     "20260417-publish-more-thoughts": {
@@ -52,12 +52,20 @@
       "x": -453.32,
       "y": -4044.51,
       "rotateDeg": -3.03,
-      "zIndex": 115,
+      "zIndex": 119,
       "width": 409,
       "height": 398,
       "pin": "📌",
       "pinX": 8,
       "pinY": 8
+    },
+    "20260825-omarchy-custom-menu": {
+      "x": -289.38,
+      "y": -3920.32,
+      "rotateDeg": -2,
+      "zIndex": 120,
+      "width": 465,
+      "height": 421
     }
   }
 }

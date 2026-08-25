@@ -1094,6 +1094,9 @@ export function initThoughtsCanvas(
     lastX = e.clientX
     lastY = e.clientY
     scheduleFlush()
+    // Drag-to-pan must count as a framing edit too, otherwise the saved
+    // `view.cx/cy` never follows the pointer-dragged viewport.
+    markViewDirty()
   }
 
   function onUp(e: PointerEvent) {
