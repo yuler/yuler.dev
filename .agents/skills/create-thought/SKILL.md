@@ -55,15 +55,26 @@ tags: ["tag-one", "tag-two"]
 - External URLs: `https://`, remove obvious tracking query params when you touch the URL.
 - Same-site references: prefer root-relative paths (`/thoughts`, `/posts/...`) instead of full `https://yuler.dev/...` when linking within the site.
 
+## Canvas layout (required for new thoughts)
+
+New thoughts must get an entry in [`src/data/thoughts-canvas-layout.json`](../../../src/data/thoughts-canvas-layout.json) under `cards`, keyed by slug (filename without `.md`). Without it, the card falls back to the auto-computed position, which can overlap existing cards.
+
+- New entries always start at the canvas **view center**: read `view.cx`/`view.cy` from the same file and center the card on it, i.e. `x = cx - width / 2`, `y = cy - height / 2`. It may temporarily overlap existing cards — positions are adjusted manually afterwards.
+- Use a small `rotateDeg` (±3°) and a plausible `width`/`height` (~380–460 × ~240–400).
+- Set `zIndex` to one more than the current max.
+- Append the new entry **at the end** of `cards` — keys are kept in chronological order.
+- Never touch other cards' entries or the `view` block.
+
 ## Workflow checklist
 
 1. Resolve **today’s date** from session context; pick `YYYY-MM-DD` and an ISO `date` value.
 2. Choose path; avoid overwriting an existing thought unless the user asked to edit it.
-3. Draft a **minimal** body from the user’s intent (brevity rules above); apply **content** optimizations.
-4. Assign **0–3 tags** with the rules above; drop `tags` key if empty.
-5. Add **`images`** only with valid relative paths and ≤3 items; otherwise omit the key.
-6. Normalize **links** in the body.
-7. Run `pnpm build` if you changed frontmatter shapes or image paths (catches collection errors).
+3. Add a `cards` entry for the new thought in `src/data/thoughts-canvas-layout.json` (see Canvas layout above).
+4. Draft a **minimal** body from the user’s intent (brevity rules above); apply **content** optimizations.
+5. Assign **0–3 tags** with the rules above; drop `tags` key if empty.
+6. Add **`images`** only with valid relative paths and ≤3 items; otherwise omit the key.
+7. Normalize **links** in the body.
+8. Run `pnpm build` if you changed frontmatter shapes or image paths (catches collection errors).
 
 ## Verification
 
