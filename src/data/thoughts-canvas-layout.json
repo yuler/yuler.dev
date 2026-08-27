@@ -1,15 +1,15 @@
 {
   "version": 1,
   "view": {
-    "cx": -168.26,
-    "cy": -3524.05
+    "cx": -300.93,
+    "cy": -3261.24
   },
   "cards": {
     "20260417-publish-more-thoughts": {
-      "x": -752.78,
-      "y": -5644.85,
+      "x": -751.49,
+      "y": -5812.24,
       "rotateDeg": -0.63,
-      "zIndex": 113,
+      "zIndex": 131,
       "width": 443,
       "height": 120,
       "pin": "⭐",
@@ -49,10 +49,10 @@
       "height": 228
     },
     "20260818-tmux-fcitx-ctrl-space-conflict": {
-      "x": -453.32,
-      "y": -4044.51,
+      "x": -447.47,
+      "y": -4030.31,
       "rotateDeg": -3.03,
-      "zIndex": 119,
+      "zIndex": 127,
       "width": 409,
       "height": 398,
       "pin": "📌",
@@ -60,12 +60,23 @@
       "pinY": 8
     },
     "20260825-omarchy-custom-menu": {
-      "x": -289.38,
-      "y": -3920.32,
+      "x": -272.06,
+      "y": -3909.32,
       "rotateDeg": -2,
-      "zIndex": 120,
+      "zIndex": 129,
       "width": 465,
       "height": 421
+    },
+    "20260827-apple-watch-battery": {
+      "x": -743.39,
+      "y": -3515.92,
+      "rotateDeg": -3.81,
+      "zIndex": 132,
+      "width": 407,
+      "height": 238,
+      "pin": "✨",
+      "pinX": 299,
+      "pinY": 12
     }
   }
 }
