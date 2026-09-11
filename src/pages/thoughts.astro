@@ -42,7 +42,8 @@ const boardCardShell = [
   'outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5f5f5]',
 ].join(' ')
 
-// Layout editing (drag / rotate / resize / pin) is a dev-only authoring tool.
+// Rotate / resize / pin / save stay a dev-only authoring tool.
+// Production still lets visitors drag cards to uncover overlap; positions are not saved.
 const isDev = import.meta.env.DEV
 ---
 
@@ -183,8 +184,10 @@ const isDev = import.meta.env.DEV
         top: var(--edit-y, var(--y-desk));
       }
     }
+    #thoughts-root[data-view-mode='canvas'] .thought-canvas-card,
     #thoughts-root[data-edit-mode='true'] .thought-canvas-card {
       cursor: grab;
+      touch-action: none;
     }
     /* Flush with the card edge so the ring is not mistaken for a position offset. */
     #thoughts-root[data-edit-mode='true'] .thought-canvas-card[data-selected='true'] {

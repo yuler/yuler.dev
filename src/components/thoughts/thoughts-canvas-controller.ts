@@ -34,6 +34,8 @@ function normalizeWheelDelta(delta: number, deltaMode: number): number {
 }
 
 const CARD_SELECTOR = '.thought-canvas-card[data-slug]'
+const INTERACTIVE_SELECTOR
+  = 'a, button, input, textarea, select, img, [contenteditable="true"], [data-lightbox="true"]'
 
 const CARD_MIN_W = 200
 const CARD_MIN_H = 120
@@ -846,65 +848,70 @@ export function initThoughtsCanvas(
       return
     }
 
-    if (!editMode)
-      return
+    if (editMode) {
+      const resizeHandle = (e.target as HTMLElement).closest<HTMLElement>('.thought-canvas-resize-handle')
+      if (resizeHandle) {
+        const card = resizeHandle.closest('.thought-canvas-card')
+        if (!card || !world.contains(card))
+          return
+        e.preventDefault()
+        e.stopPropagation()
+        const el = card as HTMLElement
+        selectCard(el)
+        cardResizeDrag = {
+          card: el,
+          handle: resizeHandle,
+          pointerId: e.pointerId,
+          originW: readCardWidth(el),
+          originH: readCardHeight(el),
+          startClientX: e.clientX,
+          startClientY: e.clientY,
+        }
+        resizeHandle.setPointerCapture(e.pointerId)
+        resizeHandle.classList.add('cursor-nwse-resize')
+        document.body.classList.add('select-none')
+        resizeHandle.addEventListener('pointermove', onCardResizePointerMove)
+        resizeHandle.addEventListener('pointerup', onCardResizePointerEnd)
+        resizeHandle.addEventListener('pointercancel', onCardResizePointerEnd)
+        return
+      }
+      const rotateHandle = (e.target as HTMLElement).closest<HTMLElement>('.thought-canvas-rotate-handle')
+      if (rotateHandle) {
+        const card = rotateHandle.closest('.thought-canvas-card')
+        if (!card || !world.contains(card))
+          return
+        e.preventDefault()
+        e.stopPropagation()
+        const el = card as HTMLElement
+        selectCard(el)
+        cardRotateDrag = {
+          card: el,
+          handle: rotateHandle,
+          pointerId: e.pointerId,
+          startPointerAngle: cardPointerAngle(el, e),
+          startRotate: readCardRotate(el),
+        }
+        rotateHandle.setPointerCapture(e.pointerId)
+        rotateHandle.classList.add('cursor-grabbing')
+        document.body.classList.add('select-none')
+        rotateHandle.addEventListener('pointermove', onCardRotatePointerMove)
+        rotateHandle.addEventListener('pointerup', onCardRotatePointerEnd)
+        rotateHandle.addEventListener('pointercancel', onCardRotatePointerEnd)
+        return
+      }
+    }
 
-    const resizeHandle = (e.target as HTMLElement).closest<HTMLElement>('.thought-canvas-resize-handle')
-    if (resizeHandle) {
-      const card = resizeHandle.closest('.thought-canvas-card')
-      if (!card || !world.contains(card))
-        return
-      e.preventDefault()
-      e.stopPropagation()
-      const el = card as HTMLElement
-      selectCard(el)
-      cardResizeDrag = {
-        card: el,
-        handle: resizeHandle,
-        pointerId: e.pointerId,
-        originW: readCardWidth(el),
-        originH: readCardHeight(el),
-        startClientX: e.clientX,
-        startClientY: e.clientY,
-      }
-      resizeHandle.setPointerCapture(e.pointerId)
-      resizeHandle.classList.add('cursor-nwse-resize')
-      document.body.classList.add('select-none')
-      resizeHandle.addEventListener('pointermove', onCardResizePointerMove)
-      resizeHandle.addEventListener('pointerup', onCardResizePointerEnd)
-      resizeHandle.addEventListener('pointercancel', onCardResizePointerEnd)
-      return
-    }
-    const rotateHandle = (e.target as HTMLElement).closest<HTMLElement>('.thought-canvas-rotate-handle')
-    if (rotateHandle) {
-      const card = rotateHandle.closest('.thought-canvas-card')
-      if (!card || !world.contains(card))
-        return
-      e.preventDefault()
-      e.stopPropagation()
-      const el = card as HTMLElement
-      selectCard(el)
-      cardRotateDrag = {
-        card: el,
-        handle: rotateHandle,
-        pointerId: e.pointerId,
-        startPointerAngle: cardPointerAngle(el, e),
-        startRotate: readCardRotate(el),
-      }
-      rotateHandle.setPointerCapture(e.pointerId)
-      rotateHandle.classList.add('cursor-grabbing')
-      document.body.classList.add('select-none')
-      rotateHandle.addEventListener('pointermove', onCardRotatePointerMove)
-      rotateHandle.addEventListener('pointerup', onCardRotatePointerEnd)
-      rotateHandle.addEventListener('pointercancel', onCardRotatePointerEnd)
-      return
-    }
     const card = (e.target as HTMLElement).closest('.thought-canvas-card')
     if (!card || !world.contains(card))
       return
+    if ((e.target as HTMLElement).closest(INTERACTIVE_SELECTOR))
+      return
     e.stopPropagation()
     const el = card as HTMLElement
-    selectCard(el)
+    if (editMode)
+      selectCard(el)
+    else
+      bringToFront(el)
     const pos = readCardPos(el, true)
     setCardPos(el, pos.x, pos.y)
     cardDrag = {
@@ -950,7 +957,8 @@ export function initThoughtsCanvas(
     bringToFront(c)
     if (!dragging)
       document.body.classList.remove('select-none')
-    markDirty()
+    if (editMode)
+      markDirty()
   }
 
   function onPinPointerMove(e: PointerEvent) {
@@ -1046,15 +1054,12 @@ export function initThoughtsCanvas(
       return
 
     const target = e.target as HTMLElement
-    if (editMode && target.closest('.thought-canvas-card'))
+    if (target.closest('.thought-canvas-card'))
       return
     if (target.closest('.thought-canvas-pin'))
       return
 
-    const onInteractive = target.closest(
-      'a, button, input, textarea, select, img, [contenteditable="true"], [data-lightbox="true"]',
-    )
-    if (onInteractive)
+    if (target.closest(INTERACTIVE_SELECTOR))
       return
 
     pointerDown = true
