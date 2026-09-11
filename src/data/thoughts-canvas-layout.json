@@ -1,8 +1,8 @@
 {
   "version": 1,
   "view": {
-    "cx": -300.93,
-    "cy": -3261.24
+    "cx": -121.47,
+    "cy": -2829.1
   },
   "cards": {
     "20260417-publish-more-thoughts": {
@@ -28,7 +28,7 @@
       "x": -128.94,
       "y": -4970.08,
       "rotateDeg": -2,
-      "zIndex": 114,
+      "zIndex": 141,
       "width": 403,
       "height": 345
     },
@@ -52,7 +52,7 @@
       "x": -447.47,
       "y": -4030.31,
       "rotateDeg": -3.03,
-      "zIndex": 127,
+      "zIndex": 134,
       "width": 409,
       "height": 398,
       "pin": "📌",
@@ -60,10 +60,10 @@
       "pinY": 8
     },
     "20260825-omarchy-custom-menu": {
-      "x": -272.06,
-      "y": -3909.32,
+      "x": 98.55,
+      "y": -3826.9,
       "rotateDeg": -2,
-      "zIndex": 129,
+      "zIndex": 143,
       "width": 465,
       "height": 421
     },
@@ -77,6 +77,14 @@
       "pin": "✨",
       "pinX": 299,
       "pinY": 12
+    },
+    "20260911-pr-review-by-difit": {
+      "x": -369.65,
+      "y": -3246.03,
+      "rotateDeg": -0.32,
+      "zIndex": 144,
+      "width": 497,
+      "height": 417
     }
   }
 }
