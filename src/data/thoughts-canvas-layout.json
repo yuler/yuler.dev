@@ -1,15 +1,15 @@
 {
   "version": 1,
   "view": {
-    "cx": -121.47,
-    "cy": -2829.1
+    "cx": -102.88,
+    "cy": -2511
   },
   "cards": {
     "20260417-publish-more-thoughts": {
-      "x": -751.49,
-      "y": -5812.24,
+      "x": -804.51,
+      "y": -5878.7,
       "rotateDeg": -0.63,
-      "zIndex": 131,
+      "zIndex": 146,
       "width": 443,
       "height": 120,
       "pin": "⭐",
@@ -82,9 +82,17 @@
       "x": -369.65,
       "y": -3246.03,
       "rotateDeg": -0.32,
-      "zIndex": 144,
+      "zIndex": 147,
       "width": 497,
       "height": 417
+    },
+    "20260916-omarchy-wechat-width": {
+      "x": 5.54,
+      "y": -2899.98,
+      "rotateDeg": 3.06,
+      "zIndex": 148,
+      "width": 560,
+      "height": 410
     }
   }
 }
