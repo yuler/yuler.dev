@@ -1,8 +1,8 @@
 {
   "version": 1,
   "view": {
-    "cx": -102.88,
-    "cy": -2511
+    "cx": -126.52,
+    "cy": -2209.32
   },
   "cards": {
     "20260417-publish-more-thoughts": {
@@ -93,6 +93,14 @@
       "zIndex": 148,
       "width": 560,
       "height": 410
+    },
+    "20260917-clash-tun-ssh-port-22": {
+      "x": -599.33,
+      "y": -2617.85,
+      "rotateDeg": -1.5,
+      "zIndex": 149,
+      "width": 456,
+      "height": 307
     }
   }
 }
