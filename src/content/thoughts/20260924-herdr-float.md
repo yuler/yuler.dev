@@ -3,11 +3,19 @@ date: 2026-09-24T02:15:00Z
 tags: ["omarchy", "herdr"]
 ---
 
-最近把大部分 agent 工作搬进了 herdr，Omarchy workspace 用法也跟着变了。
+最近把 agent 调用都放到 herdr 里面了，Omarchy workspace 用法也跟着变了。
 
-之前 herdr 常驻 scratchpad，哪个 workspace 都能快速调出来；但 Omarchy 默认 scratchpad 打开的是 terminal。现在流程反过来：herdr 关闭、重启后都能恢复 tab 和窗口，用完直接 close 掉就行。
+之前 herdr 常驻 scratchpad workspace 里面，这样无论在哪个 workspace 都能快速调出来。最近想了下，herdr 可以像 tmux 一样 close 后恢复，甚至重启后也能保留 tab 和 pane 状态。这样每次需要查看或使用的时候呼出来，用完直接 close window 就行。
 
-配合加了一组窗口设置：启动时给 herdr 绑独立 app-id，窗口 float + center，默认 1400x900，这样随开随关都不会让 tiling 布局跳动：
+然后将 herdr 默认行为调整一下：启动时绑定 `--app-id=herdr`，窗口 float 并居中。
+
+先把启动脚本覆盖到本地的 `bin/omarchy-launch-terminal-herdr`：
+
+```sh
+exec omarchy-launch-terminal --app-id=herdr herdr
+```
+
+再把窗口规则覆盖到本地的 `~/.config/hypr/hyprland.lua`：
 
 ```lua
 -- ~/.config/hypr/hyprland.lua
@@ -16,4 +24,5 @@ o.window("^herdr$", { center = true })
 o.window("^herdr$", { size = { 1400, 900 } })
 ```
 
-启动脚本（`bin/omarchy-launch-terminal-herdr`）：`exec omarchy-launch-terminal --app-id=herdr herdr`，快捷键还是 `SUPER + CTRL + RETURN`。
+这样就可以通过快捷键 `SUPER + CTRL + RETURN` 或 Omarchy menu 启动 herdr。
+

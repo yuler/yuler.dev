@@ -1,8 +1,8 @@
 {
   "version": 1,
   "view": {
-    "cx": -126.52,
-    "cy": -2209.32
+    "cx": -133.42,
+    "cy": -1480.24
   },
   "cards": {
     "20260417-publish-more-thoughts": {
@@ -103,20 +103,20 @@
       "height": 307
     },
     "20260922-git-quotepath": {
-      "x": -336.52,
-      "y": -2339.32,
+      "x": -82.81,
+      "y": -2407.82,
       "rotateDeg": 2,
-      "zIndex": 150,
-      "width": 420,
-      "height": 260
+      "zIndex": 162,
+      "width": 446,
+      "height": 292
     },
     "20260924-herdr-float": {
-      "x": -336.52,
-      "y": -2359.32,
+      "x": -669.38,
+      "y": -1873.47,
       "rotateDeg": -2,
-      "zIndex": 151,
-      "width": 420,
-      "height": 300
+      "zIndex": 163,
+      "width": 560,
+      "height": 517
     }
   }
 }
