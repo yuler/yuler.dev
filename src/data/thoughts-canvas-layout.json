@@ -109,6 +109,14 @@
       "zIndex": 150,
       "width": 420,
       "height": 260
+    },
+    "20260924-herdr-float": {
+      "x": -336.52,
+      "y": -2359.32,
+      "rotateDeg": -2,
+      "zIndex": 151,
+      "width": 420,
+      "height": 300
     }
   }
 }
