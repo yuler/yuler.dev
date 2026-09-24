@@ -101,6 +101,14 @@
       "zIndex": 149,
       "width": 456,
       "height": 307
+    },
+    "20260922-git-quotepath": {
+      "x": -336.52,
+      "y": -2339.32,
+      "rotateDeg": 2,
+      "zIndex": 150,
+      "width": 420,
+      "height": 260
     }
   }
 }
