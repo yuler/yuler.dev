@@ -14,24 +14,32 @@ Deterministic cleaning lives in [`scripts/import-strava-gpx.mjs`](../../../scrip
 
 - Call the Strava API (`src/utils/strava.ts`, `pnpm sync:strava:activities`, `pnpm strava`). The app is Inactive without a subscription.
 - Run `gh workflow enable sync-strava.yml`.
-- Request or reuse a pasted `curl`, `_strava4_session`, or `x-csrf-token`. Do not write cookies or a browser profile into the repo.
+- Request or reuse a pasted `curl`, `_strava4_session`, or `x-csrf-token`. Do not write cookies or a browser profile into the repo. Do not copy or decrypt cookies out of the default browser into another one.
 - Call `https://www.strava.com/athlete/training_activities`. Read activity links from the training page instead.
 - `git commit` unless the user asks.
 
 ## Browser
 
-Use agent-browser. Load `agent-browser skills get core` before the first command. Prefer the system Chrome at `/opt/google/chrome/chrome` when `agent-browser install` cannot download Chrome for Testing.
+Use the system default browser, the one already logged into Strava. Do not launch a second browser, Chrome for Testing, or a private profile.
 
-Keep one profile outside the repo so login survives:
+```bash
+xdg-settings get default-web-browser   # google-chrome.desktop
+```
+
+Load `agent-browser skills get core` before the first command. Attach to that running browser and open My Activities in a new tab. `--download-path` is `tmp/strava` in this repo (`tmp/` is gitignored).
 
 ```bash
 export AGENT_BROWSER_SESSION=strava-sync
-export AGENT_BROWSER_PROFILE="$HOME/.local/share/yuler-dev/strava-chrome"
+agent-browser --session "$AGENT_BROWSER_SESSION" --auto-connect --pin-tab \
+  --download-path "$PWD/tmp/strava" \
+  tab new https://www.strava.com/athlete/training
 ```
 
-Pass `--profile "$AGENT_BROWSER_PROFILE"` and `--executable-path /opt/google/chrome/chrome`. Use `--headed` when a person needs to see the window. `--download-path` is `tmp/strava` in this repo (`tmp/` is gitignored).
+Do not pass `--profile`, `--executable-path`, or a user-data-dir. Do not create `~/.local/share/yuler-dev/strava-chrome`.
 
-Open `https://www.strava.com/athlete/training`. If the page is a login screen, stop and ask the user to log in in that window. Continue only after My Activities is visible.
+If `--auto-connect` reports no running Chrome, the default browser was not started with remote debugging. Stop. Ask the user to quit that browser and start it again with `--remote-debugging-port=9222` so the existing profile and Strava login stay, then attach with `--auto-connect`. Do not open a login window in a new profile.
+
+If the new tab is a login screen, stop. The attached browser is not the logged-in default browser. Continue only after My Activities is visible. Close that tab when finished. Leave the user's other tabs open.
 
 ## Which activities
 
