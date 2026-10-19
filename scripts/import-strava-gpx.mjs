@@ -11,11 +11,9 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import process from 'node:process'
+import { activitiesDir, tmpDir } from './strava-common.mjs'
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const tmpDir = path.join(root, 'tmp', 'strava')
-const activitiesDir = path.join(root, 'data', 'strava', 'activities')
 const SHANGHAI_OFFSET_SEC = 8 * 60 * 60
 
 const SPORT = {

@@ -15,67 +15,81 @@ import path from 'node:path'
 import process from 'node:process'
 import { createInterface } from 'node:readline'
 import { fileURLToPath } from 'node:url'
+import { authFile, tmpDir, TRAINING_URL } from './strava-common.mjs'
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const tmpDir = path.join(root, 'tmp', 'strava')
-const authFile = path.join(tmpDir, 'auth-state.json')
-const TRAINING_URL = 'https://www.strava.com/athlete/training'
+const CHROME_HEADER_HASH_LENGTH = 32
 
 const READ_COOKIES = String.raw`
 import base64, json, os, sqlite3
-import gi
-gi.require_version("Secret", "1")
-from gi.repository import Secret
 
 def chrome_password():
-    service = Secret.Service.get_sync(Secret.ServiceFlags.LOAD_COLLECTIONS)
-    for col in service.get_collections() or []:
-        col.load_items_sync()
-        for item in col.get_items() or []:
-            if item.get_label() != "Chrome Safe Storage":
-                continue
-            item.load_secret_sync()
-            secret = item.get_secret()
-            raw = secret.get() if secret else None
-            if raw:
-                return bytes(raw)
-    raise SystemExit("Could not read the Chrome login key.")
+    try:
+        import gi
+        gi.require_version("Secret", "1")
+        from gi.repository import Secret
+
+        service = Secret.Service.get_sync(Secret.ServiceFlags.LOAD_COLLECTIONS)
+        labels = {"Chrome Safe Storage", "Chromium Safe Storage", "Brave Safe Storage", "Microsoft Edge Safe Storage"}
+        for col in service.get_collections() or []:
+            col.load_items_sync()
+            for item in col.get_items() or []:
+                if item.get_label() in labels:
+                    item.load_secret_sync()
+                    secret = item.get_secret()
+                    raw = secret.get() if secret else None
+                    if raw:
+                        return bytes(raw)
+    except Exception:
+        pass
+    # Default fallback used by Chromium on Linux when Secret Service is unavailable
+    return b"peanuts"
 
 def profiles():
-    base = os.path.expanduser("~/.config/google-chrome")
+    candidate_bases = [
+        "~/.config/google-chrome",
+        "~/.config/chromium",
+        "~/.config/BraveSoftware/Brave-Browser",
+        "~/.config/microsoft-edge",
+    ]
     found = []
-    if not os.path.isdir(base):
-        return found
-    for name in os.listdir(base):
-        db = os.path.join(base, name, "Cookies")
-        if os.path.isfile(db):
-            found.append(db)
+    for candidate in candidate_bases:
+        base = os.path.expanduser(candidate)
+        if not os.path.isdir(base):
+            continue
+        for name in os.listdir(base):
+            db = os.path.join(base, name, "Cookies")
+            if os.path.isfile(db):
+                found.append(db)
     return found
 
 cookies = []
 for db in profiles():
-    con = sqlite3.connect("file:%s?mode=ro" % db, uri=True)
-    rows = con.execute(
-        """
-        select host_key, name, encrypted_value, path, expires_utc, is_secure, is_httponly, samesite, has_expires
-        from cookies
-        where host_key like '%strava.com'
-        """
-    )
-    for host, name, blob, cookie_path, expires_utc, secure, http_only, site, has_expires in rows:
-        if not blob:
-            continue
-        cookies.append({
-            "name": name,
-            "encrypted": base64.b64encode(blob).decode("ascii"),
-            "domain": host,
-            "path": cookie_path or "/",
-            "expires": -1 if not has_expires else int(expires_utc / 1_000_000 - 11644473600),
-            "httpOnly": bool(http_only),
-            "secure": bool(secure),
-            "sameSite": site,
-        })
-    con.close()
+    try:
+        con = sqlite3.connect("file:%s?mode=ro" % db, uri=True)
+        rows = con.execute(
+            """
+            select host_key, name, encrypted_value, path, expires_utc, is_secure, is_httponly, samesite, has_expires
+            from cookies
+            where host_key like '%strava.com'
+            """
+        )
+        for host, name, blob, cookie_path, expires_utc, secure, http_only, site, has_expires in rows:
+            if not blob:
+                continue
+            cookies.append({
+                "name": name,
+                "encrypted": base64.b64encode(blob).decode("ascii"),
+                "domain": host,
+                "path": cookie_path or "/",
+                "expires": -1 if not has_expires else int(expires_utc / 1_000_000 - 11644473600),
+                "httpOnly": bool(http_only),
+                "secure": bool(secure),
+                "sameSite": site,
+            })
+        con.close()
+    except Exception:
+        continue
+
 print(json.dumps({
     "password": base64.b64encode(chrome_password()).decode("ascii"),
     "cookies": cookies,
@@ -101,22 +115,35 @@ function openInDefaultBrowser(url) {
   })
 }
 
+/**
+ * Decrypts a Chromium-encrypted cookie on Linux.
+ * Format: 'v10' or 'v11' prefix + AES-128-CBC encrypted payload (IV = 16 spaces).
+ * Payload may start with a 32-byte hash header in newer Chrome versions.
+ */
 function decryptCookie(blob, key) {
   const prefix = blob.subarray(0, 3).toString('utf8')
   if (prefix !== 'v10' && prefix !== 'v11')
     return null
+
   const decipher = crypto.createDecipheriv('aes-128-cbc', key, Buffer.alloc(16, 0x20))
   decipher.setAutoPadding(false)
-  const raw = Buffer.concat([decipher.update(blob.subarray(3)), decipher.final()])
-  const pad = raw[raw.length - 1]
-  if (pad < 1 || pad > 16 || !raw.subarray(-pad).every(byte => byte === pad))
+  const decryptedWithPadding = Buffer.concat([decipher.update(blob.subarray(3)), decipher.final()])
+
+  const paddingBytes = decryptedWithPadding[decryptedWithPadding.length - 1]
+  if (paddingBytes < 1 || paddingBytes > 16 || !decryptedWithPadding.subarray(-paddingBytes).every(byte => byte === paddingBytes))
     return null
-  const plain = raw.subarray(0, raw.length - pad)
-  const value = plain.length > 32 ? plain.subarray(32) : plain
-  const text = value.toString('utf8')
-  if (Buffer.from(text, 'utf8').length !== value.length)
+
+  const decryptedPayload = decryptedWithPadding.subarray(0, decryptedWithPadding.length - paddingBytes)
+  // Strip 32-byte signature/hash header if present
+  const cookieValueBuffer = decryptedPayload.length > CHROME_HEADER_HASH_LENGTH
+    ? decryptedPayload.subarray(CHROME_HEADER_HASH_LENGTH)
+    : decryptedPayload
+
+  const cookieValue = cookieValueBuffer.toString('utf8')
+  if (Buffer.from(cookieValue, 'utf8').length !== cookieValueBuffer.length)
     return null
-  return text
+
+  return cookieValue
 }
 
 function sameSite(value, secure) {
@@ -133,11 +160,13 @@ export function readStravaCookies() {
     const stderr = []
     child.stdout.on('data', chunk => stdout.push(chunk))
     child.stderr.on('data', chunk => stderr.push(chunk))
-    child.on('error', reject)
+    child.on('error', (err) => {
+      reject(new Error(`Failed to execute python3: ${err.message}. Ensure python3 is installed.`))
+    })
     child.on('close', (code) => {
       if (code !== 0) {
         const detail = Buffer.concat(stderr).toString('utf8').trim()
-        reject(new Error(detail || 'Could not read the Strava login from the default browser.'))
+        reject(new Error(detail || 'Could not read the Strava login from the default browser. Ensure Python 3 with libsecret (python3-gi) is installed.'))
         return
       }
       const payload = JSON.parse(Buffer.concat(stdout).toString('utf8'))

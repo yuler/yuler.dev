@@ -20,7 +20,7 @@
     "format": "autocorrect src/content && eslint .",
     "format:fix": "autocorrect --fix src/content && eslint . --fix",
     "test": "vitest",
-    "legacy:test:strava": "vitest run scripts/legacy-sync-strava.test.mjs",
+    "legacy:test:strava": "ENABLE_LEGACY_STRAVA_TESTS=1 vitest run scripts/legacy-sync-strava.test.mjs",
     "clean": "pnpm clean:dist && pnpm clean:pdfs && pnpm clean:screenshots",
     "clean:dist": "rm -rf dist",
     "clean:pdfs": "rm -rf pdfs",

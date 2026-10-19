@@ -12,37 +12,15 @@ import { spawn } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
-
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const tmpDir = path.join(root, 'tmp', 'strava')
-const authFile = path.join(tmpDir, 'auth-state.json')
-const activitiesDir = path.join(root, 'data', 'strava', 'activities')
-const TRAINING_URL = 'https://www.strava.com/athlete/training'
+import { activitiesDir, authFile, isLoginUrl, root, tmpDir, TRAINING_URL } from './strava-common.mjs'
 
 function parseArgs(argv) {
-  const args = { headful: false, pause: 1.5, maxPages: 999 }
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i]
-    if (arg === '--headful')
-      args.headful = true
-    else if (arg === '--pause')
-      args.pause = Number(argv[++i])
-    else if (arg === '--max-pages')
-      args.maxPages = Number(argv[++i])
-    else
-      throw new Error(`Unknown argument: ${arg}`)
+  return {
+    headful: argv.includes('--headful'),
+    pause: 1.5,
+    maxPages: 999,
   }
-  if (!Number.isFinite(args.pause) || args.pause < 0)
-    throw new Error('--pause must be a number of seconds')
-  if (!Number.isInteger(args.maxPages) || args.maxPages < 1)
-    throw new Error('--max-pages must be a positive integer')
-  return args
-}
-
-function isLoginUrl(url) {
-  return /https:\/\/www\.strava\.com\/(?:login|signup|oauth\/authorize)/.test(url)
 }
 
 function readKnownIds() {
@@ -114,6 +92,7 @@ async function scrapeMissingIds(page, knownIds, maxPages) {
       break
     }
 
+    const currentFirstId = ids[0]
     const next = page.locator('.next_page')
     if (await next.count() === 0) {
       console.log('No next page.')
@@ -125,7 +104,16 @@ async function scrapeMissingIds(page, knownIds, maxPages) {
       break
     }
     await next.click()
-    await page.waitForTimeout(1500)
+    try {
+      await page.waitForFunction((prevId) => {
+        const firstLink = document.querySelector('a[href^="/activities/"]')
+        const match = firstLink?.getAttribute('href')?.match(/\/activities\/(\d+)/)
+        return match ? match[1] !== prevId : false
+      }, currentFirstId, { timeout: 10_000 })
+    }
+    catch {
+      await page.waitForTimeout(1000)
+    }
     await assertLoggedIn(page)
   }
 
@@ -135,10 +123,43 @@ async function scrapeMissingIds(page, knownIds, maxPages) {
 async function downloadGpx(page, id) {
   const downloadUrl = `https://www.strava.com/activities/${id}/export_gpx`
   const savePath = path.join(tmpDir, `${id}.gpx`)
-  const downloadPromise = page.waitForEvent('download', { timeout: 30_000 })
+
+  let cleanup = () => {}
+  const downloadPromise = new Promise((resolve, reject) => {
+    const onDownload = (download) => {
+      cleanup()
+      resolve(download)
+    }
+    const onFramenavigated = (frame) => {
+      if (frame === page.mainFrame() && isLoginUrl(frame.url())) {
+        cleanup()
+        reject(new Error('Strava asked for login again. Run pnpm strava:login, then retry pnpm strava:export.'))
+      }
+    }
+    const timer = setTimeout(() => {
+      cleanup()
+      if (isLoginUrl(page.url())) {
+        reject(new Error('Strava asked for login again. Run pnpm strava:login, then retry pnpm strava:export.'))
+      }
+      else {
+        reject(new Error(`Timeout waiting for download of activity ${id}`))
+      }
+    }, 30_000)
+
+    cleanup = () => {
+      clearTimeout(timer)
+      page.off('download', onDownload)
+      page.off('framenavigated', onFramenavigated)
+    }
+
+    page.on('download', onDownload)
+    page.on('framenavigated', onFramenavigated)
+  })
+
   await page.evaluate((url) => {
     window.location.href = url
   }, downloadUrl)
+
   const download = await downloadPromise
   await download.saveAs(savePath)
   const body = fs.readFileSync(savePath)
@@ -186,13 +207,13 @@ function sleep(ms) {
 
 function runImport() {
   return new Promise((resolve, reject) => {
-    const child = spawn('node', ['scripts/import-strava-gpx.mjs'], { cwd: root, stdio: 'inherit' })
+    const child = spawn('pnpm', ['import:strava:gpx'], { cwd: root, stdio: 'inherit' })
     child.on('error', reject)
     child.on('exit', (code) => {
       if (code === 0)
         resolve()
       else
-        reject(new Error(`import-strava-gpx.mjs exited with ${code}`))
+        reject(new Error(`pnpm import:strava:gpx exited with ${code}`))
     })
   })
 }

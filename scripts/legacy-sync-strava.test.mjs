@@ -7,7 +7,8 @@ import { getStravaActivities } from '../src/utils/legacy-strava.ts'
 
 function stravaEnvReady() {
   return Boolean(
-    process.env.STRAVA_CLIENT_ID
+    process.env.ENABLE_LEGACY_STRAVA_TESTS
+    && process.env.STRAVA_CLIENT_ID
     && process.env.STRAVA_CLIENT_SECRET
     && process.env.STRAVA_REFRESH_TOKEN,
   )
