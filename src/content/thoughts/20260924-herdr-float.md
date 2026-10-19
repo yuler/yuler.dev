@@ -25,4 +25,3 @@ o.window("^herdr$", { size = { 1400, 900 } })
 ```
 
 这样就可以通过快捷键 `SUPER + CTRL + RETURN` 或 Omarchy menu 启动 herdr。
-
