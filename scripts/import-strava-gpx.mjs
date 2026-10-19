@@ -6,7 +6,7 @@
  * Optional stats (distance, moving time, local start) from the activity page:
  *   tmp/strava/page-stats.jsonl
  *
- * Usage: node scripts/import-strava-gpx.mjs
+ * Usage: pnpm import:strava:gpx
  */
 
 import fs from 'node:fs'
@@ -193,6 +193,10 @@ function toActivity(id, gpx, stats) {
 }
 
 const statsById = loadStats()
+if (!fs.existsSync(tmpDir)) {
+  console.log('No tmp/strava directory. Nothing to import.')
+  process.exit(0)
+}
 const files = fs.readdirSync(tmpDir).filter(name => /^\d+\.gpx$/.test(name))
 const indexPath = path.join(activitiesDir, '_index.json')
 const metaPath = path.join(activitiesDir, '_meta.json')

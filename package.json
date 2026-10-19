@@ -14,6 +14,7 @@
     "gen:screenshots": "node scripts/screenshot.mjs",
     "strava": "tsx --env-file-if-exists=.env scripts/strava-cli.ts",
     "sync:strava:activities": "tsx --env-file=.env scripts/sync-strava-activities.mjs",
+    "import:strava:gpx": "node scripts/import-strava-gpx.mjs",
     "format": "autocorrect src/content && eslint .",
     "format:fix": "autocorrect --fix src/content && eslint . --fix",
     "test": "vitest",
