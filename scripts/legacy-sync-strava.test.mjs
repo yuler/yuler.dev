@@ -1,5 +1,9 @@
+/**
+ * @deprecated 过期作废。这段测试请求已停用的 Strava API，仅保留。CI 没有凭据时会跳过。
+ */
+
 import { describe, expect, it } from 'vitest'
-import { getStravaActivities } from '../src/utils/strava.ts'
+import { getStravaActivities } from '../src/utils/legacy-strava.ts'
 
 function stravaEnvReady() {
   return Boolean(

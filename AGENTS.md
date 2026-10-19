@@ -14,7 +14,7 @@ Personal site at https://yuler.dev — Astro 6, MDX, Tailwind CSS 4, TypeScript.
 - Use `pnpm create:post` to quickly scaffold a new post.
 - Run `pnpm autocorrect` to format post content files.
 - Use `pnpm export:pdf` to export PDF for a specific post.
-- Run `pnpm sync:strava:activities` to sync Strava activities to local data.
+- Run `pnpm strava:login` once, then `pnpm strava:export` to sync Strava activities to local data. Commands prefixed with `legacy:` are the old Strava API and are not used in CI.
 
 ## Icons
 

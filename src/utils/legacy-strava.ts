@@ -1,5 +1,6 @@
 /**
- * Strava API Utility
+ * @deprecated 过期作废。Strava 官方 API 应用已停用，此客户端仅保留。
+ * 不再由 GitHub Actions 或 CI 调用。
  * Documentation: https://developers.strava.com/docs/reference/
  */
 
