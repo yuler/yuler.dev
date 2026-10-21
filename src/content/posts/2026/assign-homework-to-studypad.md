@@ -45,5 +45,3 @@ date: 2026-10-21
 拆出来就三步：收验证码、登录、布置作业。学科、标题、说明，加上老师发来的那张图，一条命令发到学习机；图片支持本地文件和剪贴板。完整的逆向报告见 [REVERSE.md](https://github.com/yuler/scripts/blob/main/studypad/REVERSE.md)，踩坑记录见 [POSTMORTEM.md](https://github.com/yuler/scripts/blob/main/studypad/POSTMORTEM.md)。
 
 英语抄写还是同一张图。差别是图留在电脑上，不用再打开手机 App。
-
-
