@@ -1,5 +1,5 @@
 /**
- * Loads locally synced Strava activity JSON (from `pnpm sync:strava:activities`).
+ * Loads locally synced Strava activity JSON (from `pnpm strava:export`).
  * Single `import.meta.glob` so Vite bundles one consistent map of modules.
  */
 

@@ -11,12 +11,12 @@ draft: true
 想在「Grok Bot 云主机」和自己的其它机器之间组一个私有网，并让协作账号能 tailscale ssh 进来。云主机环境没有完整的 systemd / 常规 TUN 权限，和家里 NAS 那套装法不太一样。
 
 1. 安装与登录
-在用户目录下落地官方二进制（示例路径：~/.local/tailscale/），用 userspace networking 跑 tailscaled（无 --tun=userspace-networking）。
-原因：/dev/net/tun 在，但创建 tailscale0 报 operation not permitted（缺少 CAP_NET_ADMIN），没法走内核 TUN。
-状态目录与 socket 放在用户目录（例如 ~/.local/state/tailscale/、~/.local/run/tailscale/tailscaled.sock），CLI 一律带 --socket=...。
-用 Owner 账号浏览器授权登录后，节点拿到 Tailscale IP（下文记为 100.x.x.A），主机名类似 grok-bot-vm-********。
+   在用户目录下落地官方二进制（示例路径：~/.local/tailscale/），用 userspace networking 跑 tailscaled（无 --tun=userspace-networking）。
+   原因：/dev/net/tun 在，但创建 tailscale0 报 operation not permitted（缺少 CAP_NET_ADMIN），没法走内核 TUN。
+   状态目录与 socket 放在用户目录（例如 ~~/.local/state/tailscale/、~~/.local/run/tailscale/tailscaled.sock），CLI 一律带 --socket=...。
+   用 Owner 账号浏览器授权登录后，节点拿到 Tailscale IP（下文记为 100.x.x.A），主机名类似 grok-bot-vm-********。
 2. 把另一个账号拉进同一个 tailnet
-Tailscale 没有「组」按钮，对应的是 tailnet。
+   Tailscale 没有「组」按钮，对应的是 tailnet。
 
 Owner 在 Admin → Users 里 Invite external users，复制邀请链接（Free 计划常见是链接邀请，不一定填邮箱）。
 对方用自己的登录身份接受（示例：GitHub 登录，下文记为 collaborator@github）。
@@ -25,7 +25,7 @@ Free 计划下邀请用户需 Admin Approve 后才真正进网。
 对方本机若早就装过 Client、以前连的是自己的私人网：需要在 Client 里 Log out 再 Log in（仍用同一个 collaborator@github，不要改成 Owner 邮箱）。网页上的「Download」可以忽略。
 
 3. 开启 Tailscale SSH
-在云主机上：
+   在云主机上：
 
 tailscale --socket=... set --ssh
 确认 prefs 里 RunSSH: true。Machines 页该节点会出现 SSH 标记。
@@ -39,15 +39,15 @@ tailnet policy does not permit you to SSH to this node
 说明 SSH 开关已开，但 ACL 没放行，不是 Client 坏了。
 
 4. ACL 踩坑与最终写法
-**默认策略（示意）**大致是：
+   **默认策略（示意）**大致是：
 
 "ssh": [
-  {
-    "action": "check",
-    "src": ["autogroup:member"],
-    "dst": ["autogroup:self"],
-    "users": ["autogroup:nonroot", "root"]
-  }
+{
+"action": "check",
+"src": ["autogroup:member"],
+"dst": ["autogroup:self"],
+"users": ["autogroup:nonroot", "root"]
+}
 ]
 dst: autogroup:self 只允许连 自己名下 的设备。协作账号进不了 Owner 名下的云主机。
 
@@ -61,39 +61,39 @@ src: collaborator + dst: owner@email	校验失败：users in dst are only allowe
 
 ACL 里声明 tag 归属，并增加跨用户 SSH 规则（示意，已打码）：
 "tagOwners": {
-  "tag:ssh": ["owner@*****.com"]
+"tag:ssh": ["owner@*****.com"]
 },
 "ssh": [
-  {
-    "action": "check",
-    "src": ["autogroup:member"],
-    "dst": ["autogroup:self"],
-    "users": ["autogroup:nonroot", "root"]
-  },
-  {
-    "action": "accept",
-    "src": ["collaborator@github"],
-    "dst": ["tag:ssh"],
-    "users": ["box", "autogroup:nonroot"]
-  }
+{
+"action": "check",
+"src": ["autogroup:member"],
+"dst": ["autogroup:self"],
+"users": ["autogroup:nonroot", "root"]
+},
+{
+"action": "accept",
+"src": ["collaborator@github"],
+"dst": ["tag:ssh"],
+"users": ["box", "autogroup:nonroot"]
+}
 ]
 在 Machines 里给云主机打上 tag:ssh。
 发布 ACL 后再试 tailscale ssh box@100.x.x.A，应可连通。
 注意：autogroup 用单数 autogroup:member，不要写成 members。
 
 5. 小结
-受限 VM：优先 userspace Tailscale，接受没有 tailscale0。
-跨账号进网：邀请链接 → 批准 →（可选）Admin；Client 需重新登录同一身份。
-tailscale set --ssh 只开能力；跨 Owner 的 SSH 靠 ACL。
-个人网跨用户 SSH：不要用「对方邮箱当 dst」，改用 tag: + tagOwners，再给目标机器打 tag。
-打码对照（写 blog 时勿贴原文）
-原文角色	文中写法
-Owner 邮箱 / 控制台账号	owner@*****.com / Cozilla41
-协作 GitHub 身份	collaborator@github
-云主机 Tailscale IP	100.x.x.A
-本机 Linux 用户	box
-邀请链接 / 密码类凭证	一律省略
-需要的话我可以再补一版「英文标题 + 大纲」或把 SOCKS5（Serve + 鉴权）那一段也加成附录。
+   受限 VM：优先 userspace Tailscale，接受没有 tailscale0。
+   跨账号进网：邀请链接 → 批准 →（可选）Admin；Client 需重新登录同一身份。
+   tailscale set --ssh 只开能力；跨 Owner 的 SSH 靠 ACL。
+   个人网跨用户 SSH：不要用「对方邮箱当 dst」，改用 tag: + tagOwners，再给目标机器打 tag。
+   打码对照（写 blog 时勿贴原文）
+   原文角色	文中写法
+   Owner 邮箱 / 控制台账号	owner@*****.com / Cozilla41
+   协作 GitHub 身份	collaborator@github
+   云主机 Tailscale IP	100.x.x.A
+   本机 Linux 用户	box
+   邀请链接 / 密码类凭证	一律省略
+   需要的话我可以再补一版「英文标题 + 大纲」或把 SOCKS5（Serve + 鉴权）那一段也加成附录。
 
 ## 6. 用 Grok Bot 当出口
 
@@ -150,5 +150,3 @@ curl -U 'USER:PASS' --socks5-hostname 100.x.x.A:1080 https://ifconfig.me
 面板里对 `grok-bot` 做出站测试，应返回 HTTP 204，出口是 Grok Bot 云电脑的公网 IP。对 `generativelanguage.googleapis.com:443` 做路由测试，命中的出站是 `grok-bot`。
 
 还没做的一步：3X-UI 里还没有给客户端用的入站。没有入站时，这条路由不会改 SSH 登录 VPS 之后系统自己发出的流量。
-
-

@@ -1,8 +1,9 @@
 /**
- * Manual Strava ops. Usage: pnpm strava <command>
+ * @deprecated 过期作废。除 `status` 与 `repair-index` 外，这些命令调用已停用的 Strava API。
+ * 脚本仅保留，不再由 GitHub Actions 或 CI 调用。
+ * 下载活动改用 `pnpm strava:login` 与 `pnpm strava:export`。
  *
- * Hourly latest sync stays on `pnpm sync:strava:activities` (GitHub Actions).
- * This CLI is for local checks: missing delayed uploads, status, repair, fetch.
+ * Usage: pnpm legacy:strava <command>
  */
 
 import process from 'node:process'
@@ -16,13 +17,13 @@ import {
   readMeta,
   repairActivityIndex,
   saveDetail,
-} from '../src/lib/strava-core.ts'
-import { getStravaActivities, getStravaActivityById } from '../src/utils/strava.ts'
+} from '../src/lib/legacy-strava-core.ts'
+import { getStravaActivities, getStravaActivityById } from '../src/utils/legacy-strava.ts'
 
 const dir = DEFAULT_ACTIVITIES_DIR
 
 function printHelp() {
-  console.log(`Usage: pnpm strava <command>
+  console.log(`Usage: pnpm legacy:strava <command>
 
 Commands:
   status         Local index vs detail files (no API)
@@ -30,8 +31,8 @@ Commands:
   repair-index   Rebuild _index.json from local *.json details
   fetch <id>     Download one activity detail by id
 
-Latest incremental sync (GitHub Actions):
-  pnpm sync:strava:activities
+@deprecated 过期作废。missing 与 fetch 走已停用的 Strava API。
+下载活动: pnpm strava:login && pnpm strava:export
 `)
 }
 
@@ -79,7 +80,7 @@ async function runMissing() {
 async function runFetch(rawId: string | undefined) {
   const id = Number(rawId)
   if (!Number.isFinite(id) || id <= 0) {
-    console.error('Usage: pnpm strava fetch <id>')
+    console.error('Usage: pnpm legacy:strava fetch <id>')
     process.exit(1)
   }
   if (hasDetail(dir, id)) {

@@ -1,19 +1,18 @@
 /**
- * Local Strava activity store + sync operations.
+ * Local Strava activity store.
  *
- * Hourly GH sync (`syncActivities`) uses `lastSync` as Strava's `after` cursor
- * to pull latest activities. Late uploads with older start dates will not show
- * up there — use `fetchAllActivities` / `pnpm strava missing` to find those.
+ * @deprecated 过期作废。`syncActivities` / `fetchAllActivities` 调用已停用的 Strava API，仅保留。
+ * 不再由 GitHub Actions 或 CI 调用。下载活动用 `pnpm strava:export`。
  */
 
-import type { StravaActivity, StravaActivityDetail } from '../utils/strava.ts'
+import type { StravaActivity, StravaActivityDetail } from '../utils/legacy-strava.ts'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   getStravaActivities as defaultGetStravaActivities,
   getStravaActivityById as defaultGetStravaActivityById,
-} from '../utils/strava.ts'
+} from '../utils/legacy-strava.ts'
 
 const IDS_FILE = '_index.json'
 const META_FILE = '_meta.json'
@@ -156,8 +155,7 @@ export function fetchAllActivities(
 }
 
 /**
- * Incremental sync of latest activities (`after: lastSync`).
- * Used by `pnpm sync:strava:activities` / GitHub Actions.
+ * @deprecated 过期作废。Incremental sync via the Strava API (`after: lastSync`).
  */
 export async function syncActivities({
   activitiesDir = DEFAULT_ACTIVITIES_DIR,
