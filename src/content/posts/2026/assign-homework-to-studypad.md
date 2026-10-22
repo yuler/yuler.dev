@@ -20,21 +20,22 @@ date: 2026-10-21
 
 既然没有网页入口，思路就是在我这台电脑上（Omarchy Linux）装一个 Android 模拟器。这样后续也可以在这上面跑一些其他的 App。
 
-## Waydroid：包的链接有问题，装不上
+## 模拟器：装得上，一打开就退出
 
-一开始用的是 Waydroid。结果安装包的下载链接一直有问题，装不上。这条路先放下。
+先后试了两条路：
 
-## 官方模拟器：脚本在，没起来
+- **Waydroid。** 装是装上了，但讯飞 AI 学一样打不开。
+- **Android Emulator（AVD）。** Android Studio 那套，只是没走 IDE，直接用 Arch 的 SDK 包装。脚本在 dotfiles 仓库的 [`emulator/`](https://github.com/yuler/dotfiles/tree/main/emulator) 目录下：[`android-emulator-setup.sh`](https://github.com/yuler/dotfiles/blob/main/emulator/android-emulator-setup.sh) 负责一次性安装，[`android-emulator-start-pixel-7.sh`](https://github.com/yuler/dotfiles/blob/main/emulator/android-emulator-start-pixel-7.sh) 负责每次启动。
 
-后来上了 Android 那套——Android Studio 用的 AVD，只是没走 IDE，直接用 Arch 的 SDK 包装。脚本在 `~/brain/setup-emulator.sh`。
+装好之后，用 `adb install -r ~/Downloads/讯飞AI学-4.9.0.13591.apk` 把应用装进模拟器。
 
-`setup-emulator.sh` 装命令行工具、模拟器、`android-tools` 和 JDK 17，SDK 放在 `/opt/android-sdk`，再下载 Android 13 的 `google_apis` x86_64 镜像，创建一个叫 `xunfei` 的虚拟设备，4 GB 内存、4 核。`start-xunfei.sh` 负责每次启动、装 APK、拉起应用。
+两条路都装得上，但都因为同一个原因打不开：两边架构对不上。讯飞 AI 学带的是 ARM 程序，还套了一层只认 ARM 的加固壳。这台电脑是 x86，模拟器系统也是 x86，两边对不上，所以一打开就退出。包里的原生库只有 `arm64-v8a` 和 `armeabi-v7a`，没有 x86 版。模拟器虽然能用翻译层跑普通 ARM 库，但这个壳会按手机 CPU 去改系统里的运行时——它以为自己在改 ARM 的运行时，实际改到的是 x86 的，改完就崩溃了。
 
-脚本一直在，但模拟器里讯飞 AI 学就是装不上，一直没起来。
+能跑起来的办法：
 
-仔细看了一下原因：这个 Android 13 `google_apis` x86_64 镜像的 `ro.product.cpu.abilist` 只有 `x86_64`，并没有脚本注释里以为的 ARM 翻译。讯飞 AI 学的安装包里只有 `arm64-v8a` 和 `armeabi-v7a`，没有 x86 的库。所以 `adb install` 直接报 `INSTALL_FAILED_NO_MATCHING_ABIS`。
-
-也就是说，**脚本以为镜像自带 ARM 翻译，其实没有**。要跑 ARM 应用，得换一个真正带 arm64 翻译的镜像（Android 11/12 的 `google_apis` 镜像带）。
+- **真机。** 普通的 ARM 手机，用数据线装这个 APK。这是这个包本来就支持的环境。
+- **ARM 版安卓模拟器。** 系统本身是 ARM，壳和运行时就一致了。这台电脑是 Intel，ARM 系统没有硬件虚拟化，只能用软件模拟，会比现在这台慢很多。
+- **借用一台 ARM 设备。** 比如另一台安卓手机，或云端的 ARM 真机。
 
 ## REA：拆开安装包找接口
 
