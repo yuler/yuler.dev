@@ -316,7 +316,7 @@ layout: default
 
 <!--
 接下来是工具二：Termius 终端配 Agent CLI（图二）。
-在圈子里大家都亲切地叫 Termius “汤米老师”。
+在圈子里大家都亲切地叫 Termius“汤米老师”。
 大家看截图，在 SSH 终端里有两个极其关键的实战技巧：
 第一：macOS 的 SSH 默认会锁死 Keychain 钥匙串，导致你的 Git pull/push 弹密码挂死。我们用一个 mac-unlock-keychain 脚本，连上之后自动解锁，保证所有凭据通行无阻。
 第二：调起 Cursor Agent CLI（简写 ca），模型选 Grok 4.7 256K，并且必须带上 [yolo] 参数！
@@ -445,7 +445,7 @@ layout: default
     <div class="text-xs font-mono text-slate-300 bg-slate-900/80 p-2 rounded border border-slate-800">
       底部 build 时间 + commit 的 PR 开好了：<br>
       <span class="text-amber-400">https://github.com/yuler/k41/pull/3</span><br>
-      页面底部灰色小字显示 构建时间 + 7位 commit<br>
+      页面底部灰色小字显示 构建时间 + 7 位 commit<br>
       <span class="text-sky-300">@PR Reviewer</span> 麻烦看一下。
     </div>
   </div>
@@ -525,7 +525,7 @@ layout: default
 这里是人机双重把关：
 第一关：Agent 提 PR 时，会列出架构设计与实现方式，比如本次说明了它是怎么通过 Vite define 注入常量，双环境如何兼顾；
 第二关：人类肉眼审查。不需要去咬文嚼字扣语法，重点看架构合理性、改动文件有没有越权。
-确认 CI 跑通后，大拇指按一下 “Squash and merge”，正式合并！
+确认 CI 跑通后，大拇指按一下“Squash and merge”，正式合并！
 -->
 
 ---
@@ -547,7 +547,7 @@ layout: default
     <p class="text-xs text-slate-300 mb-3">改样式、试效果、调交互，不需要频繁推代码到 GitHub。</p>
     <div class="space-y-2 text-xs font-mono text-slate-300 bg-slate-900/80 p-3 rounded-lg border border-slate-800">
       <div><b>1. 宿主机服务启动：</b><br><span class="text-teal-300">pnpm dev --host 0.0.0.0</span></div>
-      <div><b>2. 手机 Safari 访问：</b><br><span class="text-slate-400">http://&lt;局域网IP或Tailscale IP&gt;:3000</span></div>
+      <div><b>2. 手机 Safari 访问：</b><br><span class="text-slate-400">http://&lt;局域网 IP 或 Tailscale IP&gt;:3000</span></div>
       <div><b>3. 体验：</b><br>HMR 毫秒级热更新，代码一改手机即变</div>
     </div>
   </div>
@@ -604,7 +604,7 @@ layout: default
     <h4 class="text-emerald-400 font-semibold mb-1">🎯 线上验收实证 (k41.yuler.cc)</h4>
     <ul class="text-xs list-disc list-inside space-y-1 text-slate-400">
       <li>切到手机 Safari，直接访问生产域名</li>
-      <li>页面 Footer 底部精准显示：<code class="text-emerald-300">构建 2026-10-xx 23:39:xx + 7位 commit hash</code></li>
+      <li>页面 Footer 底部精准显示：<code class="text-emerald-300">构建 2026-10-xx 23:39:xx + 7 位 commit hash</code></li>
       <li>验证实际线上环境完全符合预期，零延迟闭环！</li>
     </ul>
   </div>
