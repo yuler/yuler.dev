@@ -27,29 +27,14 @@ css: unocss
 </div>
 
 <div class="mt-5 text-left">
-  <div class="text-xs font-mono text-slate-400 mb-2.5">📋 具体闭环思路：</div>
-  <div class="flex flex-col gap-2">
-    <div class="flex items-center gap-2.5 p-2 rounded bg-slate-800/40 border border-slate-700/60 text-xs text-slate-200">
-      <span class="w-5 h-5 flex items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[11px] shrink-0 font-bold">1</span>
-      <span>通过 <b>GitHub APP</b> review 大概的内容</span>
-    </div>
-    <div class="flex items-center gap-2.5 p-2 rounded bg-slate-800/40 border border-slate-700/60 text-xs text-slate-200">
-      <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-500/20 text-blue-400 font-mono text-[11px] shrink-0 font-bold">2</span>
-      <span>由 <b>AI</b> 去写代码</span>
-    </div>
-    <div class="flex items-center gap-2.5 p-2 rounded bg-slate-800/40 border border-slate-700/60 text-xs text-slate-200">
-      <span class="w-5 h-5 flex items-center justify-center rounded-full bg-purple-500/20 text-purple-400 font-mono text-[11px] shrink-0 font-bold">3</span>
-      <span><b>AI</b> 再进行 review</span>
-    </div>
-    <div class="flex items-center gap-2.5 p-2 rounded bg-slate-800/40 border border-slate-700/60 text-xs text-slate-200">
-      <span class="w-5 h-5 flex items-center justify-center rounded-full bg-amber-500/20 text-amber-400 font-mono text-[11px] shrink-0 font-bold">4</span>
-      <span>补充一些测试</span>
-    </div>
-    <div class="flex items-center gap-2.5 p-2 rounded bg-slate-800/40 border border-slate-700/60 text-xs text-slate-200">
-      <span class="w-5 h-5 flex items-center justify-center rounded-full bg-sky-500/20 text-sky-400 font-mono text-[11px] shrink-0 font-bold">5</span>
-      <span>进行线上验证</span>
-    </div>
-  </div>
+  <div class="text-xs font-mono text-slate-400 mb-2.5">具体闭环思路</div>
+  <ol class="loop-steps">
+    <li>通过 <b>GitHub APP</b> review 大概的内容</li>
+    <li>由 <b>AI</b> 去写代码</li>
+    <li><b>AI</b> 再进行 review</li>
+    <li>补充一些测试</li>
+    <li>进行线上验证</li>
+  </ol>
 </div>
 
 <div class="mt-8 text-slate-400 text-xs font-mono">
