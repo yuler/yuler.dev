@@ -6,6 +6,7 @@
 @import '@fontsource/inter/700.css';
 
 @import "tailwindcss";
+@source "../content/slides";
 @plugin "@tailwindcss/typography";
 
 /* Global Styles */

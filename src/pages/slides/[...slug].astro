@@ -1,0 +1,668 @@
+---
+import type { SlideDeck } from '../../lib/slides'
+import { getAllSlideDecks } from '../../lib/slides'
+import '../../styles/global.css'
+
+export async function getStaticPaths() {
+  const decks = await getAllSlideDecks()
+  return decks.map(deck => ({
+    params: { slug: deck.slug },
+    props: { deck },
+  }))
+}
+
+interface Props {
+  deck: SlideDeck
+}
+
+const { deck } = Astro.props
+---
+
+<html lang="zh-CN" class="deck-root">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{deck.title}</title>
+    <style is:global>
+      /* 墨水经典 — guizang-ppt-skill themes.md, stripped to black and paper for phone reading. */
+      .deck-root {
+        --ink: #0a0a0b;
+        --ink-rgb: 10, 10, 11;
+        --paper: #f1efea;
+        --paper-tint: #e8e5de;
+        --muted: rgba(10, 10, 11, 0.62);
+        --rule: rgba(10, 10, 11, 0.16);
+        height: 100%;
+        background: var(--paper);
+        color: var(--ink);
+      }
+      .deck-root ::selection {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .deck-body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      .deck-bar,
+      .deck-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.55rem 0.85rem;
+        background: var(--paper);
+        border-color: var(--rule);
+        z-index: 20;
+      }
+      .deck-bar {
+        border-bottom: 1px solid var(--rule);
+        padding-top: max(0.55rem, env(safe-area-inset-top));
+      }
+      .deck-nav {
+        position: relative;
+        border-top: 1px solid var(--rule);
+        padding-bottom: max(0.55rem, env(safe-area-inset-bottom));
+      }
+      .deck-progress {
+        position: absolute;
+        top: -1px;
+        left: 0;
+        height: 2px;
+        width: 0;
+        background: var(--ink);
+      }
+      .deck-title {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.01em;
+      }
+      .deck-icon-btn,
+      .deck-nav-btn {
+        border: 1px solid var(--ink);
+        background: transparent;
+        color: var(--ink);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.72rem;
+        line-height: 1;
+        min-height: 2.25rem;
+        padding: 0 0.7rem;
+        white-space: nowrap;
+      }
+      .deck-nav-btn {
+        min-width: 5.5rem;
+      }
+      .deck-nav-btn:disabled {
+        opacity: 0.28;
+        pointer-events: none;
+      }
+      .deck-icon-btn[aria-pressed="true"],
+      .deck-nav-btn.is-primary {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .deck-count {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.75rem;
+      }
+      .deck-stage-wrap {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        justify-content: center;
+      }
+      #presentation-stage {
+        width: 100%;
+        max-width: 34rem;
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        background: var(--paper);
+        border-inline: 1px solid transparent;
+      }
+      @media (min-width: 40rem) {
+        #presentation-stage {
+          border-inline-color: var(--rule);
+        }
+      }
+      .slide-frame {
+        display: none;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 1.25rem 1.15rem 1.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .slide-frame.active {
+        display: flex;
+        flex-direction: column;
+      }
+      .slide-content {
+        color: var(--ink);
+        font-size: 0.95rem;
+        line-height: 1.55;
+      }
+      .slide-content,
+      .slide-content * {
+        color: var(--ink);
+      }
+      .slide-content h1 {
+        font-family: 'Songti SC', 'Noto Serif CJK SC', 'Noto Serif SC', 'Source Han Serif SC', Palatino, 'Palatino Linotype', serif;
+        font-size: clamp(1.55rem, 6.4vw, 2.05rem);
+        font-weight: 700;
+        line-height: 1.22;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.45rem;
+      }
+      .slide-content h3 {
+        font-size: 0.98rem;
+        font-weight: 500;
+        line-height: 1.45;
+        color: var(--muted) !important;
+        margin: 0 0 1rem;
+      }
+      .slide-content h4 {
+        font-size: 0.92rem;
+        font-weight: 600;
+        margin: 0 0 0.35rem;
+      }
+      .slide-content p,
+      .slide-content li {
+        line-height: 1.55;
+      }
+      .slide-content [class*="text-slate-4"],
+      .slide-content [class*="text-slate-5"],
+      .slide-content [class*="text-slate-600"] {
+        color: var(--muted) !important;
+      }
+      .slide-content [class*="bg-"] {
+        background-color: transparent !important;
+        background-image: none !important;
+      }
+      .slide-content [class*="shadow"] {
+        box-shadow: none !important;
+      }
+      .slide-content [class*="rounded"] {
+        border-radius: 0 !important;
+        border-color: var(--rule) !important;
+        box-shadow: none !important;
+      }
+      .slide-content .grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.25rem !important;
+      }
+      .slide-content .grid > .flex {
+        order: -1;
+      }
+      .slide-content .flex.justify-center {
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+      .slide-content .flex.justify-between {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.2rem !important;
+      }
+      .slide-content .rounded-full {
+        display: block;
+        width: 100%;
+        line-height: 1.4;
+      }
+      .slide-content .text-xs {
+        font-size: 0.84rem !important;
+      }
+      .slide-content .text-sm {
+        font-size: 0.95rem !important;
+      }
+      .slide-content img {
+        width: 100%;
+        height: auto;
+        max-height: 46vh !important;
+        object-fit: contain;
+        object-position: top center;
+        border: 1px solid var(--ink) !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: #fff;
+        transform: none !important;
+      }
+      .slide-content pre,
+      .slide-content :not(pre) > code {
+        background: var(--paper-tint) !important;
+        color: var(--ink) !important;
+        border: 1px solid var(--rule) !important;
+        border-radius: 0 !important;
+      }
+      .slide-content pre {
+        padding: 0.7rem 0.8rem;
+        font-size: 0.78rem;
+        line-height: 1.45;
+        overflow-x: auto;
+      }
+      .slide-content code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      .slide-content :not(pre) > code {
+        padding: 0.05rem 0.28rem;
+        font-size: 0.84em;
+      }
+      .slide-content a {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .slide-content ul {
+        list-style: disc;
+        padding-left: 1.1rem;
+      }
+      .slide-content li {
+        margin-bottom: 0.35rem;
+      }
+      .mermaid-container {
+        overflow-x: auto;
+        margin: 0.5rem 0 1rem;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        padding: 0.75rem 0;
+      }
+      .mermaid-container svg {
+        width: 100% !important;
+        max-width: 100%;
+        height: auto;
+      }
+      .mermaid-container .node rect,
+      .mermaid-container .node polygon,
+      .mermaid-container .cluster rect,
+      .mermaid-container .label-container {
+        fill: var(--paper) !important;
+        stroke: var(--ink) !important;
+      }
+      .mermaid-container .edgePath path,
+      .mermaid-container .flowchart-link {
+        stroke: var(--ink) !important;
+        fill: none !important;
+      }
+      .mermaid-container marker path {
+        stroke: var(--ink) !important;
+        fill: var(--ink) !important;
+      }
+      .mermaid-container text,
+      .mermaid-container span,
+      .mermaid-container .nodeLabel,
+      .mermaid-container .edgeLabel {
+        fill: var(--ink) !important;
+        color: var(--ink) !important;
+      }
+      .slide-meta {
+        margin-top: auto;
+        padding-top: 0.7rem;
+        border-top: 1px solid var(--rule);
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.02em;
+        color: var(--muted);
+      }
+      .deck-sheet,
+      .deck-overview {
+        background: var(--paper);
+        color: var(--ink);
+      }
+      .deck-sheet {
+        position: absolute;
+        left: 0.6rem;
+        right: 0.6rem;
+        bottom: 4.6rem;
+        max-height: 48vh;
+        overflow: auto;
+        border: 1px solid var(--ink);
+        padding: 0.9rem 1rem;
+        z-index: 30;
+      }
+      .deck-overview {
+        position: absolute;
+        inset: 0;
+        z-index: 40;
+        flex-direction: column;
+        padding: 0.85rem;
+      }
+      .deck-overview:not(.hidden) {
+        display: flex;
+      }
+      .deck-overview-list {
+        flex: 1;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+      .overview-item {
+        text-align: left;
+        border: 1px solid var(--rule);
+        background: transparent;
+        padding: 0.75rem 0.8rem;
+      }
+      .overview-item strong {
+        display: block;
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+      .keys {
+        display: none;
+      }
+      @media (min-width: 48rem) {
+        .keys { display: flex; gap: 0.8rem; }
+        .deck-sheet { left: auto; width: min(32rem, 46vw); right: 1rem; }
+      }
+    </style>
+  </head>
+  <body class="deck-body">
+    <header class="deck-bar">
+      <h1 class="deck-title">{deck.title}</h1>
+      <div class="flex items-center gap-1.5">
+        <button id="btn-overview" type="button" class="deck-icon-btn" title="大纲 (O)">目录</button>
+        <button id="btn-notes" type="button" class="deck-icon-btn" title="逐字稿 (P)">讲稿</button>
+      </div>
+    </header>
+
+    <main class="deck-stage-wrap relative">
+      <div id="presentation-stage">
+        {deck.slides.map((slide, idx) => (
+          <div
+            class={`slide-frame ${idx === 0 ? 'active' : ''}`}
+            data-slide-index={idx + 1}
+            data-notes={encodeURIComponent(slide.notes)}
+          >
+            <div class="slide-content">
+              <Fragment set:html={slide.html} />
+            </div>
+            <div class="slide-meta">
+              <span>{idx + 1} / {deck.slideCount}</span>
+              <span>左右滑动翻页</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <aside id="notes-drawer" class="deck-sheet hidden">
+        <div class="mb-2 flex items-center justify-between gap-3 border-b border-black/15 pb-2">
+          <span id="notes-slide-num" class="font-mono text-xs">讲稿 · 1</span>
+          <button id="close-notes-btn" type="button" class="deck-icon-btn">关闭</button>
+        </div>
+        <div id="notes-body" class="select-text text-sm leading-relaxed"></div>
+      </aside>
+
+      <div id="overview-modal" class="deck-overview hidden">
+        <div class="mb-3 flex items-center justify-between gap-3 border-b border-black/15 pb-2">
+          <h2 class="font-mono text-xs">目录</h2>
+          <button id="close-overview-btn" type="button" class="deck-icon-btn">关闭</button>
+        </div>
+        <div class="deck-overview-list">
+          {deck.slides.map((s, idx) => (
+            <button type="button" class="overview-item" data-jump-index={idx + 1}>
+              <span class="font-mono text-[11px] opacity-60">{String(idx + 1).padStart(2, '0')}</span>
+              <strong>{s.title}</strong>
+            </button>
+          ))}
+        </div>
+      </div>
+    </main>
+
+    <footer class="deck-nav">
+      <div id="deck-progress" class="deck-progress"></div>
+      <button id="btn-prev" type="button" class="deck-nav-btn">上一页</button>
+      <div class="deck-count">
+        <span id="current-slide-num">1</span>
+        <span> / {deck.slideCount}</span>
+      </div>
+      <button id="btn-next" type="button" class="deck-nav-btn is-primary">下一页</button>
+    </footer>
+
+    <!-- Presentation Client Script -->
+    <script>
+let currentSlide = 1
+const totalSlides = document.querySelectorAll('.slide-frame').length
+
+const frames = document.querySelectorAll('.slide-frame')
+const currentNumEl = document.getElementById('current-slide-num')
+const btnPrev = document.getElementById('btn-prev') as HTMLButtonElement
+const btnNext = document.getElementById('btn-next') as HTMLButtonElement
+const notesDrawer = document.getElementById('notes-drawer')
+const notesBody = document.getElementById('notes-body')
+const notesSlideNum = document.getElementById('notes-slide-num')
+const overviewModal = document.getElementById('overview-modal')
+const progressEl = document.getElementById('deck-progress')
+const notesBtn = document.getElementById('btn-notes')
+const overviewBtn = document.getElementById('btn-overview')
+
+function updateSlide(targetIndex: number) {
+  if (targetIndex < 1 || targetIndex > totalSlides)
+    return
+  currentSlide = targetIndex
+
+  frames.forEach((frame, idx) => {
+    if (idx + 1 === currentSlide) {
+      frame.classList.add('active')
+    }
+    else {
+      frame.classList.remove('active')
+    }
+  })
+
+  if (currentNumEl)
+    currentNumEl.textContent = String(currentSlide)
+  if (btnPrev)
+    btnPrev.disabled = currentSlide === 1
+  if (btnNext)
+    btnNext.disabled = currentSlide === totalSlides
+
+  // Update speaker notes
+  const activeFrame = frames[currentSlide - 1] as HTMLElement
+  const rawNotes = activeFrame?.getAttribute('data-notes')
+  const notes = rawNotes ? decodeURIComponent(rawNotes) : '本页无单独演讲者备注。'
+  if (notesBody)
+    notesBody.textContent = notes
+  if (notesSlideNum)
+    notesSlideNum.textContent = `讲稿 · ${currentSlide} / ${totalSlides}`
+  if (progressEl)
+    progressEl.style.width = `${(currentSlide / totalSlides) * 100}%`
+  if (activeFrame)
+    activeFrame.scrollTop = 0
+
+  initMermaidOnActiveSlide(activeFrame)
+}
+
+function nextSlide() {
+  if (currentSlide < totalSlides)
+    updateSlide(currentSlide + 1)
+}
+
+function prevSlide() {
+  if (currentSlide > 1)
+    updateSlide(currentSlide - 1)
+}
+
+function toggleNotes() {
+  if (!notesDrawer)
+    return
+  notesDrawer.classList.toggle('hidden')
+  notesBtn?.setAttribute('aria-pressed', notesDrawer.classList.contains('hidden') ? 'false' : 'true')
+}
+
+function toggleOverview() {
+  if (!overviewModal)
+    return
+  overviewModal.classList.toggle('hidden')
+  overviewBtn?.setAttribute('aria-pressed', overviewModal.classList.contains('hidden') ? 'false' : 'true')
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {})
+  }
+  else {
+    document.exitFullscreen().catch(() => {})
+  }
+}
+
+// Init Mermaid dynamically
+function initMermaidOnActiveSlide(container: HTMLElement | null) {
+  if (!container)
+    return
+  const mermaidPre = container.querySelectorAll('pre code.language-mermaid, pre[data-language="mermaid"] code')
+  if (!mermaidPre.length)
+    return
+
+  import('mermaid').then(({ default: mermaid }) => {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      securityLevel: 'loose',
+      themeVariables: {
+        darkMode: false,
+        background: '#f1efea',
+        fontFamily: 'Inter, sans-serif',
+        primaryColor: '#f1efea',
+        primaryTextColor: '#0a0a0b',
+        primaryBorderColor: '#0a0a0b',
+        secondaryColor: '#e8e5de',
+        secondaryTextColor: '#0a0a0b',
+        secondaryBorderColor: '#0a0a0b',
+        tertiaryColor: '#ffffff',
+        tertiaryTextColor: '#0a0a0b',
+        tertiaryBorderColor: '#0a0a0b',
+        lineColor: '#0a0a0b',
+        textColor: '#0a0a0b',
+        mainBkg: '#f1efea',
+        nodeBorder: '#0a0a0b',
+        clusterBkg: '#e8e5de',
+        clusterBorder: '#0a0a0b',
+        titleColor: '#0a0a0b',
+        edgeLabelBackground: '#f1efea',
+        nodeTextColor: '#0a0a0b',
+      },
+    })
+    mermaidPre.forEach((el, index) => {
+      const code = el.textContent || ''
+      const parent = el.closest('pre')
+      if (parent && !parent.getAttribute('data-mermaid-processed')) {
+        parent.setAttribute('data-mermaid-processed', 'true')
+        const graphId = `mermaid-${currentSlide}-${index}`
+        mermaid.render(graphId, code).then(({ svg }) => {
+          const div = document.createElement('div')
+          div.className = 'mermaid-container flex justify-center my-4 overflow-x-auto'
+          div.innerHTML = svg
+          parent.replaceWith(div)
+        }).catch(() => {})
+      }
+    })
+  })
+}
+
+// Keyboard navigation
+window.addEventListener('keydown', (e) => {
+  if (overviewModal && !overviewModal.classList.contains('hidden')) {
+    if (e.key === 'Escape')
+      toggleOverview()
+    return
+  }
+
+  switch (e.key) {
+    case 'ArrowRight':
+    case ' ':
+    case 'PageDown':
+      e.preventDefault()
+      nextSlide()
+      break
+    case 'ArrowLeft':
+    case 'PageUp':
+      e.preventDefault()
+      prevSlide()
+      break
+    case 'Home':
+      e.preventDefault()
+      updateSlide(1)
+      break
+    case 'End':
+      e.preventDefault()
+      updateSlide(totalSlides)
+      break
+    case 'p':
+    case 'P':
+      e.preventDefault()
+      toggleNotes()
+      break
+    case 'o':
+    case 'O':
+      e.preventDefault()
+      toggleOverview()
+      break
+    case 'f':
+    case 'F':
+      e.preventDefault()
+      toggleFullscreen()
+      break
+    case 'Escape':
+      if (notesDrawer && !notesDrawer.classList.contains('hidden'))
+        toggleNotes()
+      break
+  }
+})
+
+// Button bindings
+btnPrev?.addEventListener('click', prevSlide)
+btnNext?.addEventListener('click', nextSlide)
+document.getElementById('btn-notes')?.addEventListener('click', toggleNotes)
+document.getElementById('close-notes-btn')?.addEventListener('click', toggleNotes)
+document.getElementById('btn-overview')?.addEventListener('click', toggleOverview)
+document.getElementById('close-overview-btn')?.addEventListener('click', toggleOverview)
+document.getElementById('btn-fullscreen')?.addEventListener('click', toggleFullscreen)
+
+// Overview item jump
+document.querySelectorAll('.overview-item').forEach((item) => {
+  item.addEventListener('click', () => {
+    const jumpIndex = Number(item.getAttribute('data-jump-index'))
+    if (jumpIndex) {
+      updateSlide(jumpIndex)
+      toggleOverview()
+    }
+  })
+})
+
+let touchStartX = 0
+let touchStartY = 0
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX
+  touchStartY = e.changedTouches[0].screenY
+}, { passive: true })
+document.addEventListener('touchend', (e) => {
+  if (overviewModal && !overviewModal.classList.contains('hidden'))
+    return
+  const dx = e.changedTouches[0].screenX - touchStartX
+  const dy = e.changedTouches[0].screenY - touchStartY
+  if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy))
+    return
+  if (dx < 0)
+    nextSlide()
+  else
+    prevSlide()
+}, { passive: true })
+
+// Initial load
+updateSlide(1)
+</script>
+  </body>
+</html>
