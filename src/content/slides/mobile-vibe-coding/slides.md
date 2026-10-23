@@ -3,7 +3,7 @@ theme: default
 title: 纯手机 Vibe Coding 实战
 info: |
   ## 纯手机 Vibe Coding 实战
-  基于 Mac mini 私有算力与多 Agent 协作的移动端极客开发范式
+  告别编辑器，手机端原生 AI 与 AI APP 端到端生产闭环
 class: text-center
 highlighter: shiki
 lineNumbers: true
@@ -15,80 +15,97 @@ css: unocss
 
 # 纯手机 Vibe Coding 实战
 
-### 用一部 iPhone 掌控 Mac mini 与多 Agent 生产闭环
+### 告别手写与编辑器 · 手机端原生 AI 端到端生产闭环
 
-<div class="mt-8 flex justify-center gap-3">
-  <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-sm font-mono">📱 iOS / Termius 控制面</span>
-  <span class="px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full text-sm font-mono">🖥️ Mac mini 私有算力端</span>
-  <span class="px-3 py-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full text-sm font-mono">🤖 多 Agent 协同生态</span>
-  <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-sm font-mono">🚀 双轨验证与秒级上线</span>
+<div class="mt-6 p-4 rounded-xl border border-sky-500/20 bg-sky-500/5 text-left">
+  <div class="text-sm font-semibold mb-1.5 text-sky-400 flex items-center gap-2">
+    <span>💡</span> 核心思想
+  </div>
+  <p class="text-xs text-slate-300 leading-relaxed">
+    通过手机去操作，利用原生 AI 以及 AI APP（例如这个，还有那个等等）。因为现在编程都不是手写的，所以我们都不需要编辑器（Editor）了，直接由 AI 生成代码就行。
+  </p>
 </div>
 
-<div class="mt-12 text-slate-400 text-sm">
-  分享人：Yuler · 开发者极客社区技术分享
+<div class="mt-5 text-left">
+  <div class="text-xs font-mono text-slate-400 mb-2.5">具体闭环思路</div>
+  <ol class="loop-steps">
+    <li>通过 <b>GitHub APP</b> review 大概的内容</li>
+    <li>由 <b>AI</b> 去写代码</li>
+    <li><b>AI</b> 再进行 review</li>
+    <li>补充一些测试</li>
+    <li>进行线上验证</li>
+  </ol>
+</div>
+
+<div class="mt-8 text-slate-400 text-xs font-mono">
+  分享人：Yuler
 </div>
 
 <!--
-各位同行、朋友们大家好！今天我想和大家分享一个彻底改变我日常开发习惯的实践：
-“完全通过手机进行 Vibe Coding 实战”。
+各位同行、朋友们大家好！今天我想和大家分享一个彻底颠覆我日常开发习惯的范式：
+“纯手机 Vibe Coding 实战”。
 
-以前一提到“用手机写代码”，大家的第一反应往往是：屏幕那么小、没有机械键盘、没有终端、写代码纯属自虐。
-但大模型时代彻底重构了这一切——
-我们不再需要用手指去逐行敲击语法符号，编程的核心变成了“意图表达”与“架构决策”。
-今天这套方案，将系统拆解我是如何在通勤路上、甚至躺在沙发上，仅凭一部 iPhone，调度家里常开的 Mac mini，
-通过 UU 远程、Termius（汤米老师）、Cursor 移动端与 Grok 机器人，
-完成从需求派单、终端交互、代码审查到内网秒级调试与线上自动化发布的全套生产闭环！
+现在的编程时代已经彻底变了——代码不再需要我们用手在键盘上一行行手写，我们甚至完全不需要编辑器（Editor）了！
+核心思想就是纯粹通过手机去操作，充分利用手机上的原生 AI 以及各类 AI APP，直接把意图交由 AI 生成完整代码。
+
+整套生产闭环的具体思路大概如下：
+1. 随时随地通过手机端的 GitHub APP review 大概的需求与代码内容；
+2. 调度 AI 去写核心业务代码；
+3. 由 AI 再次进行 review，交叉校验；
+4. 补充相关测试用例，保障健壮性；
+5. 最后直接推送到线上进行真实环境验证。
+
+接下来我们将一步步展开这套无需编辑器、全靠手机与 AI 协同的极速开发闭环！
 -->
 
 ---
 layout: default
 ---
 
-# 核心思想：AI 时代为什么可以用手机编程？
+# 核心思想：为什么我们不再需要编辑器？
 
-告别语法打字，手机是意图控制台，算力与环境后置到主机
+告别手写语法打字，手机是意图控制台，AI 端到端闭环交付
 
 <div class="grid grid-cols-2 gap-8 mt-6">
 
 <div class="p-5 rounded-xl border border-red-500/20 bg-red-500/5">
   <h3 class="text-red-400 font-bold text-lg mb-3 flex items-center gap-2">
-    <span>❌</span> 传统移动端编程痛点
+    <span>❌</span> 传统编程依赖编辑器
   </h3>
   <ul class="space-y-3 text-sm text-slate-300">
-    <li><b>输入低效：</b> 手机软键盘缺少代码符号（括号、分号、缩进），手工输入效率暴跌 80%</li>
-    <li><b>环境缺失：</b> 移动端 OS 无法本地运行 Node、Docker、编译器等重型开发套件</li>
-    <li><b>调试艰难：</b> 屏幕局限，无法同时容纳代码编辑器、终端和浏览器多窗口</li>
-    <li><b>工具繁冗：</b> 依赖各种沉重的 IDE 插件与复杂的语法提示/补全配置</li>
+    <li><b>人工输入语法：</b> 必须依赖键盘逐字敲括号、分号与缩进，手机小屏幕输入效率极低</li>
+    <li><b>沉重工具链：</b> 依赖 VS Code 等庞大 IDE、各种插件生态以及本地环境配置</li>
+    <li><b>心智负担繁重：</b> 大量精力被困在排查语法拼写与繁琐工具配置上</li>
   </ul>
 </div>
 
 <div class="p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
   <h3 class="text-emerald-400 font-bold text-lg mb-3 flex items-center gap-2">
-    <span>✨</span> AI Native 时代的 Vibe Coding
+    <span>✨</span> AI 原生移动端范式
   </h3>
   <ul class="space-y-3 text-sm text-slate-300">
-    <li><b>编码全包：</b> 代码编写由 AI 全权接管，不再需要任何软键盘符号与语法提示</li>
-    <li><b>SSH 极简通道：</b> 核心本质就是通过极简的 SSH 终端，直连自己常开的电脑或服务器</li>
-    <li><b>算力私有：</b> 家里一台静音低功耗 Mac mini 常年开机，免额外云服务器费用且复用本地凭据</li>
-    <li><b>职责升维：</b> 手机只负责发号施令、把关架构与验收成果，成为掌上总指挥台</li>
+    <li><b>完全告别编辑器：</b> 编程不再手写，不需要任何 Editor，由 AI 端到端直接生成代码</li>
+    <li><b>手机即控制台：</b> 利用原生 AI 以及各种 AI APP，发号施令并驱动开发任务</li>
+    <li><b>端到端质量闭环：</b> GitHub APP 审查 + AI 写码 + AI 复审 + 测试补充 + 线上秒级验证</li>
   </ul>
 </div>
 
 </div>
 
 <div class="mt-8 p-3 rounded-lg bg-slate-800/60 border border-slate-700 text-center font-mono text-xs text-slate-300">
-  💡 核心哲学：计算留在家里，AI 顶在前面，控制握在掌心。
+  💡 核心哲学：告别编辑器，手机握在掌心，AI 顶在前面，意图即交付。
 </div>
 
 <!--
-我们先来聊透“核心思想”。
+我们来聊透“核心思想”。
 为什么以前用手机写代码是受罪，现在却变成了一种享受？
-因为编程的本质变了。过去写代码 80% 的精力花在键盘敲语法、查文档补全、配环境上。
+因为编程的本质变了——我们根本不需要编辑器（Editor）了。
+过去写代码 80% 的精力花在键盘敲语法、查文档补全、配 IDE 插件上。
 但在今天：
-第一，代码逻辑由 AI 全权负责编写，我们根本不需要在手机屏幕上逐个输入大括号、箭头函数或分号，甚至连语法高亮和补全提示都不再是必需品。
-第二，连接的本质极其纯粹——就是一条通往后端的 SSH 终端连接。
-手机只做控制面（Control Plane），家里的 Mac mini 做算力面（Compute Plane）。M 芯片 Mac mini 功耗只有几瓦，常年静音开机，零服务器账单，而且本地 Keychain、Git 凭据应有尽有。
-你只需要负责清晰表达意图，敲回车让 Agent 跑起来。
+第一，代码逻辑由 AI 全权负责编写，我们根本不需要在手机屏幕上去手写代码；
+第二，手机只做意图表达与质量决策：
+通过 GitHub APP 看需求，让 AI 写代码，AI 交叉 review，补充测试，直接上线验证。
+手机只做控制面，计算与实现交给 AI，不需要编辑器，这就是 AI 原生时代的极速闭环！
 -->
 
 ---
@@ -97,56 +114,55 @@ layout: default
 
 # 整体系统拓扑：端到端解耦架构
 
-内网直连 + 外网主力穿透 + 双轨验证闭环
+从上往下看：两条入口汇合到本地，再提交、Review、用手机浏览器看结果
 
-```mermaid
-flowchart TB
-    subgraph Mobile ["📱 移动控制面 (iPhone)"]
-        Termius["Termius (汤米老师)"]
-        UU_App["UU 远程 (主通道)"]
-        Cursor_iOS["Cursor iOS 原生 App"]
-        Grok_IM["Grok Bot 群聊"]
-        GH_App["GitHub App (PR 审查)"]
-        Safari["Safari 浏览器 (验证)"]
-    end
-
-    subgraph Network ["🌐 连接与穿透矩阵"]
-        Home_LAN["在家: Wi-Fi 局域网直连 SSH\n(无需开显示器)"]
-        UU_Tunnel["外出主力: UU 远程内置 SSH\n(随时一键滑入图形桌面)"]
-        TS_Mesh["安全兜底: Tailscale Mesh\n(加密私网穿透)"]
-    end
-
-    subgraph Host ["🖥️ 宿主机算力端 (Mac mini)"]
-        CLI_Agent["Agent CLI (YOLO 自治执行)"]
-        Bot_Agent["Grok Coder & Reviewer"]
-        Dev_Stack["Node.js / Docker / Git / Vite"]
-    end
-
-    subgraph Verification ["🔍 双轨验证与交付体系"]
-        Local_Preview["【开发联调态】本地暴露内网端口\n--host 0.0.0.0 手机秒级热更新"]
-        Prod_Deploy["【最终交付态】GitHub Actions 自动构建\n云服务器 + 生产域名 (k41.yuler.cc)"]
-    end
-
-    Mobile --> Network
-    Network --> Host
-    Host --> Local_Preview
-    Host -->|Commit & PR| GH_App
-    GH_App -->|Merge 自动打通| Prod_Deploy
-    Safari -.->|即时验收| Local_Preview
-    Safari -.->|生产验收| Prod_Deploy
-```
+<div class="topo">
+  <div class="topo-fork">
+    <div class="topo-card">
+      <div class="topo-kicker">路径一</div>
+      <div class="topo-title">AI 客户端</div>
+      <div class="topo-line">Cursor</div>
+      <div class="topo-line">Grok Bot</div>
+      <div class="topo-line">Muse · Codex</div>
+      <div class="topo-note">不经过终端</div>
+    </div>
+    <div class="topo-card">
+      <div class="topo-kicker">路径二</div>
+      <div class="topo-title">终端 Termius</div>
+      <div class="topo-note">先连到本地</div>
+      <div class="topo-line">SSH</div>
+      <div class="topo-line">UU 远程的 SSH</div>
+      <div class="topo-line">Tailscale 隧道</div>
+    </div>
+  </div>
+  <div class="topo-arrow"></div>
+  <div class="topo-step">本地 Mac mini · 写代码</div>
+  <div class="topo-arrow"></div>
+  <div class="topo-step">提交到 GitHub</div>
+  <div class="topo-arrow"></div>
+  <div class="topo-step">机器人 PR Review</div>
+  <div class="topo-arrow"></div>
+  <div class="topo-fork">
+    <div class="topo-card">
+      <div class="topo-kicker">看结果</div>
+      <div class="topo-title">远程服务器</div>
+      <div class="topo-note">手机浏览器打开线上页面</div>
+    </div>
+    <div class="topo-card">
+      <div class="topo-kicker">或</div>
+      <div class="topo-title">留在本地</div>
+      <div class="topo-note">手机走局域网浏览器打开</div>
+    </div>
+  </div>
+</div>
 
 <!--
-大家看这张最新的全景系统拓扑：
-整套架构分为四个模块：
-1. 移动控制面：手机上的 Termius、UU 远程、Cursor iOS、Grok 机器人群、GitHub App 与 Safari 浏览器；
-2. 连接与穿透矩阵：
-   - 在家时：直接通过家庭 Wi-Fi 局域网连 SSH，电脑屏幕都不需要点亮；
-   - 出门在外：以 UU 远程为主力，常规使用内置 SSH，遇到特殊图形需求一键切入桌面；Tailscale 作为虚拟私网兜底；
-3. 宿主机算力端：Mac mini 常年挂载，跑着 CLI Agent、多机器人后台与前端工具链；
-4. 双轨验证体系：
-   - 快速改样式走本地内网暴露端口，秒级热更；
-   - 正式发布走 GitHub Actions 自动打通，上线生产域名。
+这张图从上往下看，不要横着扫。
+手机上有两条路。
+第一条是 AI 客户端：Cursor、Grok Bot，同类的还有 Muse、Codex 这种，不经过终端。
+第二条是终端，用 Termius。终端前面还有一层连接，才能传到家里的机器：可以直接 SSH，可以用 UU 远程里的 SSH，也可以走 Tailscale 隧道。
+两条路汇合到本地 Mac mini，在这里写代码，然后提交到 GitHub。
+机器人做 PR Review。通过之后有两种看结果的方式：部署到远程服务器，手机浏览器打开线上页面；或者就跑在本地，手机用局域网浏览器打开。
 -->
 
 ---
@@ -194,7 +210,7 @@ layout: default
     </div>
     <ul class="space-y-3 text-xs text-slate-300 mt-2">
       <li>
-        <b class="text-emerald-300">⚡ Termius（汤米老师）：</b><br>
+        <b class="text-emerald-300">⚡ Termius：</b><br>
         iOS 生态综合体验最好的 SSH 客户端。支持多主机分组、会话保持与弱网自动重连。
       </li>
       <li>
@@ -286,25 +302,25 @@ layout: default
 
 <div class="space-y-3 text-sm text-slate-300">
   <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
-    <h4 class="text-emerald-400 font-semibold mb-1">🔑 关键痛点解决：SSH 解锁 Keychain</h4>
-    <div class="text-xs font-mono text-slate-300 bg-slate-900/80 p-2 rounded border border-slate-800">
-      <span class="text-slate-500">yule@macmini k41 %</span> mac-unlock-keychain<br>
-      <span class="text-emerald-400">login keychain unlocked</span>
-    </div>
-    <p class="text-xs text-slate-400 mt-1">根除 macOS 无头 SSH 会话中无法读取 Git/SSH 密钥与私有环境变量的痛点。</p>
-  </div>
-
-  <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
     <h4 class="text-emerald-400 font-semibold mb-1">⚡ Agent CLI YOLO 自治模式</h4>
     <ul class="text-xs list-disc list-inside space-y-1 text-slate-400">
-      <li>终端输入命令（如 <code class="text-emerald-300">ca</code>）调起 CLI Agent</li>
+      <li>终端输入 <code class="text-emerald-300">ca</code>（<code class="text-emerald-300">cursor-agent</code> 的 alias）调起 Agent</li>
       <li>开启 YOLO 模式：赋予防灾沙盒内的终端自主执行权，自动改文件与跑单测，杜绝手机端频繁弹窗按确认</li>
     </ul>
   </div>
 
   <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
-    <h4 class="text-emerald-400 font-semibold mb-1">📱 Termius（汤米老师）实操利好</h4>
+    <h4 class="text-emerald-400 font-semibold mb-1">📱 Termius 实操利好</h4>
     <p class="text-xs text-slate-400">在家里直接敲局域网 IP 秒连；外出配合穿透无缝重连，后台挂起不掉线。</p>
+  </div>
+
+  <div class="p-3 rounded-lg bg-slate-800/40 border border-sky-500/20">
+    <h4 class="text-sky-400 font-semibold mb-1">💡 Tip：SSH 解锁 Keychain</h4>
+    <div class="text-xs font-mono text-slate-300 bg-slate-900/80 p-2 rounded border border-slate-800">
+      <span class="text-slate-500">yule@macmini k41 %</span> mac-unlock-keychain<br>
+      <span class="text-emerald-400">login keychain unlocked</span>
+    </div>
+    <p class="text-xs text-slate-400 mt-1">根除 macOS 无头 SSH 会话中无法读取 Git/SSH 密钥与私有环境变量的痛点。</p>
   </div>
 </div>
 
@@ -316,12 +332,10 @@ layout: default
 
 <!--
 接下来是工具二：Termius 终端配 Agent CLI（图二）。
-在圈子里大家都亲切地叫 Termius“汤米老师”。
-大家看截图，在 SSH 终端里有两个极其关键的实战技巧：
-第一：macOS 的 SSH 默认会锁死 Keychain 钥匙串，导致你的 Git pull/push 弹密码挂死。我们用一个 mac-unlock-keychain 脚本，连上之后自动解锁，保证所有凭据通行无阻。
-第二：调起 Cursor Agent CLI（简写 ca），模型选 Grok 4.7 256K，并且必须带上 [yolo] 参数！
+大家看截图，核心是调起 cursor-agent（alias 是 ca），模型选 Grok 4.7 256K，并且必须带上 [yolo] 参数！
 为什么在手机上一定要 YOLO 模式？
 因为手机屏幕小，如果 Agent 每跑一条命令、改一个文件都要停下来问你“是否确认”，在手机上会让人崩溃。开启 YOLO，让 Agent 在 Git 版本控制保护下自主跑单测、改代码，你只管提需求看结果。
+最后补一个 Tip：macOS 的 SSH 默认会锁死 Keychain 钥匙串，导致你的 Git pull/push 弹密码挂死。连上之后跑一下 mac-unlock-keychain，自动解锁，保证所有凭据通行无阻。
 -->
 
 ---
@@ -343,7 +357,7 @@ layout: default
     <p class="text-xs text-slate-300 mb-3">直面 Agent 思维脉络与终端日志，适合架构重构与疑难 Debug。</p>
     <div class="space-y-2 text-xs font-mono text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800">
       <div>💻 <b>Termius:</b> SSH 直连宿主机</div>
-      <div>⬇️ <b>ca [yolo]:</b> 自主规划执行、改文件、跑测试</div>
+      <div>⬇️ <b>ca [yolo]:</b> cursor-agent 的 alias，自主规划、改文件、跑测试</div>
       <div>⬇️ <b>实时打断:</b> 随时按 Ctrl+C 调整提示词</div>
     </div>
   </div>
@@ -588,30 +602,30 @@ layout: default
 layout: default
 ---
 
-# 生产验收实战：秒级反馈的完美正向闭环
+# 生产验收实战：手机浏览器看结果，直接对着结果 Review
 
-合并即上线，手机 Safari 刷新即见最新生产产物
+打开线上页面，Review 只看浏览器里呈现出来的结果
 
 <div class="grid grid-cols-2 gap-6 mt-2 items-center">
 
 <div class="space-y-4 text-sm text-slate-300">
   <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
-    <h4 class="text-teal-400 font-semibold mb-1">🌐 生产环境即时可观测</h4>
-    <p class="text-xs text-slate-400">PR 合并后，GitHub Actions 自动构建 Docker 镜像并推送至 GHCR，Webhook 触发轻量级生产服务器无缝更新。</p>
+    <h4 class="text-teal-400 font-semibold mb-1">🌐 用手机浏览器打开结果</h4>
+    <p class="text-xs text-slate-400">PR 合并后自动部署到生产域名。验收时切到手机 Safari，直接打开 <code class="text-teal-300">k41.yuler.cc</code>，看的就是线上这一版。</p>
   </div>
 
   <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
-    <h4 class="text-emerald-400 font-semibold mb-1">🎯 线上验收实证 (k41.yuler.cc)</h4>
+    <h4 class="text-emerald-400 font-semibold mb-1">🎯 对着页面本身做 Review</h4>
     <ul class="text-xs list-disc list-inside space-y-1 text-slate-400">
-      <li>切到手机 Safari，直接访问生产域名</li>
-      <li>页面 Footer 底部精准显示：<code class="text-emerald-300">构建 2026-10-xx 23:39:xx + 7 位 commit hash</code></li>
-      <li>验证实际线上环境完全符合预期，零延迟闭环！</li>
+      <li>看布局、文案、交互是不是要的那个结果</li>
+      <li>不以 diff 或终端日志为准，以浏览器里看到的为准</li>
+      <li>Footer 上的构建时间和 commit，用来确认这就是刚合并的那一版</li>
     </ul>
   </div>
 
   <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
-    <h4 class="text-purple-400 font-semibold mb-1">⚡ 极致的正反馈周期</h4>
-    <p class="text-xs text-slate-400">从提出需求、Agent 编码、自动评审、手机审查合并到生产环境见效，整个过程不到 5 分钟，全程无需触碰任何实体电脑！</p>
+    <h4 class="text-purple-400 font-semibold mb-1">🔁 结果不过就再改一轮</h4>
+    <p class="text-xs text-slate-400">页面对了就收；不对就回到手机上改下一轮。全程对着结果验收，不用打开电脑。</p>
   </div>
 </div>
 
@@ -622,13 +636,11 @@ layout: default
 </div>
 
 <!--
-最后一步：手机 Safari 浏览器线上验收（图六）。
-当我们在 GitHub App 点击 Merge 之后，GitHub Actions 流水线自动完成构建发布。
-在手机 Safari 里打开线上生产地址 k41.yuler.cc，下拉刷新一下——
-大家看页面底部，那行小灰字清清楚楚地显示着刚刚构建的北京时间以及那 7 位短 commit 哈希！
-这个瞬间给人的多巴胺刺激是非常强烈的：
-你从头到尾只拿了一部手机，没有打开过笔记本，几分钟内把一个真实需求写完、审查完、推上线并亲自验收。
-这就是掌上 Vibe Coding 的极致闭环体验。
+最后一步：用手机浏览器看结果，然后直接对着结果 Review（图六）。
+当我们在 GitHub App 点击 Merge 之后，流水线会把这一版部署到线上。
+验收时打开手机 Safari，访问 k41.yuler.cc。Review 不回到电脑上看 diff，就看浏览器里这个页面是不是要的结果：布局、文案、交互对不对。
+页面底部的构建时间和 commit 哈希，只用来确认你看的就是刚合并的那一版。
+对了就收；不对就回到手机上再改一轮。从头到尾只拿一部手机，写完、合并、打开浏览器、对着结果做 Review。
 -->
 
 ---
@@ -798,7 +810,7 @@ layout: default
   <h3 class="text-emerald-400 font-bold text-sm">📱 手机端必装软件 (iOS Stack)</h3>
   <div class="space-y-2 text-xs">
     <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700 flex justify-between items-center">
-      <span><b>Termius（汤米老师）</b> - 核心 SSH 终端管理，支持 Snippets 与手势优化</span>
+      <span><b>Termius</b> - 核心 SSH 终端管理，支持 Snippets 与手势优化</span>
       <span class="text-emerald-400 font-mono">App Store</span>
     </div>
     <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700 flex justify-between items-center">
