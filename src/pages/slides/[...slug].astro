@@ -98,6 +98,7 @@ const { deck } = Astro.props
         min-height: 2.25rem;
         padding: 0 0.7rem;
         white-space: nowrap;
+        text-decoration: none;
       }
       .deck-nav-btn {
         min-width: 5.5rem;
@@ -237,6 +238,88 @@ const { deck } = Astro.props
         box-shadow: none !important;
         background: #fff;
         transform: none !important;
+        cursor: zoom-in;
+      }
+      .image-lightbox {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        flex-direction: column;
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .image-lightbox.is-open {
+        display: flex;
+      }
+      .image-lightbox-bar,
+      .image-lightbox-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.55rem 0.75rem;
+        border-color: rgba(241, 239, 234, 0.24);
+      }
+      .image-lightbox-bar {
+        border-bottom: 1px solid rgba(241, 239, 234, 0.24);
+        padding-top: max(0.55rem, env(safe-area-inset-top));
+      }
+      .image-lightbox-nav {
+        border-top: 1px solid rgba(241, 239, 234, 0.24);
+        padding-bottom: max(0.55rem, env(safe-area-inset-bottom));
+      }
+      .image-lightbox-actions {
+        display: flex;
+        gap: 0.4rem;
+      }
+      .image-lightbox button {
+        border: 1px solid var(--paper);
+        background: transparent;
+        color: var(--paper);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.72rem;
+        line-height: 1;
+        min-height: 2.25rem;
+        padding: 0 0.7rem;
+        cursor: pointer;
+      }
+      .image-lightbox button:disabled {
+        opacity: 0.28;
+        pointer-events: none;
+      }
+      .image-lightbox-count {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.75rem;
+      }
+      .image-lightbox-stage {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem;
+      }
+      .image-lightbox-stage img {
+        display: block;
+        width: auto;
+        max-width: 100%;
+        max-height: 100%;
+        margin: auto;
+        object-fit: contain;
+        background: #fff;
+        cursor: zoom-in;
+      }
+      .image-lightbox-stage.is-zoomed {
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      .image-lightbox-stage.is-zoomed img {
+        max-width: none;
+        max-height: none;
+        margin: 0;
+        cursor: zoom-out;
       }
       .slide-content pre,
       .slide-content :not(pre) > code {
@@ -268,6 +351,76 @@ const { deck } = Astro.props
       }
       .slide-content li {
         margin-bottom: 0.35rem;
+      }
+      .topo {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        margin-top: 0.35rem;
+      }
+      .topo-fork {
+        display: flex;
+        align-items: stretch;
+        gap: 0.45rem;
+      }
+      .topo-card,
+      .topo-step {
+        border: 1px solid var(--ink);
+        background: transparent;
+        padding: 0.55rem 0.6rem 0.6rem;
+      }
+      .topo-card {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .topo-step {
+        text-align: center;
+        font-size: 0.84rem;
+        font-weight: 600;
+        line-height: 1.35;
+      }
+      .topo-kicker {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.62rem;
+        letter-spacing: 0.04em;
+        opacity: 0.62;
+        margin-bottom: 0.15rem;
+      }
+      .topo-title {
+        font-size: 0.86rem;
+        font-weight: 650;
+        line-height: 1.3;
+        margin-bottom: 0.28rem;
+      }
+      .topo-line {
+        font-size: 0.75rem;
+        line-height: 1.45;
+      }
+      .topo-note {
+        margin-top: auto;
+        padding-top: 0.35rem;
+        font-size: 0.68rem;
+        line-height: 1.35;
+        opacity: 0.62;
+      }
+      .topo-arrow {
+        width: 1px;
+        height: 0.85rem;
+        margin: 0 auto;
+        background: var(--ink);
+        position: relative;
+      }
+      .topo-arrow::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -1px;
+        transform: translateX(-50%);
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid var(--ink);
       }
       .mermaid-container {
         overflow-x: auto;
@@ -371,8 +524,11 @@ const { deck } = Astro.props
   </head>
   <body class="deck-body">
     <header class="deck-bar">
-      <h1 class="deck-title">{deck.title}</h1>
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-2 min-w-0">
+        <a href="/" class="deck-icon-btn inline-flex items-center justify-center" title="返回首页">首页</a>
+        <h1 class="deck-title">{deck.title}</h1>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
         <button id="btn-overview" type="button" class="deck-icon-btn" title="大纲 (O)">目录</button>
         <button id="btn-notes" type="button" class="deck-icon-btn" title="逐字稿 (P)">讲稿</button>
       </div>
@@ -430,6 +586,24 @@ const { deck } = Astro.props
       </div>
       <button id="btn-next" type="button" class="deck-nav-btn is-primary">下一页</button>
     </footer>
+
+    <div id="image-lightbox" class="image-lightbox" role="dialog" aria-modal="true" aria-label="图片预览" hidden>
+      <div class="image-lightbox-bar">
+        <span id="image-lightbox-count" class="image-lightbox-count">1 / 1</span>
+        <div class="image-lightbox-actions">
+          <button id="image-lightbox-zoom" type="button">放大</button>
+          <button id="image-lightbox-download" type="button">下载</button>
+          <button id="image-lightbox-close" type="button">关闭</button>
+        </div>
+      </div>
+      <div id="image-lightbox-stage" class="image-lightbox-stage">
+        <img id="image-lightbox-img" alt="" draggable="false" />
+      </div>
+      <div class="image-lightbox-nav">
+        <button id="image-lightbox-prev" type="button">上一张</button>
+        <button id="image-lightbox-next" type="button">下一张</button>
+      </div>
+    </div>
 
     <!-- Presentation Client Script -->
     <script>
@@ -663,6 +837,204 @@ document.addEventListener('touchend', (e) => {
 
 // Initial load
 updateSlide(1)
+</script>
+
+    <script>
+const lightbox = document.getElementById('image-lightbox')
+const lightboxImg = document.getElementById('image-lightbox-img') as HTMLImageElement | null
+const lightboxStage = document.getElementById('image-lightbox-stage')
+const lightboxCount = document.getElementById('image-lightbox-count')
+const lightboxPrev = document.getElementById('image-lightbox-prev') as HTMLButtonElement | null
+const lightboxNext = document.getElementById('image-lightbox-next') as HTMLButtonElement | null
+const lightboxZoom = document.getElementById('image-lightbox-zoom') as HTMLButtonElement | null
+const lightboxDownload = document.getElementById('image-lightbox-download') as HTMLButtonElement | null
+const lightboxClose = document.getElementById('image-lightbox-close') as HTMLButtonElement | null
+const gallery = Array.from(document.querySelectorAll<HTMLImageElement>('.slide-content img'))
+
+let imageIndex = 0
+let zoom = 1
+let downloadName = 'image.jpg'
+let pinchStartDistance = 0
+let pinchStartZoom = 1
+
+function lightboxOpen() {
+  return lightbox?.classList.contains('is-open') ?? false
+}
+
+function setZoom(next: number) {
+  zoom = Math.min(3, Math.max(1, next))
+  if (!lightboxImg || !lightboxStage || !lightboxZoom)
+    return
+  if (zoom <= 1.02) {
+    zoom = 1
+    lightboxImg.style.width = ''
+    lightboxStage.classList.remove('is-zoomed')
+    lightboxZoom.textContent = '放大'
+  }
+  else {
+    lightboxStage.classList.add('is-zoomed')
+    lightboxImg.style.width = `${Math.round(zoom * 100)}%`
+    lightboxZoom.textContent = zoom >= 2.9 ? '还原' : '继续放大'
+  }
+}
+
+function showLightboxImage(index: number) {
+  if (!lightboxImg || index < 0 || index >= gallery.length)
+    return
+  imageIndex = index
+  setZoom(1)
+  const source = gallery[index]
+  const src = source.currentSrc || source.src
+  lightboxImg.src = src
+  lightboxImg.alt = source.alt || '幻灯片图片'
+  downloadName = decodeURIComponent(src.split('/').pop()?.split('?')[0] || 'image.jpg')
+  if (lightboxCount)
+    lightboxCount.textContent = `${index + 1} / ${gallery.length}`
+  if (lightboxPrev)
+    lightboxPrev.disabled = index === 0
+  if (lightboxNext)
+    lightboxNext.disabled = index === gallery.length - 1
+}
+
+function openLightbox(index: number) {
+  if (!lightbox)
+    return
+  lightbox.hidden = false
+  lightbox.classList.add('is-open')
+  showLightboxImage(index)
+  lightboxClose?.focus()
+}
+
+function closeLightbox() {
+  if (!lightbox || !lightboxImg)
+    return
+  lightbox.classList.remove('is-open')
+  lightbox.hidden = true
+  lightboxImg.removeAttribute('src')
+  setZoom(1)
+}
+
+async function downloadLightboxImage() {
+  if (!lightboxImg?.src)
+    return
+  const response = await fetch(lightboxImg.src)
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = downloadName
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+function touchDistance(touches: TouchList) {
+  const dx = touches[0].clientX - touches[1].clientX
+  const dy = touches[0].clientY - touches[1].clientY
+  return Math.hypot(dx, dy)
+}
+
+gallery.forEach((img, index) => {
+  img.tabIndex = 0
+  img.setAttribute('role', 'button')
+  img.setAttribute('aria-label', '查看大图')
+  const open = (event: Event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    openLightbox(index)
+  }
+  img.addEventListener('click', open)
+  img.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      event.stopPropagation()
+      openLightbox(index)
+    }
+  })
+})
+
+lightboxPrev?.addEventListener('click', () => showLightboxImage(imageIndex - 1))
+lightboxNext?.addEventListener('click', () => showLightboxImage(imageIndex + 1))
+lightboxClose?.addEventListener('click', closeLightbox)
+lightboxZoom?.addEventListener('click', () => {
+  if (zoom < 2)
+    setZoom(2)
+  else if (zoom < 3)
+    setZoom(3)
+  else
+    setZoom(1)
+})
+lightboxDownload?.addEventListener('click', () => {
+  downloadLightboxImage().catch(() => {})
+})
+lightboxImg?.addEventListener('dblclick', () => {
+  setZoom(zoom === 1 ? 2 : 1)
+})
+
+lightboxStage?.addEventListener('touchstart', (event) => {
+  if (event.touches.length === 2) {
+    pinchStartDistance = touchDistance(event.touches)
+    pinchStartZoom = zoom
+  }
+}, { passive: true })
+
+lightboxStage?.addEventListener('touchmove', (event) => {
+  if (event.touches.length !== 2 || pinchStartDistance === 0)
+    return
+  event.preventDefault()
+  setZoom(pinchStartZoom * (touchDistance(event.touches) / pinchStartDistance))
+}, { passive: false })
+
+window.addEventListener('keydown', (event) => {
+  if (!lightboxOpen())
+    return
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    event.stopPropagation()
+    closeLightbox()
+    return
+  }
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+    event.stopPropagation()
+    showLightboxImage(imageIndex - 1)
+    return
+  }
+  if (event.key === 'ArrowRight') {
+    event.preventDefault()
+    event.stopPropagation()
+    showLightboxImage(imageIndex + 1)
+    return
+  }
+  if (event.key === ' ' || event.key === 'PageDown' || event.key === 'PageUp' || event.key === 'Home' || event.key === 'End') {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+}, true)
+
+let lightboxTouchX = 0
+let lightboxTouchY = 0
+document.addEventListener('touchstart', (event) => {
+  if (!lightboxOpen())
+    return
+  lightboxTouchX = event.changedTouches[0].screenX
+  lightboxTouchY = event.changedTouches[0].screenY
+}, { capture: true, passive: true })
+
+document.addEventListener('touchend', (event) => {
+  if (!lightboxOpen())
+    return
+  event.stopPropagation()
+  if (zoom !== 1 || event.changedTouches.length !== 1)
+    return
+  const dx = event.changedTouches[0].screenX - lightboxTouchX
+  const dy = event.changedTouches[0].screenY - lightboxTouchY
+  if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy))
+    return
+  if (dx < 0)
+    showLightboxImage(imageIndex + 1)
+  else
+    showLightboxImage(imageIndex - 1)
+}, { capture: true, passive: true })
 </script>
   </body>
 </html>
