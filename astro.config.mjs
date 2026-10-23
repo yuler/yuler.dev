@@ -106,6 +106,34 @@ function thoughtsCanvasLayoutDevPlugin() {
   }
 }
 
+function slidesDevPlugin() {
+  const slidesContentDir = path.resolve(__dirname, 'src/content/slides')
+  return {
+    name: 'slides-dev-plugin',
+    configureServer(server) {
+      server.httpServer?.once('listening', () => {
+        setTimeout(() => {
+          const address = server.httpServer?.address()
+          const port = typeof address === 'object' && address?.port ? address.port : 4321
+
+          console.log('\x1B[35m%s\x1B[0m', ' 🎴 [slides] Presentations ready:')
+
+          console.log('\x1B[36m%s\x1B[0m', `   ➜  Slides Hub:  http://localhost:${port}/slides`)
+
+          console.log('\x1B[32m%s\x1B[0m', `   ➜  Mobile Vibe: http://localhost:${port}/slides/mobile-vibe-coding\n`)
+        }, 150)
+      })
+
+      server.watcher.add(slidesContentDir)
+      server.watcher.on('change', (file) => {
+        if (file.startsWith(slidesContentDir)) {
+          server.ws.send({ type: 'full-reload' })
+        }
+      })
+    },
+  }
+}
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://yuler.dev',
@@ -137,7 +165,7 @@ export default defineConfig({
   ],
 
   vite: {
-    plugins: [tailwindcss(), thoughtsCanvasLayoutDevPlugin()],
+    plugins: [tailwindcss(), thoughtsCanvasLayoutDevPlugin(), slidesDevPlugin()],
     server: {
       watch: {
         ignored: [thoughtsCanvasLayoutPath],

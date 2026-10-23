@@ -1,0 +1,58 @@
+---
+import { getAllSlideDecks } from '../../lib/slides'
+import CornerMarkers from '../CornerMarkers.astro'
+import ArrowRight from '../icons/ArrowRight.astro'
+import Play from '../icons/Play.astro'
+
+const decks = await getAllSlideDecks()
+const latest = decks[0]
+---
+
+{latest && (
+  <div class="relative bg-white border border-gray-200 p-5 max-h-40 transition-all duration-300 hover:border-gray-400">
+    <CornerMarkers />
+
+    <div class="mb-3 flex items-center justify-between border-b border-gray-100 pb-3">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-900 font-mono">
+        Slides
+        <span class="px-2 py-0.5 text-xs sm:text-sm bg-gray-100 text-gray-600 font-mono">
+          {decks.length}
+        </span>
+      </h2>
+      <a
+        href="/slides"
+        class="inline-flex items-center gap-1 text-xs text-gray-400 font-mono transition-colors hover:text-gray-600 underline underline-offset-2 decoration-gray-200 hover:decoration-gray-400"
+      >
+        View all
+        <ArrowRight class="h-3 w-3" />
+      </a>
+    </div>
+
+    <div class="flex items-center justify-between gap-3">
+      <div class="min-w-0 flex-1">
+        <h3 class="font-bold text-gray-900 font-mono text-sm leading-snug hover:text-blue-600 transition-colors truncate">
+          <a href={`/slides/${latest.slug}`}>
+            {latest.title}
+          </a>
+        </h3>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="border border-gray-200 px-1.5 py-0.5 text-[10px] font-mono leading-none text-gray-500">
+            {latest.slideCount} Slides
+          </span>
+          <span class="border border-gray-200 px-1.5 py-0.5 text-[10px] font-mono leading-none text-gray-500">
+            Vibe Coding
+          </span>
+        </div>
+      </div>
+
+      <a
+        href={`/slides/${latest.slug}`}
+        class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 font-mono text-xs transition-colors"
+        title="播放演示"
+      >
+        <Play size={12} class="fill-current" />
+        <span>播放</span>
+      </a>
+    </div>
+  </div>
+)}

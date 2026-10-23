@@ -37,6 +37,7 @@
     "date-fns": "^4.4.0",
     "html-to-image": "^1.11.13",
     "leaflet": "^1.9.4",
+    "marked": "^18.1.1",
     "mermaid": "^11.16.1",
     "qrcode": "^1.5.4",
     "sharp": "^0.34.5",

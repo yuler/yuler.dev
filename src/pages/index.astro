@@ -5,6 +5,7 @@ import LatestThought from '../components/cards/LatestThought.astro'
 import Location from '../components/cards/Location.astro'
 import Posts from '../components/cards/Posts.astro'
 import Profile from '../components/cards/Profile.astro'
+import SlidesCard from '../components/cards/SlidesCard.astro'
 import Workouts from '../components/cards/Workouts.astro'
 import X from '../components/cards/X.astro'
 import Layout from '../layouts/Layout.astro'
@@ -31,18 +32,21 @@ import Layout from '../layouts/Layout.astro'
           <div class="order-5 sm:contents">
             <LatestThought />
           </div>
+          <div class="order-6 sm:contents">
+            <SlidesCard />
+          </div>
           <div class="order-7 sm:contents">
             <AgentStuff />
           </div>
         </div>
 
         <!-- Right Content -->
-        <div class="contents sm:grid sm:grid-cols-1 sm:gap-4 lg:col-span-2 lg:h-0 lg:min-h-full lg:grid-rows-[auto_minmax(0,1fr)]">
+        <div class="contents sm:flex sm:flex-col sm:gap-4 lg:col-span-2">
           <div class="order-4 sm:contents">
             <Workouts />
           </div>
-          <div class="order-6 sm:contents">
-            <Posts class="lg:h-full lg:min-h-0" />
+          <div class="order-8 sm:contents">
+            <Posts />
           </div>
         </div>
       </div>
