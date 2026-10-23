@@ -1,6 +1,6 @@
 ---
 import CornerMarkers from '../../components/CornerMarkers.astro'
-import ArrowRight from '../../components/icons/ArrowRight.astro'
+import Play from '../../components/icons/Play.astro'
 import Layout from '../../layouts/Layout.astro'
 import { getAllSlideDecks } from '../../lib/slides'
 
@@ -30,7 +30,7 @@ const decks = await getAllSlideDecks()
           </span>
         </div>
         <p class="text-sm text-gray-500 font-mono">
-          Developer slide decks authored in Slidev-compatible Markdown under <code class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-800">src/content/slides/</code>.
+          这里收录了我所有的 Slides 幻灯片与技术分享演示文稿。
         </p>
       </div>
 
@@ -41,20 +41,17 @@ const decks = await getAllSlideDecks()
             <CornerMarkers />
             <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="px-2 py-0.5 text-[11px] font-mono bg-gray-100 text-gray-800 border border-gray-300">
-                    {deck.slideCount} Slides
-                  </span>
-                  <span class="px-2 py-0.5 text-[11px] font-mono bg-gray-100 text-gray-600 border border-gray-200">
-                    Slidev Format
-                  </span>
-                </div>
                 <h2 class="text-xl font-bold text-gray-900 font-mono mb-2">
                   <a href={`/slides/${deck.slug}`} class="hover:underline transition-colors">
                     {deck.title}
                   </a>
                 </h2>
-                <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+                <div class="flex items-center gap-2 text-xs font-mono text-gray-500 mb-3">
+                  <span>{deck.slideCount} Slides</span>
+                  <span class="text-gray-300">|</span>
+                  <span>Slidev Format</span>
+                </div>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">
                   {deck.description || '基于 Mac mini 私有算力与 Grok Bot 多 Agent 协作的移动端极客开发范式。'}
                 </p>
                 <div class="text-xs font-mono text-gray-400 flex items-center gap-2">
@@ -62,61 +59,20 @@ const decks = await getAllSlideDecks()
                 </div>
               </div>
 
-              <!-- Action Buttons -->
+              <!-- Action Button -->
               <div class="shrink-0 flex sm:flex-col gap-2">
                 <a
                   href={`/slides/${deck.slug}`}
-                  class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white font-mono text-xs transition-colors"
+                  class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 font-mono text-xs transition-colors"
                 >
-                  <span>▶ 播放幻灯片</span>
-                  <ArrowRight class="w-3 h-3" />
+                  <Play size={12} class="fill-current" />
+                  <span>播放幻灯片</span>
                 </a>
-                <button
-                  type="button"
-                  data-copy-cmd={`pnpm dlx @slidev/cli src/content/slides/${deck.slug}/slides.md --open`}
-                  class="copy-cmd-btn inline-flex items-center justify-center gap-1.5 px-3 py-1.5 border border-gray-300 hover:border-gray-400 text-gray-700 font-mono text-xs bg-gray-50 transition-colors"
-                  title="复制 Slidev 本地启动命令"
-                >
-                  <span>📋 复制 Slidev CLI 命令</span>
-                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
-
-      <!-- Slidev CLI Instructions Card -->
-      <div class="relative bg-white border border-gray-200 p-6 mt-8">
-        <CornerMarkers />
-        <h3 class="text-sm font-bold font-mono text-gray-900 uppercase tracking-wider mb-2">
-          💡 本地 Slidev 原生体验与导出
-        </h3>
-        <p class="text-xs text-gray-600 leading-relaxed mb-3">
-          所有幻灯片均遵循标准 Slidev 规范编写，既可在此页面直接交互播放，也可使用官方 Slidev CLI 获取演讲者模式、画板涂鸦及 PDF/PPTX 导出能力：
-        </p>
-        <div class="bg-gray-900 text-gray-200 p-3 rounded font-mono text-xs space-y-1 overflow-x-auto">
-          <div class="text-gray-400"># 启动原生 Slidev 演示（支持双屏演讲者备注按 P）</div>
-          <div class="text-white">pnpm dlx @slidev/cli src/content/slides/mobile-vibe-coding/slides.md --open</div>
-          <div class="text-gray-400 mt-2"># 导出为 PowerPoint (.pptx) 或 PDF</div>
-          <div class="text-white">pnpm dlx @slidev/cli export src/content/slides/mobile-vibe-coding/slides.md --format pptx</div>
-        </div>
-      </div>
     </div>
   </div>
-
-  <script>
-    document.querySelectorAll('.copy-cmd-btn').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const cmd = btn.getAttribute('data-copy-cmd')
-        if (cmd) {
-          await navigator.clipboard.writeText(cmd)
-          const orig = btn.innerHTML
-          btn.innerHTML = '<span>✅ 已复制命令!</span>'
-          setTimeout(() => {
-            btn.innerHTML = orig
-          }, 2000)
-        }
-      })
-    })
-  </script>
 </Layout>
