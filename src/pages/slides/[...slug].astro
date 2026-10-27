@@ -429,12 +429,138 @@ const { deck } = Astro.props
         line-height: 1.35;
         opacity: 0.62;
       }
+      .topo-bridge {
+        display: flex;
+        flex-direction: column;
+        margin-top: 0.2rem;
+      }
+      .topo-bridge-row {
+        display: flex;
+        align-items: stretch;
+        gap: 0.45rem;
+      }
+      .topo-bridge-row .topo-step {
+        flex: 1;
+      }
+      .topo-step.muted {
+        opacity: 0.45;
+        border-style: dashed;
+        font-weight: 500;
+      }
+      .topo-label {
+        text-align: center;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.66rem;
+        letter-spacing: 0.03em;
+        opacity: 0.62;
+        padding: 0.15rem 0;
+      }
+      .topo-step.topo-review {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        text-align: left;
+        font-weight: normal;
+        padding: 0;
+      }
+      .topo-review-col {
+        flex: 1;
+        padding: 0.55rem 0.6rem 0.6rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        font-size: 0.84rem;
+        font-weight: 600;
+        line-height: 1.35;
+      }
+      .topo-review-col .topo-note {
+        margin-top: 0.2rem;
+        padding-top: 0;
+        font-weight: 400;
+      }
+      .topo-review-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+        padding: 0 0.35rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.68rem;
+        opacity: 0.45;
+      }
+      .topo-has-arrow {
+        position: relative;
+        margin-bottom: 0.85rem;
+      }
+      .topo-has-arrow::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -0.85rem;
+        transform: translateX(-50%);
+        width: 1px;
+        height: 0.85rem;
+        background: var(--ink);
+      }
+      .topo-has-arrow::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -0.85rem;
+        transform: translateX(-50%);
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid var(--ink);
+      }
       .topo-arrow {
         width: 1px;
         height: 0.85rem;
         margin: 0 auto;
         background: var(--ink);
         position: relative;
+      }
+      .topo-arrow-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.45rem;
+      }
+      .topo-arrow-row .topo-arrow {
+        flex: 1;
+        width: auto;
+        background: transparent;
+      }
+      .topo-arrow-row .topo-arrow::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        background: var(--ink);
+      }
+      .topo-fork-center {
+        justify-content: center;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .topo-card-center {
+        flex: none;
+        width: 38%;
+        text-align: center;
+      }
+      .topo-card-center .topo-kicker {
+        text-align: center;
+      }
+      .topo-card-center .topo-title {
+        text-align: center;
+      }
+      .topo-or {
+        flex: none;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.68rem;
+        font-weight: 600;
+        opacity: 0.45;
+        padding: 0 0.2rem;
       }
       .topo-arrow::after {
         content: "";
@@ -553,6 +679,7 @@ const { deck } = Astro.props
         <h1 class="deck-title">{deck.title}</h1>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
+        <button id="btn-copy-link" type="button" class="deck-icon-btn" title="复制当前页链接">分享</button>
         <button id="btn-overview" type="button" class="deck-icon-btn" title="大纲 (O)">目录</button>
         <button id="btn-notes" type="button" class="deck-icon-btn" title="逐字稿 (P)">讲稿</button>
       </div>
@@ -560,21 +687,27 @@ const { deck } = Astro.props
 
     <main class="deck-stage-wrap relative">
       <div id="presentation-stage">
-        {deck.slides.map((slide, idx) => (
-          <div
-            class={`slide-frame ${idx === 0 ? 'active' : ''}`}
-            data-slide-index={idx + 1}
-            data-notes={encodeURIComponent(slide.notes)}
-          >
-            <div class="slide-content">
-              <Fragment set:html={slide.html} />
+        {deck.slides.map((slide, idx) => {
+          const hashId = slide.slug && slide.slug !== `slide-${idx + 1}` ? `${idx + 1}-${slide.slug}` : String(idx + 1)
+          return (
+            <div
+              id={slide.slug || `slide-${idx + 1}`}
+              class={`slide-frame ${idx === 0 ? 'active' : ''}`}
+              data-slide-index={idx + 1}
+              data-slide-slug={slide.slug}
+              data-slide-hash={hashId}
+              data-notes={encodeURIComponent(slide.notes)}
+            >
+              <div class="slide-content">
+                <Fragment set:html={slide.html} />
+              </div>
+              <div class="slide-meta">
+                <span>{idx + 1} / {deck.slideCount} · #{hashId}</span>
+                <span>左右滑动翻页</span>
+              </div>
             </div>
-            <div class="slide-meta">
-              <span>{idx + 1} / {deck.slideCount}</span>
-              <span>左右滑动翻页</span>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <aside id="notes-drawer" class="deck-sheet hidden">
@@ -591,12 +724,22 @@ const { deck } = Astro.props
           <button id="close-overview-btn" type="button" class="deck-icon-btn">关闭</button>
         </div>
         <div class="deck-overview-list">
-          {deck.slides.map((s, idx) => (
-            <button type="button" class="overview-item" data-jump-index={idx + 1}>
-              <span class="font-mono text-[11px] opacity-60">{String(idx + 1).padStart(2, '0')}</span>
-              <strong>{s.title}</strong>
-            </button>
-          ))}
+          {deck.slides.map((s, idx) => {
+            const hashId = s.slug && s.slug !== `slide-${idx + 1}` ? `${idx + 1}-${s.slug}` : String(idx + 1)
+            return (
+              <a
+                href={`#${hashId}`}
+                class="overview-item flex items-center justify-between no-underline"
+                data-jump-index={idx + 1}
+              >
+                <div class="min-w-0 pr-2">
+                  <span class="font-mono text-[11px] opacity-60 mr-2">{String(idx + 1).padStart(2, '0')}</span>
+                  <strong>{s.title}</strong>
+                </div>
+                <span class="font-mono text-[11px] opacity-60 shrink-0">#{hashId}</span>
+              </a>
+            )
+          })}
         </div>
       </div>
     </main>
@@ -632,12 +775,13 @@ const { deck } = Astro.props
     <!-- Presentation Client Script -->
     <script>
 let currentSlide = 1
-const totalSlides = document.querySelectorAll('.slide-frame').length
-
 const frames = document.querySelectorAll('.slide-frame')
+const totalSlides = frames.length
+
 const currentNumEl = document.getElementById('current-slide-num')
-const btnPrev = document.getElementById('btn-prev') as HTMLButtonElement
-const btnNext = document.getElementById('btn-next') as HTMLButtonElement
+const btnPrev = document.getElementById('btn-prev') as HTMLButtonElement | null
+const btnNext = document.getElementById('btn-next') as HTMLButtonElement | null
+const btnCopyLink = document.getElementById('btn-copy-link') as HTMLButtonElement | null
 const notesDrawer = document.getElementById('notes-drawer')
 const notesBody = document.getElementById('notes-body')
 const notesSlideNum = document.getElementById('notes-slide-num')
@@ -646,7 +790,67 @@ const progressEl = document.getElementById('deck-progress')
 const notesBtn = document.getElementById('btn-notes')
 const overviewBtn = document.getElementById('btn-overview')
 
-function updateSlide(targetIndex: number) {
+function getSlideHash(index: number): string {
+  const frame = frames[index - 1]
+  const hash = frame?.getAttribute('data-slide-hash')
+  if (hash)
+    return hash
+  const slug = frame?.getAttribute('data-slide-slug')
+  return slug && slug !== `slide-${index}` ? `${index}-${slug}` : String(index)
+}
+
+function findSlideIndexFromHash(rawHash?: string | null): number | null {
+  if (!rawHash)
+    return null
+  const clean = decodeURIComponent(rawHash.replace(/^#/, '').trim())
+  if (!clean)
+    return null
+
+  // 1. Direct page number: e.g. "3"
+  const directNum = parseInt(clean, 10)
+  if (!Number.isNaN(directNum) && String(directNum) === clean) {
+    if (directNum >= 1 && directNum <= totalSlides) {
+      return directNum
+    }
+  }
+
+  // 2. Number prefix: e.g. "3-topology", "03-topology", "slide-3"
+  const prefixMatch = clean.match(/^(?:slide-)?(\d+)(?:-.*)?$/i)
+  if (prefixMatch) {
+    const num = parseInt(prefixMatch[1], 10)
+    if (!Number.isNaN(num) && num >= 1 && num <= totalSlides) {
+      return num
+    }
+  }
+
+  // 3. Match data-slide-slug or data-slide-hash
+  for (let i = 0; i < frames.length; i++) {
+    const frame = frames[i]
+    const slug = frame.getAttribute('data-slide-slug')?.toLowerCase()
+    const hashAttr = frame.getAttribute('data-slide-hash')?.toLowerCase()
+    if (slug === clean.toLowerCase() || hashAttr === clean.toLowerCase()) {
+      return i + 1
+    }
+  }
+
+  // 4. Match inner element ID inside a slide
+  try {
+    const el = document.getElementById(clean)
+    if (el) {
+      const parentFrame = el.closest('.slide-frame')
+      if (parentFrame) {
+        const idx = Number(parentFrame.getAttribute('data-slide-index'))
+        if (idx)
+          return idx
+      }
+    }
+  }
+  catch {}
+
+  return null
+}
+
+function updateSlide(targetIndex: number, pushHistory = true) {
   if (targetIndex < 1 || targetIndex > totalSlides)
     return
   currentSlide = targetIndex
@@ -659,6 +863,17 @@ function updateSlide(targetIndex: number) {
       frame.classList.remove('active')
     }
   })
+
+  // Update hash & history push
+  const currentHash = `#${getSlideHash(currentSlide)}`
+  if (window.location.hash !== currentHash) {
+    if (pushHistory) {
+      history.pushState({ slide: currentSlide }, '', currentHash)
+    }
+    else {
+      history.replaceState({ slide: currentSlide }, '', currentHash)
+    }
+  }
 
   if (currentNumEl)
     currentNumEl.textContent = String(currentSlide)
@@ -685,12 +900,12 @@ function updateSlide(targetIndex: number) {
 
 function nextSlide() {
   if (currentSlide < totalSlides)
-    updateSlide(currentSlide + 1)
+    updateSlide(currentSlide + 1, true)
 }
 
 function prevSlide() {
   if (currentSlide > 1)
-    updateSlide(currentSlide - 1)
+    updateSlide(currentSlide - 1, true)
 }
 
 function toggleNotes() {
@@ -792,11 +1007,11 @@ window.addEventListener('keydown', (e) => {
       break
     case 'Home':
       e.preventDefault()
-      updateSlide(1)
+      updateSlide(1, true)
       break
     case 'End':
       e.preventDefault()
-      updateSlide(totalSlides)
+      updateSlide(totalSlides, true)
       break
     case 'p':
     case 'P':
@@ -831,13 +1046,68 @@ document.getElementById('btn-fullscreen')?.addEventListener('click', toggleFulls
 
 // Overview item jump
 document.querySelectorAll('.overview-item').forEach((item) => {
-  item.addEventListener('click', () => {
+  item.addEventListener('click', (e) => {
+    e.preventDefault()
     const jumpIndex = Number(item.getAttribute('data-jump-index'))
     if (jumpIndex) {
-      updateSlide(jumpIndex)
+      updateSlide(jumpIndex, true)
       toggleOverview()
     }
   })
+})
+
+// In-page hash clicks (e.g. from slide content or overview links)
+document.addEventListener('click', (e) => {
+  const anchor = (e.target as HTMLElement)?.closest('a')
+  if (!anchor)
+    return
+  const href = anchor.getAttribute('href')
+  if (href && href.startsWith('#')) {
+    const target = findSlideIndexFromHash(href)
+    if (target) {
+      e.preventDefault()
+      updateSlide(target, true)
+      if (overviewModal && !overviewModal.classList.contains('hidden')) {
+        toggleOverview()
+      }
+    }
+  }
+})
+
+// Popstate & hashchange navigation
+window.addEventListener('popstate', (e) => {
+  const target = findSlideIndexFromHash(window.location.hash) || (e.state?.slide ?? 1)
+  if (target && target !== currentSlide) {
+    updateSlide(target, false)
+  }
+})
+
+window.addEventListener('hashchange', () => {
+  const target = findSlideIndexFromHash(window.location.hash)
+  if (target && target !== currentSlide) {
+    updateSlide(target, false)
+  }
+})
+
+// Copy link button
+btnCopyLink?.addEventListener('click', async () => {
+  const url = window.location.href
+  const original = btnCopyLink.textContent || '分享'
+  try {
+    await navigator.clipboard.writeText(url)
+    btnCopyLink.textContent = '已复制'
+    setTimeout(() => { btnCopyLink.textContent = original }, 1500)
+  }
+  catch {
+    const input = document.createElement('input')
+    input.value = url
+    document.body.appendChild(input)
+    input.select()
+    document.execCommand('copy')
+    document.body.removeChild(input)
+    btnCopyLink.textContent = '已复制'
+    setTimeout(() => { btnCopyLink.textContent = original }, 1500)
+  }
 })
 
 let touchStartX = 0
@@ -859,8 +1129,9 @@ document.addEventListener('touchend', (e) => {
     prevSlide()
 }, { passive: true })
 
-// Initial load
-updateSlide(1)
+// Initial load: resolve hash or default to 1, using replaceState to avoid dirty history
+const initialSlide = findSlideIndexFromHash(window.location.hash) || 1
+updateSlide(initialSlide, false)
 </script>
 
     <script>

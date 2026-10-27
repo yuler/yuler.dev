@@ -6,6 +6,7 @@ import { marked } from 'marked'
 export interface SlideItem {
   index: number
   title: string
+  slug: string
   frontmatter: Record<string, string>
   content: string
   html: string
@@ -63,7 +64,7 @@ export function parseSlidevContent(content: string, slug: string): { frontmatter
     let slideContent = block
 
     // Check if this block is slide-level frontmatter (e.g. layout: default)
-    if (/^(?:layout|class|transition|background):/m.test(block) && !block.includes('#') && i + 1 < rawBlocks.length) {
+    if (/^(?:layout|class|transition|background|name|id|slug|routeAlias):/m.test(block) && !block.includes('#') && i + 1 < rawBlocks.length) {
       block.split('\n').forEach((l) => {
         const colonIdx = l.indexOf(':')
         if (colonIdx > 0) {
@@ -92,9 +93,37 @@ export function parseSlidevContent(content: string, slug: string): { frontmatter
     // Parse markdown to HTML
     const html = marked.parse(cleanContent) as string
 
+    const defaultSlugs: Record<number, string> = {
+      1: 'intro',
+      2: 'no-editor',
+      3: 'topology',
+      4: 'tunnel-matrix',
+      5: 'uu-remote',
+      6: 'termius-cli',
+      7: 'agent-ecosystem',
+      8: 'cursor-ios',
+      9: 'grok-bot',
+      10: 'github-pr-review',
+      11: 'verification-modes',
+      12: 'production-review',
+      13: 'safety',
+      14: 'pitfalls',
+      15: 'equipment',
+      16: 'summary',
+    }
+    const slideIndex = slides.length + 1
+    const rawSlug = slideFrontmatter.name
+      || slideFrontmatter.id
+      || slideFrontmatter.slug
+      || slideFrontmatter.routeAlias
+      || (slug === 'mobile-vibe-coding' ? defaultSlugs[slideIndex] : null)
+      || `slide-${slideIndex}`
+    const slideSlug = rawSlug.toLowerCase().trim().replace(/[^a-z0-9_-]+/g, '-')
+
     slides.push({
-      index: slides.length + 1,
+      index: slideIndex,
       title,
+      slug: slideSlug,
       frontmatter: slideFrontmatter,
       content: cleanContent,
       html,

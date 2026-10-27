@@ -11,6 +11,7 @@ drawings:
   persist: false
 transition: slide-left
 css: unocss
+name: intro
 ---
 
 # 纯手机 Vibe Coding 实战
@@ -22,18 +23,18 @@ css: unocss
     <span>💡</span> 核心思想
   </div>
   <p class="text-xs text-slate-300 leading-relaxed">
-    通过手机去操作，利用原生 AI 以及 AI APP（例如这个，还有那个等等）。因为现在编程都不是手写的，所以我们都不需要编辑器（Editor）了，直接由 AI 生成代码就行。
+    通过手机去操作，利用原生 AI 以及 AI APP（例如 <a href="https://ai.meta.com/muse/" target="_blank" class="text-sky-400 hover:text-sky-300 underline">Muse</a>、<a href="https://x.ai/bot" target="_blank" class="text-sky-400 hover:text-sky-300 underline">Grok Bot</a>、<a href="https://openai.com/index/introducing-dots/" target="_blank" class="text-sky-400 hover:text-sky-300 underline">dot</a> 等等）。现在绝大部分代码都可以用 AI 来直接生成了，所以我们都不需要编辑器（Editor）了，直接由 AI 生成代码就行。
   </p>
 </div>
 
 <div class="mt-5 text-left">
   <div class="text-xs font-mono text-slate-400 mb-2.5">具体闭环思路</div>
   <ol class="loop-steps">
-    <li>通过 <b>GitHub APP</b> review 大概的内容</li>
-    <li>由 <b>AI</b> 去写代码</li>
-    <li><b>AI</b> 再进行 review</li>
-    <li>补充一些测试</li>
-    <li>进行线上验证</li>
+    <li><a href="#6-termius-cli" class="text-inherit hover:underline">由 <b>AI</b> 先写代码</a></li>
+    <li><a href="#10-github-pr-review" class="text-inherit hover:underline">推送代码到 <b>GitHub</b></a></li>
+    <li><a href="#10-github-pr-review" class="text-inherit hover:underline">由 <b>GitHub</b> 触发 CI</a></li>
+    <li><span><a href="#9-grok-bot" class="text-inherit hover:underline"><b>机器人</b>自动 review</a>（跑测试用例、多个 AI 交叉 review），同时加上<a href="#10-github-pr-review" class="text-inherit hover:underline"><b>人工 review</b></a></span></li>
+    <li><a href="#11-verification-modes" class="text-inherit hover:underline">看效果，效果没问题就<b>合并</b></a></li>
   </ol>
 </div>
 
@@ -45,21 +46,22 @@ css: unocss
 各位同行、朋友们大家好！今天我想和大家分享一个彻底颠覆我日常开发习惯的范式：
 “纯手机 Vibe Coding 实战”。
 
-现在的编程时代已经彻底变了——代码不再需要我们用手在键盘上一行行手写，我们甚至完全不需要编辑器（Editor）了！
-核心思想就是纯粹通过手机去操作，充分利用手机上的原生 AI 以及各类 AI APP，直接把意图交由 AI 生成完整代码。
+现在的编程时代已经彻底变了——现在绝大部分代码都可以用 AI 来直接生成了，我们甚至完全不需要编辑器（Editor）了！
+核心思想就是纯粹通过手机去操作，充分利用手机上的原生 AI 以及各类 AI APP（例如 Muse、Grok Bot、dot 等等），直接把意图交由 AI 生成完整代码。
 
 整套生产闭环的具体思路大概如下：
-1. 随时随地通过手机端的 GitHub APP review 大概的需求与代码内容；
-2. 调度 AI 去写核心业务代码；
-3. 由 AI 再次进行 review，交叉校验；
-4. 补充相关测试用例，保障健壮性；
-5. 最后直接推送到线上进行真实环境验证。
+1. 先由 AI 去写代码；
+2. 写完把代码推送到 GitHub；
+3. 由 GitHub 自动触发 CI；
+4. 机器人自动 review（跑测试用例，甚至多个 AI 交叉 review），同时人也一起 review，两边并行；
+5. 看效果，效果没问题就合并。
 
 接下来我们将一步步展开这套无需编辑器、全靠手机与 AI 协同的极速开发闭环！
 -->
 
 ---
 layout: default
+name: no-editor
 ---
 
 # 核心思想：为什么我们不再需要编辑器？
@@ -74,7 +76,7 @@ layout: default
   </h3>
   <ul class="space-y-3 text-sm text-slate-300">
     <li><b>人工输入语法：</b> 必须依赖键盘逐字敲括号、分号与缩进，手机小屏幕输入效率极低</li>
-    <li><b>沉重工具链：</b> 依赖 VS Code 等庞大 IDE、各种插件生态以及本地环境配置</li>
+    <li><b>沉重工具链：</b> 依赖 <a href="https://code.visualstudio.com/" target="_blank" class="text-red-300 hover:text-red-200 underline">VS Code</a> 等庞大 IDE、各种插件生态以及本地环境配置</li>
     <li><b>心智负担繁重：</b> 大量精力被困在排查语法拼写与繁琐工具配置上</li>
   </ul>
 </div>
@@ -86,7 +88,7 @@ layout: default
   <ul class="space-y-3 text-sm text-slate-300">
     <li><b>完全告别编辑器：</b> 编程不再手写，不需要任何 Editor，由 AI 端到端直接生成代码</li>
     <li><b>手机即控制台：</b> 利用原生 AI 以及各种 AI APP，发号施令并驱动开发任务</li>
-    <li><b>端到端质量闭环：</b> GitHub APP 审查 + AI 写码 + AI 复审 + 测试补充 + 线上秒级验证</li>
+    <li><b>端到端质量闭环：</b> <a href="https://github.com/mobile" target="_blank" class="text-emerald-300 hover:text-emerald-200 underline">GitHub APP</a> 审查 + AI 写码 + AI 复审 + 测试补充 + 线上秒级验证</li>
   </ul>
 </div>
 
@@ -110,48 +112,59 @@ layout: default
 
 ---
 layout: default
+name: topology
 ---
 
 # 整体系统拓扑：端到端解耦架构
 
-从上往下看：两条入口汇合到本地，再提交、Review、用手机浏览器看结果
+从上往下看：AI 客户端直接在云端闭环；终端经 Mac mini 桥接到本地会话；两条路统一汇入 GitHub Review
 
 <div class="topo">
-  <div class="topo-fork">
+  <div class="topo-fork topo-has-arrow">
     <div class="topo-card">
       <div class="topo-kicker">路径一</div>
-      <div class="topo-title">AI 客户端</div>
-      <div class="topo-line">Cursor</div>
-      <div class="topo-line">Grok Bot</div>
-      <div class="topo-line">Muse · Codex</div>
-      <div class="topo-note">不经过终端</div>
+      <div class="topo-title"><a href="#7-agent-ecosystem" class="text-inherit hover:underline">AI 客户端（端上在云端）</a></div>
+      <div class="topo-line"><a href="#8-cursor-ios" class="text-inherit hover:underline">Cursor</a></div>
+      <div class="topo-line"><a href="#9-grok-bot" class="text-inherit hover:underline">Grok Bot</a></div>
+      <div class="topo-line">Muse · <a href="https://openai.com/index/openai-codex/" target="_blank" class="text-inherit hover:underline">Codex</a></div>
     </div>
     <div class="topo-card">
       <div class="topo-kicker">路径二</div>
-      <div class="topo-title">终端 Termius</div>
-      <div class="topo-note">先连到本地</div>
+      <div class="topo-title"><a href="#6-termius-cli" class="text-inherit hover:underline">终端 Termius</a></div>
       <div class="topo-line">SSH</div>
-      <div class="topo-line">UU 远程的 SSH</div>
-      <div class="topo-line">Tailscale 隧道</div>
+      <div class="topo-line"><a href="#5-uu-remote" class="text-inherit hover:underline">UU 远程的 SSH</a></div>
+      <div class="topo-line"><a href="#4-tunnel-matrix" class="text-inherit hover:underline">Tailscale 隧道</a></div>
     </div>
   </div>
-  <div class="topo-arrow"></div>
-  <div class="topo-step">本地 Mac mini · 写代码</div>
-  <div class="topo-arrow"></div>
-  <div class="topo-step">提交到 GitHub</div>
-  <div class="topo-arrow"></div>
-  <div class="topo-step">机器人 PR Review</div>
-  <div class="topo-arrow"></div>
-  <div class="topo-fork">
-    <div class="topo-card">
-      <div class="topo-kicker">看结果</div>
-      <div class="topo-title">远程服务器</div>
-      <div class="topo-note">手机浏览器打开线上页面</div>
+  <div class="topo-bridge topo-has-arrow">
+    <div class="topo-bridge-row">
+      <div class="topo-step muted">路径一在云端直接写代码</div>
+      <div class="topo-step"><a href="#4-tunnel-matrix" class="text-inherit hover:underline">本地 Mac mini · 作为桥（仅路径二）</a></div>
     </div>
-    <div class="topo-card">
-      <div class="topo-kicker">或</div>
-      <div class="topo-title">留在本地</div>
-      <div class="topo-note">手机走局域网浏览器打开</div>
+  </div>
+  <div class="topo-step topo-has-arrow"><a href="#10-github-pr-review" class="text-inherit hover:underline">提交到 GitHub</a></div>
+  <div class="topo-step topo-has-arrow"><a href="#10-github-pr-review" class="text-inherit hover:underline">GitHub 触发 CI</a></div>
+  <div class="topo-label">PR Review · 人机同时进行</div>
+  <div class="topo-fork topo-fork-center topo-has-arrow">
+    <div class="topo-card topo-card-center">
+      <div class="topo-kicker">自动 · 机器人</div>
+      <div class="topo-title"><a href="#9-grok-bot" class="text-inherit hover:underline">机器人 PR Review</a></div>
+    </div>
+    <div class="topo-or">OR</div>
+    <div class="topo-card topo-card-center">
+      <div class="topo-kicker">人工 · 同时</div>
+      <div class="topo-title"><a href="#10-github-pr-review" class="text-inherit hover:underline">人类 Review</a></div>
+    </div>
+  </div>
+  <div class="topo-fork topo-fork-center">
+    <div class="topo-card topo-card-center">
+      <div class="topo-kicker">线上</div>
+      <div class="topo-title"><a href="#12-production-review" class="text-inherit hover:underline">远程服务器</a></div>
+    </div>
+    <div class="topo-or">OR</div>
+    <div class="topo-card topo-card-center">
+      <div class="topo-kicker">本地</div>
+      <div class="topo-title"><a href="#11-verification-modes" class="text-inherit hover:underline">留在本地</a></div>
     </div>
   </div>
 </div>
@@ -159,14 +172,14 @@ layout: default
 <!--
 这张图从上往下看，不要横着扫。
 手机上有两条路。
-第一条是 AI 客户端：Cursor、Grok Bot，同类的还有 Muse、Codex 这种，不经过终端。
-第二条是终端，用 Termius。终端前面还有一层连接，才能传到家里的机器：可以直接 SSH，可以用 UU 远程里的 SSH，也可以走 Tailscale 隧道。
-两条路汇合到本地 Mac mini，在这里写代码，然后提交到 GitHub。
-机器人做 PR Review。通过之后有两种看结果的方式：部署到远程服务器，手机浏览器打开线上页面；或者就跑在本地，手机用局域网浏览器打开。
+第一条是 AI 客户端：Cursor、Grok Bot，同类的还有 Muse、Codex 这种。这条路的端上都在云端，不经过终端、也不经过本地的 Mac mini，直接在云端写代码并提交到 GitHub。
+第二条是终端，用 Termius。这条路才需要连到家里的机器：可以直接 SSH，可以用 UU 远程里的 SSH，也可以走 Tailscale 隧道。这里 Mac mini 更像一个桥，把终端会话桥接到本地工作区。
+两条路最终都汇入 GitHub。代码推送上去之后，GitHub 先自动触发 CI；紧接着 PR Review 由人机两边同时进行——机器人这边跑测试用例、还能让多个 AI 交叉 review，人这边同时在 GitHub App 上扫读 diff 和 Review 报告。看完效果没问题就合并。通过之后有两种看结果的方式：部署到远程服务器，手机浏览器打开线上页面；或者就跑在本地，手机用局域网浏览器打开。
 -->
 
 ---
 layout: default
+name: tunnel-matrix
 ---
 
 # 隧道连接工具矩阵：内外网打通方案
@@ -187,13 +200,13 @@ layout: default
         无需开电脑屏幕，直接基于家庭局域网 IP 直连 SSH，延迟趋近于 0，极速进入工作状态。
       </li>
       <li>
-        <b class="text-emerald-300">🌟 外出主力 · UU 远程 (UU Remote)：</b><br>
+        <b class="text-emerald-300">🌟 外出主力 · <a href="https://uuyc.163.com/" target="_blank" class="text-emerald-300 hover:text-emerald-200 underline">UU 远程 (UU Remote)</a>：</b><br>
         • <b>常规主力：</b>使用 UU 远程内置的 SSH 终端，穿透稳定迅速。<br>
         • <b>备用逃生舱：</b>自带低延迟图形桌面，需要启动特定 GUI 应用或看 DevTools 时一键切入。
       </li>
       <li>
-        <b class="text-purple-300">🛡️ 安全兜底 · Tailscale：</b><br>
-        基于 WireGuard 的加密 Mesh 虚拟私网，在复杂网络环境下提供零端口暴露的安全直连兜底。
+        <b class="text-purple-300">🛡️ 安全兜底 · <a href="https://tailscale.com/" target="_blank" class="text-purple-300 hover:text-purple-200 underline">Tailscale</a>：</b><br>
+        基于 <a href="https://www.wireguard.com/" target="_blank" class="text-purple-300 hover:text-purple-200 underline">WireGuard</a> 的加密 Mesh 虚拟私网，在复杂网络环境下提供零端口暴露的安全直连兜底。
       </li>
     </ul>
   </div>
@@ -210,7 +223,7 @@ layout: default
     </div>
     <ul class="space-y-3 text-xs text-slate-300 mt-2">
       <li>
-        <b class="text-emerald-300">⚡ Termius：</b><br>
+        <b class="text-emerald-300">⚡ <a href="https://termius.com/" target="_blank" class="text-emerald-300 hover:text-emerald-200 underline">Termius</a>：</b><br>
         iOS 生态综合体验最好的 SSH 客户端。支持多主机分组、会话保持与弱网自动重连。
       </li>
       <li>
@@ -246,6 +259,7 @@ layout: default
 
 ---
 layout: default
+name: uu-remote
 ---
 
 # 工具一 · UU 远程：外出主力穿透与图形化“逃生舱”
@@ -268,11 +282,6 @@ layout: default
       <li>右侧内嵌浏览器：直观观测本地服务端口与页面截图渲染</li>
     </ul>
   </div>
-
-  <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
-    <h4 class="text-sky-400 font-semibold mb-1">💡 极客配置建议</h4>
-    <p class="text-xs text-slate-400">将 Mac mini 配合虚拟显示插件（如 BetterDisplay 虚拟 1080p），开启触控惯性指针，单指滑动、双指缩放极度丝滑。</p>
-  </div>
 </div>
 
 <div class="flex justify-center">
@@ -292,6 +301,7 @@ layout: default
 
 ---
 layout: default
+name: termius-cli
 ---
 
 # 工具二 · Termius + Agent CLI：掌上纯文本极速交互
@@ -340,6 +350,7 @@ layout: default
 
 ---
 layout: default
+name: agent-ecosystem
 ---
 
 # 第三部分 · 多元 Agent 工具生态
@@ -372,7 +383,7 @@ layout: default
     </div>
     <p class="text-xs text-slate-300 mb-3">不用进黑漆漆的命令行，靠原生 App 与群聊即可派活。</p>
     <div class="space-y-2 text-xs font-mono text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-      <div>📱 <b>Cursor iOS App:</b> 语音输入意图、思维链可视化</div>
+      <div>📱 <b><a href="https://www.cursor.com/" target="_blank" class="text-blue-300 hover:text-blue-200 underline">Cursor iOS App</a>:</b> 语音输入意图、思维链可视化</div>
       <div>💬 <b>Grok / Grok Bot:</b> 群聊直接派单、多 Agent 自动提 PR</div>
       <div>🔄 <b>云端漫游:</b> 手机讨论进度随时漫游至电脑</div>
     </div>
@@ -399,6 +410,7 @@ layout: default
 
 ---
 layout: default
+name: cursor-ios
 ---
 
 # 工具三 · Cursor iOS 原生客户端：移动端沉浸对齐
@@ -444,6 +456,7 @@ layout: default
 
 ---
 layout: default
+name: grok-bot
 ---
 
 # 工具四 · Grok Bot 协同群：多 Agent 的“微信办公室”
@@ -495,6 +508,7 @@ Reviewer 机器人秒回：“收到，开始看 #3。本地分别跑带参数�
 
 ---
 layout: default
+name: github-pr-review
 ---
 
 # 第四部分 · 架构 Review 与 GitHub 提交
@@ -517,7 +531,7 @@ layout: default
     <h4 class="text-emerald-400 font-semibold mb-1">⚙️ 人机双重架构审查标准</h4>
     <ul class="text-xs list-disc list-inside space-y-1 text-slate-400">
       <li><b>步骤一 (AI 自述)：</b> Agent 提交时简述架构改动（如本次通过 Vite define 注入编译期常量，通过 Docker ARG 传参）</li>
-      <li><b>步骤二 (人类把关)：</b> 在手机 GitHub App 上花 30 秒扫读 Files Changed，确认无越权改动或多余依赖</li>
+      <li><b>步骤二 (人类把关)：</b> 在手机 <a href="https://github.com/mobile" target="_blank" class="text-emerald-300 hover:text-emerald-200 underline">GitHub App</a> 上花 30 秒扫读 Files Changed，确认无越权改动或多余依赖</li>
     </ul>
   </div>
 
@@ -544,6 +558,7 @@ layout: default
 
 ---
 layout: default
+name: verification-modes
 ---
 
 # 第五部分 · 最重要的一点：查看结果的两种方式
@@ -600,6 +615,7 @@ layout: default
 
 ---
 layout: default
+name: production-review
 ---
 
 # 生产验收实战：手机浏览器看结果，直接对着结果 Review
@@ -645,55 +661,7 @@ layout: default
 
 ---
 layout: default
----
-
-# 深度硬核实战：三大工程支柱剖析
-
-让“手机打代码”从玩具走向高可用工程实践的底层秘密
-
-<div class="grid grid-cols-3 gap-4 mt-6">
-
-<div class="p-4 rounded-xl border border-sky-500/20 bg-sky-500/5">
-  <div class="text-sky-400 font-mono text-sm font-bold mb-2">01 · Headless 凭据与网络</div>
-  <h4 class="text-white text-sm font-semibold mb-2">UU 远程 + Tailscale + Keychain</h4>
-  <p class="text-xs text-slate-400 leading-relaxed">
-    • <b>内外网双通道：</b> 在家局域网极速直连，在外 UU 远程主力穿透 + Tailscale 加密 Mesh 私网兜底。<br>
-    • <b>mac-unlock-keychain：</b> 自动化解开 macOS 登录钥匙串，彻底根除 SSH 会话中无法拉取私钥与 GitHub Token 的顽疾。
-  </p>
-</div>
-
-<div class="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
-  <div class="text-emerald-400 font-mono text-sm font-bold mb-2">02 · YOLO 机制与多角自治</div>
-  <h4 class="text-white text-sm font-semibold mb-2">Agent CLI & 角色分权</h4>
-  <p class="text-xs text-slate-400 leading-relaxed">
-    • <b>YOLO 自治执行：</b> 给 Agent 赋予终端执行自治权，减少 95% 手机端冗余按键交互。<br>
-    • <b>Coder 与 Reviewer 分权：</b> Coder 负责产出与本地预检；Reviewer 负责双构建对比、截图打标与 PR 留言。<br>
-    • <b>超大上下文：</b> 256K 超大上下文保持全工程理解，避免手机端反复喂文件。
-  </p>
-</div>
-
-<div class="p-4 rounded-xl border border-purple-500/20 bg-purple-500/5">
-  <div class="text-purple-400 font-mono text-sm font-bold mb-2">03 · 编译注入与双轨验证</div>
-  <h4 class="text-white text-sm font-semibold mb-2">--host 暴露 + GitHub Actions</h4>
-  <p class="text-xs text-slate-400 leading-relaxed">
-    • <b>联调态内网暴露：</b> 开发服务器绑定 <code class="text-purple-300">--host 0.0.0.0</code>，手机 Safari 免构建即时验证。<br>
-    • <b>交付态参数注入：</b> CI 阶段通过 Docker build-arg 捕获精确 commit 和 timestamp。<br>
-    • <b>Vite define：</b> 编译期常数替换，零运行时开销渲染构建信息。
-  </p>
-</div>
-
-</div>
-
-<!--
-聊完流程，我们来看看支撑这套系统的三个深水区硬核工程细节：
-很多朋友自己尝试搭建时，往往会卡在几个坑里：
-第一是 macOS 无头机器的凭据。SSH 连进去 Keychain 是锁死的，Git clone 经常会弹交互密码，脚本直接挂掉。我们用 unlock 脚本彻底解套；网络上利用 UU 远程和 Tailscale 形成稳健通道。
-第二是 Agent 行为设计。开启 YOLO 模式，把无谓的确认弹窗全部消灭；
-第三是双轨验证的工程化。开发期用 --host 0.0.0.0 暴露局域网给手机，上线期走 Vite define 和 Docker ARG 自动化注入，严丝合缝。
--->
-
----
-layout: default
+name: safety
 ---
 
 # 安全防护网：手机端敲代码如何防止“翻车”？
@@ -738,6 +706,7 @@ layout: default
 
 ---
 layout: default
+name: pitfalls
 ---
 
 # 踩坑与避坑指南：移动端实操经验谈
@@ -772,7 +741,7 @@ layout: default
   </h4>
   <p class="text-xs text-slate-300 leading-relaxed">
     <b>现象：</b> 切到微信看消息，再切回 Termius，SSH 管道断开重连，正在跑的任务丢失交互。<br>
-    <b>解法：</b> 算力端强依赖 <code class="text-amber-300">tmux</code> 持久化会话，配合 Termius 开启后台保持与自动重连功能。
+    <b>解法：</b> 算力端强依赖 <code class="text-amber-300"><a href="https://github.com/tmux/tmux" target="_blank" class="text-amber-300 hover:text-amber-200 underline">tmux</a></code> 持久化会话，配合 Termius 开启后台保持与自动重连功能。
   </p>
 </div>
 
@@ -798,6 +767,7 @@ layout: default
 
 ---
 layout: default
+name: equipment
 ---
 
 # 移动端 Vibe Coding 装备清单
@@ -810,20 +780,20 @@ layout: default
   <h3 class="text-emerald-400 font-bold text-sm">📱 手机端必装软件 (iOS Stack)</h3>
   <div class="space-y-2 text-xs">
     <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700 flex justify-between items-center">
-      <span><b>Termius</b> - 核心 SSH 终端管理，支持 Snippets 与手势优化</span>
-      <span class="text-emerald-400 font-mono">App Store</span>
+      <span><b><a href="https://termius.com/" target="_blank" class="hover:underline text-slate-200">Termius</a></b> - 核心 SSH 终端管理，支持 Snippets 与手势优化</span>
+      <a href="https://apps.apple.com/app/termius-terminal-ssh-client/id1176074088" target="_blank" class="text-emerald-400 hover:text-emerald-300 font-mono underline">App Store</a>
     </div>
     <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700 flex justify-between items-center">
-      <span><b>UU 远程 (UU Remote)</b> - 外出主力穿透，内置 SSH + 备用图形桌面</span>
-      <span class="text-emerald-400 font-mono">App Store</span>
+      <span><b><a href="https://uuyc.163.com/" target="_blank" class="hover:underline text-slate-200">UU 远程 (UU Remote)</a></b> - 外出主力穿透，内置 SSH + 备用图形桌面</span>
+      <a href="https://apps.apple.com/cn/app/uu%E8%BF%9C%E7%A8%8B/id6448731454" target="_blank" class="text-emerald-400 hover:text-emerald-300 font-mono underline">App Store</a>
     </div>
     <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700 flex justify-between items-center">
-      <span><b>Cursor iOS / Grok</b> - 原生沉浸对话与群聊异步派单</span>
-      <span class="text-emerald-400 font-mono">App Store</span>
+      <span><b><a href="https://www.cursor.com/" target="_blank" class="hover:underline text-slate-200">Cursor iOS</a> / <a href="https://x.ai/bot" target="_blank" class="hover:underline text-slate-200">Grok</a></b> - 原生沉浸对话与群聊异步派单</span>
+      <a href="https://apps.apple.com/app/cursor-ai-code-editor/id6738324405" target="_blank" class="text-emerald-400 hover:text-emerald-300 font-mono underline">App Store</a>
     </div>
     <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700 flex justify-between items-center">
-      <span><b>GitHub App / Safari</b> - 掌上 PR 审查合并与内网/线上双轨验证</span>
-      <span class="text-emerald-400 font-mono">原生 / App Store</span>
+      <span><b><a href="https://github.com/mobile" target="_blank" class="hover:underline text-slate-200">GitHub App</a> / Safari</b> - 掌上 PR 审查合并与内网/线上双轨验证</span>
+      <span class="text-emerald-400 font-mono">原生 / <a href="https://apps.apple.com/app/github/id1477376905" target="_blank" class="text-emerald-400 hover:text-emerald-300 underline">App Store</a></span>
     </div>
   </div>
 </div>
@@ -840,7 +810,7 @@ layout: default
       <span class="text-sky-400 font-mono">CLI 工具</span>
     </div>
     <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700 flex justify-between items-center">
-      <span><b>Keychain & Tailscale</b> - 自动化解密脚本与虚拟 Mesh 安全私网</span>
+      <span><b>Keychain & <a href="https://tailscale.com/" target="_blank" class="hover:underline text-slate-200">Tailscale</a></b> - 自动化解密脚本与虚拟 Mesh 安全私网</span>
       <span class="text-sky-400 font-mono">安全底座</span>
     </div>
     <div class="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700 flex justify-between items-center">
@@ -863,6 +833,7 @@ layout: default
 ---
 layout: default
 class: text-center
+name: summary
 ---
 
 # 总结与思考：未来的开发者长什么样？
@@ -879,10 +850,6 @@ class: text-center
 </div>
 
 <div class="mt-12 flex justify-center gap-6">
-  <div class="text-center">
-    <div class="text-xs text-slate-400 font-mono mb-1">项目案例开源地址</div>
-    <div class="text-sm font-bold text-emerald-400 font-mono">github.com/yuler/k41</div>
-  </div>
   <div class="border-r border-slate-700"></div>
   <div class="text-center">
     <div class="text-xs text-slate-400 font-mono mb-1">线上部署效果预览</div>
