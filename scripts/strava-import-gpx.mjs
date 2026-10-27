@@ -6,7 +6,7 @@
  * Optional stats (distance, moving time, local start) from the activity page:
  *   tmp/strava/page-stats.jsonl
  *
- * Usage: pnpm import:strava:gpx
+ * Usage: pnpm strava:import:gpx
  */
 
 import fs from 'node:fs'

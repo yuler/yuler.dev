@@ -207,13 +207,13 @@ function sleep(ms) {
 
 function runImport() {
   return new Promise((resolve, reject) => {
-    const child = spawn('pnpm', ['import:strava:gpx'], { cwd: root, stdio: 'inherit' })
+    const child = spawn('pnpm', ['strava:import:gpx'], { cwd: root, stdio: 'inherit' })
     child.on('error', reject)
     child.on('exit', (code) => {
       if (code === 0)
         resolve()
       else
-        reject(new Error(`pnpm import:strava:gpx exited with ${code}`))
+        reject(new Error(`pnpm strava:import:gpx exited with ${code}`))
     })
   })
 }
