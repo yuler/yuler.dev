@@ -161,6 +161,7 @@ const columns = rawColumns.map((col, columnIndex) =>
                     <div
                       class="relative min-h-0 min-w-0"
                       data-wk-tip={JSON.stringify(tipPayload)}
+                      data-wk-today={day.isToday ? '1' : undefined}
                     >
                       {!day.isFuture
                         ? (
@@ -538,28 +539,79 @@ const columns = rawColumns.map((col, columnIndex) =>
     })
   }
 
-  function scrollWorkoutGridToRecent() {
+  function scrollWorkoutGridToToday(node: HTMLElement) {
+    const todayCell = node.querySelector('[data-wk-today]') as HTMLElement | null
+    const prevBehavior = node.style.scrollBehavior
+    // Override Tailwind `scroll-smooth` so the initial jump is instant (esp. on mobile).
+    node.style.scrollBehavior = 'auto'
+
+    if (todayCell) {
+      const cellRect = todayCell.getBoundingClientRect()
+      const scrollerRect = node.getBoundingClientRect()
+      // Keep today near the right edge with a little padding so the ring is fully visible.
+      const pad = 8
+      node.scrollLeft += cellRect.right - scrollerRect.right + pad
+    }
+    else {
+      node.scrollLeft = Math.max(0, node.scrollWidth - node.clientWidth)
+    }
+
+    node.style.scrollBehavior = prevBehavior
+  }
+
+  function scrollAllWorkoutGridsToToday() {
     document.querySelectorAll('[data-workout-contrib-scroll]').forEach((el) => {
-      const node = el as HTMLElement
-      node.scrollLeft = node.scrollWidth - node.clientWidth
+      scrollWorkoutGridToToday(el as HTMLElement)
     })
   }
 
-  scrollWorkoutGridToRecent()
-  requestAnimationFrame(() => {
-    requestAnimationFrame(scrollWorkoutGridToRecent)
-  })
+  function scheduleScrollWorkoutGridsToToday() {
+    scrollAllWorkoutGridsToToday()
+    requestAnimationFrame(() => {
+      scrollAllWorkoutGridsToToday()
+      requestAnimationFrame(scrollAllWorkoutGridsToToday)
+    })
+    // Mobile layout (esp. with `display: contents` parents) can settle after first paint.
+    window.setTimeout(scrollAllWorkoutGridsToToday, 0)
+    window.setTimeout(scrollAllWorkoutGridsToToday, 100)
+  }
+
+  function bindWorkoutGridScrollObservers() {
+    document.querySelectorAll('[data-workout-contrib-scroll]').forEach((el) => {
+      const node = el as HTMLElement
+      if (node.dataset.wkScrollObserved)
+        return
+      node.dataset.wkScrollObserved = '1'
+      const grid = node.querySelector('.wk-scroll-grid')
+      if (!grid)
+        return
+      const ro = new ResizeObserver(() => {
+        // Wait until overflow is measurable — early paints often have scrollWidth === clientWidth.
+        if (node.scrollWidth <= node.clientWidth + 1)
+          return
+        scrollWorkoutGridToToday(node)
+        ro.disconnect()
+      })
+      ro.observe(grid)
+      window.setTimeout(() => ro.disconnect(), 2000)
+    })
+  }
+
+  scheduleScrollWorkoutGridsToToday()
+  bindWorkoutGridScrollObservers()
   initAllWkHeatmapRoots()
 
   const htmlRoot = document.documentElement
   if (!htmlRoot.dataset.wkContribScrollBound) {
-    htmlRoot.dataset.wkContribScrollBound = ''
+    htmlRoot.dataset.wkContribScrollBound = '1'
     document.addEventListener('astro:page-load', () => {
-      scrollWorkoutGridToRecent()
+      scheduleScrollWorkoutGridsToToday()
+      bindWorkoutGridScrollObservers()
       initAllWkHeatmapRoots()
     })
     document.addEventListener('astro:after-swap', () => {
-      scrollWorkoutGridToRecent()
+      scheduleScrollWorkoutGridsToToday()
+      bindWorkoutGridScrollObservers()
       initAllWkHeatmapRoots()
     })
   }
