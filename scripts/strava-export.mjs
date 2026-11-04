@@ -54,14 +54,34 @@ function activityIdsOnPage(html) {
 }
 
 async function assertLoggedIn(page) {
-  if (!isLoginUrl(page.url()))
-    return
-  throw new Error('Strava asked for login again. Run pnpm strava:login, then retry pnpm strava:export.')
+  if (isLoginUrl(page.url()))
+    throw new Error('Strava asked for login again. Run pnpm strava:login, then retry pnpm strava:export.')
+
+  const athlete = await page.evaluate(() => {
+    const ca = window.currentAthlete?.attributes
+    if (ca && ca.logged_in) {
+      return {
+        id: ca.id,
+        name: ca.display_name || `${ca.first_name || ''} ${ca.last_name || ''}`.trim() || 'Athlete',
+      }
+    }
+    const hasLogout = !!document.querySelector('a[href*="/logout"], form[action*="/logout"]')
+    const userMenu = !!document.querySelector('.user-menu, [data-testid="user-menu"]')
+    if (hasLogout || userMenu)
+      return { id: null, name: 'Athlete' }
+    return null
+  }).catch(() => null)
+
+  if (!athlete)
+    throw new Error('Strava asked for login again. Run pnpm strava:login, then retry pnpm strava:export.')
+
+  return athlete
 }
 
 async function scrapeMissingIds(page, knownIds, maxPages) {
   await page.goto(TRAINING_URL, { waitUntil: 'networkidle', timeout: 60_000 })
-  await assertLoggedIn(page)
+  const athlete = await assertLoggedIn(page)
+  console.log(`Logged in as ${athlete.name}${athlete.id ? ` (${athlete.id})` : ''}`)
 
   const missing = []
   const seen = new Set()
